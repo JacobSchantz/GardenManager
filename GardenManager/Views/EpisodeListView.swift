@@ -2,22 +2,16 @@ import SwiftUI
 
 struct EpisodeListView: View {
     let podcast: Podcast
-    @StateObject private var audioPlayer = AudioPlayerService()
+    @EnvironmentObject var audioPlayer: AudioPlayerService
     
     var body: some View {
-        VStack(spacing: 0) {
-            List(podcast.episodes) { episode in
-                Button(action: {
-                    audioPlayer.play(episode: episode)
-                }) {
-                    EpisodeRow(episode: episode, isPlaying: audioPlayer.currentEpisode?.id == episode.id && audioPlayer.isPlaying)
-                }
-                .buttonStyle(PlainButtonStyle())
+        List(podcast.episodes) { episode in
+            Button(action: {
+                audioPlayer.play(episode: episode)
+            }) {
+                EpisodeRow(episode: episode, isPlaying: audioPlayer.currentEpisode?.id == episode.id && audioPlayer.isPlaying)
             }
-            
-            if audioPlayer.currentEpisode != nil {
-                PlayerControlsView(audioPlayer: audioPlayer)
-            }
+            .buttonStyle(PlainButtonStyle())
         }
         .navigationTitle(podcast.title)
         .navigationBarTitleDisplayMode(.inline)
@@ -133,7 +127,7 @@ struct PlayerControlsView: View {
                 
                 Slider(value: Binding(
                     get: { audioPlayer.currentTime },
-                    set: { audioPlayer.seek(to: $0) }
+                    set: { audioPlayer.debouncedSeek(to: $0) }
                 ), in: 0...max(audioPlayer.duration, 1))
                     .padding(.horizontal)
                 

@@ -5,7 +5,7 @@ import SwiftUI
 struct GardenManagerApp: App {
     var body: some Scene {
         WindowGroup {
-            PodcastListView()
+            RootView()
         }
     }
 }

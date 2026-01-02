@@ -15,6 +15,13 @@
 		ABB111111111111111111111 /* ToolParameterSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACC222222222222222222222 /* ToolParameterSheet.swift */; };
 		DDD111111111111111111111 /* SpeechRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDD222222222222222222222 /* SpeechRecognizer.swift */; };
 		EEE111111111111111111111 /* CommandParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEE222222222222222222222 /* CommandParser.swift */; };
+		FFF111111111111111111111 /* Podcast.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFF222222222222222222222 /* Podcast.swift */; };
+		GGG111111111111111111111 /* RSSFeedParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = GGG222222222222222222222 /* RSSFeedParser.swift */; };
+		HHH111111111111111111111 /* AudioPlayerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = HHH222222222222222222222 /* AudioPlayerService.swift */; };
+		III111111111111111111111 /* PodcastListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = III222222222222222222222 /* PodcastListView.swift */; };
+		JJJ111111111111111111111 /* EpisodeListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = JJJ222222222222222222222 /* EpisodeListView.swift */; };
+		KKK111111111111111111111 /* MiniPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = KKK222222222222222222222 /* MiniPlayerView.swift */; };
+		LLL111111111111111111111 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = LLL222222222222222222222 /* RootView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -27,6 +34,13 @@
 		ADD333333333333333333333 /* GardenManager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GardenManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DDD222222222222222222222 /* SpeechRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechRecognizer.swift; sourceTree = "<group>"; };
 		EEE222222222222222222222 /* CommandParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandParser.swift; sourceTree = "<group>"; };
+		FFF222222222222222222222 /* Podcast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Podcast.swift; sourceTree = "<group>"; };
+		GGG222222222222222222222 /* RSSFeedParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RSSFeedParser.swift; sourceTree = "<group>"; };
+		HHH222222222222222222222 /* AudioPlayerService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPlayerService.swift; sourceTree = "<group>"; };
+		III222222222222222222222 /* PodcastListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PodcastListView.swift; sourceTree = "<group>"; };
+		JJJ222222222222222222222 /* EpisodeListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EpisodeListView.swift; sourceTree = "<group>"; };
+		KKK222222222222222222222 /* MiniPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiniPlayerView.swift; sourceTree = "<group>"; };
+		LLL222222222222222222222 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -73,6 +87,10 @@
 			children = (
 				A44444444444444444444444 /* ContentView.swift */,
 				ACC222222222222222222222 /* ToolParameterSheet.swift */,
+				III222222222222222222222 /* PodcastListView.swift */,
+				JJJ222222222222222222222 /* EpisodeListView.swift */,
+				KKK222222222222222222222 /* MiniPlayerView.swift */,
+				LLL222222222222222222222 /* RootView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -81,6 +99,7 @@
 			isa = PBXGroup;
 			children = (
 				A88888888888888888888888 /* Tool.swift */,
+				FFF222222222222222222222 /* Podcast.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -91,6 +110,8 @@
 				AAA000000000000000000000 /* ToolService.swift */,
 				DDD222222222222222222222 /* SpeechRecognizer.swift */,
 				EEE222222222222222222222 /* CommandParser.swift */,
+				GGG222222222222222222222 /* RSSFeedParser.swift */,
+				HHH222222222222222222222 /* AudioPlayerService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -171,6 +192,13 @@
 				ABB111111111111111111111 /* ToolParameterSheet.swift in Sources */,
 				DDD111111111111111111111 /* SpeechRecognizer.swift in Sources */,
 				EEE111111111111111111111 /* CommandParser.swift in Sources */,
+				FFF111111111111111111111 /* Podcast.swift in Sources */,
+				GGG111111111111111111111 /* RSSFeedParser.swift in Sources */,
+				HHH111111111111111111111 /* AudioPlayerService.swift in Sources */,
+				III111111111111111111111 /* PodcastListView.swift in Sources */,
+				JJJ111111111111111111111 /* EpisodeListView.swift in Sources */,
+				KKK111111111111111111111 /* MiniPlayerView.swift in Sources */,
+				LLL111111111111111111111 /* RootView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -311,6 +339,7 @@
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Garden Manager uses speech recognition to understand your voice commands and execute garden tools.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UIBackgroundModes = audio;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -343,6 +372,7 @@
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Garden Manager uses speech recognition to understand your voice commands and execute garden tools.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UIBackgroundModes = audio;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
