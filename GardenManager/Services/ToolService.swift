@@ -1,6 +1,7 @@
 import Foundation
 
-class ToolService: ObservableObject {
+@MainActor
+final class ToolService: ObservableObject {
     @Published var toolCalls: [ToolCall] = []
     @Published var isExecuting: Bool = false
     
@@ -11,13 +12,16 @@ class ToolService: ObservableObject {
         isExecuting = true
         
         // Simulate async tool execution
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
-            self?.executeToolCall(call)
+        let callId = call.id
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 1_000_000_000)
+            self.executeToolCall(id: callId)
         }
     }
     
-    private func executeToolCall(_ call: ToolCall) {
-        guard let index = toolCalls.firstIndex(where: { $0.id == call.id }) else { return }
+    private func executeToolCall(id: UUID) {
+        guard let index = toolCalls.firstIndex(where: { $0.id == id }) else { return }
+        let call = toolCalls[index]
         
         let result = executeTool(call.tool, parameters: call.parameters)
         

@@ -1,13 +1,31 @@
 import SwiftUI
+#if canImport(FoundationModels)
+import FoundationModels
+#endif
 
+@available(iOS 26.0, *)
 struct ContentView: View {
     @StateObject private var toolService = ToolService()
+    @StateObject private var speechRecognizer = SpeechRecognizer()
+    @StateObject private var commandParser: CommandParser
     @State private var showingToolSheet = false
     @State private var selectedTool: ToolType?
+    
+    init() {
+        let service = ToolService()
+        _toolService = StateObject(wrappedValue: service)
+        _speechRecognizer = StateObject(wrappedValue: SpeechRecognizer())
+        _commandParser = StateObject(wrappedValue: CommandParser(toolService: service))
+    }
     
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
+                // Voice Input Section
+                voiceInputSection
+                
+                Divider()
+                
                 // Tool Buttons
                 toolButtonsSection
                 
@@ -29,6 +47,100 @@ struct ContentView: View {
                 ToolParameterSheet(tool: tool, toolService: toolService)
             }
         }
+    }
+    
+    private var voiceInputSection: some View {
+        VStack(spacing: 12) {
+            // Microphone Button
+            Button(action: toggleListening) {
+                ZStack {
+                    Circle()
+                        .fill(speechRecognizer.isListening ? Color.red : Color.green)
+                        .frame(width: 80, height: 80)
+                        .shadow(color: speechRecognizer.isListening ? .red.opacity(0.4) : .green.opacity(0.4), radius: 10)
+                    
+                    Image(systemName: speechRecognizer.isListening ? "stop.fill" : "mic.fill")
+                        .font(.system(size: 32))
+                        .foregroundColor(.white)
+                }
+            }
+            
+            // Status Text
+            if speechRecognizer.isListening {
+                HStack(spacing: 8) {
+                    Circle()
+                        .fill(Color.red)
+                        .frame(width: 8, height: 8)
+                    Text("Listening...")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+            } else {
+                Text("Tap to speak a command")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            }
+            
+            // Transcript Display
+            if !speechRecognizer.transcript.isEmpty {
+                VStack(spacing: 8) {
+                    Text("\"\(speechRecognizer.transcript)\"")
+                        .font(.body)
+                        .italic()
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+                    
+                    if commandParser.isProcessing {
+                        HStack(spacing: 8) {
+                            ProgressView()
+                                .scaleEffect(0.8)
+                            Text("Processing with Apple Intelligence...")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+                .padding(.vertical, 8)
+                .frame(maxWidth: .infinity)
+                .background(Color(.systemGray6))
+                .cornerRadius(12)
+                .padding(.horizontal)
+            }
+            
+            // Error Display
+            if let error = speechRecognizer.errorMessage {
+                Text(error)
+                    .font(.caption)
+                    .foregroundColor(.red)
+            }
+            
+            if let error = commandParser.errorMessage {
+                Text(error)
+                    .font(.caption)
+                    .foregroundColor(.red)
+            }
+        }
+        .padding()
+        .background(Color(.systemGroupedBackground))
+    }
+    
+    private func toggleListening() {
+        print("ContentView: toggleListening called, isListening=\(speechRecognizer.isListening)")
+        if speechRecognizer.isListening {
+            speechRecognizer.stopListening()
+            // Process the command after stopping
+            Task {
+                await processVoiceCommand()
+            }
+        } else {
+            print("ContentView: Calling startListening...")
+            speechRecognizer.startListening()
+        }
+    }
+    
+    private func processVoiceCommand() async {
+        guard !speechRecognizer.transcript.isEmpty else { return }
+        await commandParser.processCommand(speechRecognizer.transcript)
     }
     
     private var toolButtonsSection: some View {

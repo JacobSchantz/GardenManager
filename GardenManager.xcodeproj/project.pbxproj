@@ -13,16 +13,20 @@
 		A77777777777777777777777 /* Tool.swift in Sources */ = {isa = PBXBuildFile; fileRef = A88888888888888888888888 /* Tool.swift */; };
 		A99999999999999999999999 /* ToolService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA000000000000000000000 /* ToolService.swift */; };
 		ABB111111111111111111111 /* ToolParameterSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACC222222222222222222222 /* ToolParameterSheet.swift */; };
+		DDD111111111111111111111 /* SpeechRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDD222222222222222222222 /* SpeechRecognizer.swift */; };
+		EEE111111111111111111111 /* CommandParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEE222222222222222222222 /* CommandParser.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		ADD333333333333333333333 /* GardenManager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GardenManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A22222222222222222222222 /* GardenManagerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GardenManagerApp.swift; sourceTree = "<group>"; };
 		A44444444444444444444444 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		A66666666666666666666666 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A88888888888888888888888 /* Tool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tool.swift; sourceTree = "<group>"; };
 		AAA000000000000000000000 /* ToolService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolService.swift; sourceTree = "<group>"; };
 		ACC222222222222222222222 /* ToolParameterSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolParameterSheet.swift; sourceTree = "<group>"; };
+		ADD333333333333333333333 /* GardenManager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GardenManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		DDD222222222222222222222 /* SpeechRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechRecognizer.swift; sourceTree = "<group>"; };
+		EEE222222222222222222222 /* CommandParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandParser.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -44,14 +48,6 @@
 			);
 			sourceTree = "<group>";
 		};
-		B11777777777777777777777 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				ADD333333333333333333333 /* GardenManager.app */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 		B00666666666666666666666 /* GardenManager */ = {
 			isa = PBXGroup;
 			children = (
@@ -62,6 +58,14 @@
 				A66666666666666666666666 /* Assets.xcassets */,
 			);
 			path = GardenManager;
+			sourceTree = "<group>";
+		};
+		B11777777777777777777777 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				ADD333333333333333333333 /* GardenManager.app */,
+			);
+			name = Products;
 			sourceTree = "<group>";
 		};
 		B22888888888888888888888 /* Views */ = {
@@ -85,6 +89,8 @@
 			isa = PBXGroup;
 			children = (
 				AAA000000000000000000000 /* ToolService.swift */,
+				DDD222222222222222222222 /* SpeechRecognizer.swift */,
+				EEE222222222222222222222 /* CommandParser.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -163,6 +169,8 @@
 				A77777777777777777777777 /* Tool.swift in Sources */,
 				A99999999999999999999999 /* ToolService.swift in Sources */,
 				ABB111111111111111111111 /* ToolParameterSheet.swift in Sources */,
+				DDD111111111111111111111 /* SpeechRecognizer.swift in Sources */,
+				EEE111111111111111111111 /* CommandParser.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -221,7 +229,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -278,7 +286,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -296,22 +304,26 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
+				DEVELOPMENT_TEAM = C545RG9LW8;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Garden Manager needs microphone access to listen to your voice commands.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Garden Manager uses speech recognition to understand your voice commands and execute garden tools.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.gardenmanager.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.gardenmanager.application;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -324,22 +336,26 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";
+				DEVELOPMENT_TEAM = C545RG9LW8;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Garden Manager needs microphone access to listen to your voice commands.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Garden Manager uses speech recognition to understand your voice commands and execute garden tools.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.gardenmanager.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.gardenmanager.application;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
@@ -347,20 +363,20 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		C00000000000000000000000 /* Build configuration list for PBXProject "GardenManager" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				C11111111111111111111111 /* Debug */,
-				C22222222222222222222222 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		B66CCCCCCCCCCCCCCCCCCCCCC /* Build configuration list for PBXNativeTarget "GardenManager" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				C33333333333333333333333 /* Debug */,
 				C44444444444444444444444 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C00000000000000000000000 /* Build configuration list for PBXProject "GardenManager" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C11111111111111111111111 /* Debug */,
+				C22222222222222222222222 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

@@ -1,0 +1,88 @@
+{
+  "source": "/Users/jakeschantz/GardenManager/GardenManager/Views/ToolParameterSheet.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Call Tool",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 47
+        }
+      },
+      {
+        "comment": "",
+        "key": "Parameters (Optional)",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 29
+        }
+      },
+      {
+        "comment": "",
+        "key": "Depth (e.g., 6 inches)",
+        "location": {
+          "startingColumn": 23,
+          "startingLine": 63
+        }
+      },
+      {
+        "comment": "",
+        "key": "Location (e.g., garden bed)",
+        "location": {
+          "startingColumn": 23,
+          "startingLine": 64
+        }
+      },
+      {
+        "comment": "",
+        "key": "Seed Type (e.g., tomato)",
+        "location": {
+          "startingColumn": 23,
+          "startingLine": 67
+        }
+      },
+      {
+        "comment": "",
+        "key": "Quantity (e.g., 3)",
+        "location": {
+          "startingColumn": 23,
+          "startingLine": 68
+        }
+      },
+      {
+        "comment": "",
+        "key": "Duration (e.g., 10 minutes)",
+        "location": {
+          "startingColumn": 23,
+          "startingLine": 71
+        }
+      },
+      {
+        "comment": "",
+        "key": "Area (e.g., vegetable section)",
+        "location": {
+          "startingColumn": 23,
+          "startingLine": 72
+        }
+      },
+      {
+        "comment": "",
+        "key": "Execute %@",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 38
+        }
+      },
+      {
+        "comment": "",
+        "key": "Cancel",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 51
+        }
+      }
+    ]
+  },
+  "version": 1
+}
