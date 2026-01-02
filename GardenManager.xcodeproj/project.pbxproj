@@ -35,6 +35,7 @@
 		AAA000000000000000000000 /* ToolService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolService.swift; sourceTree = "<group>"; };
 		ACC222222222222222222222 /* ToolParameterSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolParameterSheet.swift; sourceTree = "<group>"; };
 		ADD333333333333333333333 /* GardenManager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GardenManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CCAAF83E2F082CA100D14C0E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		DDD222222222222222222222 /* SpeechRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechRecognizer.swift; sourceTree = "<group>"; };
 		EEE222222222222222222222 /* CommandParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandParser.swift; sourceTree = "<group>"; };
 		FFF222222222222222222222 /* Podcast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Podcast.swift; sourceTree = "<group>"; };
@@ -71,6 +72,7 @@
 		B00666666666666666666666 /* GardenManager */ = {
 			isa = PBXGroup;
 			children = (
+				CCAAF83E2F082CA100D14C0E /* Info.plist */,
 				A22222222222222222222222 /* GardenManagerApp.swift */,
 				OOO222222222222222222222 /* AppDelegate.swift */,
 				PPP111111111111111111111 /* Podcasts */,
@@ -96,6 +98,16 @@
 				PPP555555555555555555555 /* Services */,
 			);
 			path = Podcasts;
+			sourceTree = "<group>";
+		};
+		PPP222222222222222222222 /* Tools */ = {
+			isa = PBXGroup;
+			children = (
+				PPP666666666666666666666 /* Views */,
+				PPP777777777777777777777 /* Models */,
+				PPP888888888888888888888 /* Services */,
+			);
+			path = Tools;
 			sourceTree = "<group>";
 		};
 		PPP333333333333333333333 /* Views */ = {
@@ -126,16 +138,6 @@
 				MMM222222222222222222222 /* DownloadManager.swift */,
 			);
 			path = Services;
-			sourceTree = "<group>";
-		};
-		PPP222222222222222222222 /* Tools */ = {
-			isa = PBXGroup;
-			children = (
-				PPP666666666666666666666 /* Views */,
-				PPP777777777777777777777 /* Models */,
-				PPP888888888888888888888 /* Services */,
-			);
-			path = Tools;
 			sourceTree = "<group>";
 		};
 		PPP666666666666666666666 /* Views */ = {
@@ -387,6 +389,7 @@
 				DEVELOPMENT_TEAM = C545RG9LW8;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = GardenManager/Info.plist;
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "This app needs network access to download podcast episodes.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Garden Manager needs microphone access to listen to your voice commands.";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Garden Manager uses speech recognition to understand your voice commands and execute garden tools.";
@@ -421,6 +424,7 @@
 				DEVELOPMENT_TEAM = C545RG9LW8;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = GardenManager/Info.plist;
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "This app needs network access to download podcast episodes.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Garden Manager needs microphone access to listen to your voice commands.";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Garden Manager uses speech recognition to understand your voice commands and execute garden tools.";

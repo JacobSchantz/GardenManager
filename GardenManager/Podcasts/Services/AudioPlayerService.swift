@@ -14,15 +14,26 @@ class AudioPlayerService: NSObject, ObservableObject {
     private var seekWorkItem: DispatchWorkItem?
     private var isSeeking = false
     private var isAudioSessionConfigured = false
+    private var lastSavedTime: TimeInterval = 0
+    
+    private let playbackPositionsKey = "PlaybackPositions"
     
     override init() {
         super.init()
-        configureAudioSession()
         setupRemoteCommandCenter()
         setupInterruptionHandling()
+        
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(savePositionOnBackground),
+            name: UIApplication.willResignActiveNotification,
+            object: nil
+        )
     }
     
     private func configureAudioSession() {
+        guard !isAudioSessionConfigured else { return }
+        
         do {
             let audioSession = AVAudioSession.sharedInstance()
             try audioSession.setCategory(
@@ -30,7 +41,6 @@ class AudioPlayerService: NSObject, ObservableObject {
                 mode: .spokenAudio,
                 options: [.allowAirPlay, .allowBluetooth]
             )
-            try audioSession.setActive(true, options: [])
             isAudioSessionConfigured = true
             print("[AudioPlayerService] Audio session configured for background playback")
         } catch {
@@ -40,7 +50,8 @@ class AudioPlayerService: NSObject, ObservableObject {
     
     private func activateAudioSession() {
         do {
-            try AVAudioSession.sharedInstance().setActive(true, options: [])
+            let audioSession = AVAudioSession.sharedInstance()
+            try audioSession.setActive(true, options: [])
             print("[AudioPlayerService] Audio session activated")
         } catch {
             print("[AudioPlayerService] Failed to activate audio session: \(error)")
@@ -106,13 +117,17 @@ class AudioPlayerService: NSObject, ObservableObject {
     }
     
     func play(episode: Episode) {
-        // Always ensure audio session is active before playing
-        if !isAudioSessionConfigured {
-            configureAudioSession()
-        }
+        configureAudioSession()
         activateAudioSession()
         
-        if currentEpisode?.id != episode.id {
+        let isNewEpisode = currentEpisode?.id != episode.id
+        
+        if isNewEpisode {
+            // Save position of previous episode before switching
+            if let prevEpisode = currentEpisode {
+                savePlaybackPosition(for: prevEpisode.id)
+            }
+            
             currentEpisode = episode
             let audioURL = episode.localFileURL ?? episode.audioURL
             let playerItem = AVPlayerItem(url: audioURL)
@@ -127,6 +142,15 @@ class AudioPlayerService: NSObject, ObservableObject {
                 name: .AVPlayerItemDidPlayToEndTime,
                 object: playerItem
             )
+            
+            // Restore saved position for this episode
+            let savedPosition = getPlaybackPosition(for: episode.id)
+            if savedPosition > 0 {
+                let cmTime = CMTime(seconds: savedPosition, preferredTimescale: 600)
+                player?.seek(to: cmTime)
+                currentTime = savedPosition
+                print("[AudioPlayerService] Restored position: \(savedPosition)s")
+            }
         }
         
         player?.play()
@@ -135,10 +159,22 @@ class AudioPlayerService: NSObject, ObservableObject {
         print("[AudioPlayerService] Playing: \(episode.title)")
     }
     
+    func resume() {
+        activateAudioSession()
+        player?.play()
+        isPlaying = true
+        updateNowPlayingPlaybackState()
+    }
+    
     func pause() {
         player?.pause()
         isPlaying = false
         updateNowPlayingPlaybackState()
+        
+        // Save playback position when pausing
+        if let episode = currentEpisode {
+            savePlaybackPosition(for: episode.id)
+        }
     }
     
     func togglePlayPause() {
@@ -205,6 +241,13 @@ class AudioPlayerService: NSObject, ObservableObject {
             if !self.isSeeking {
                 self.updateNowPlayingElapsedTime()
             }
+            
+            // Save position every 10 seconds during playback
+            if let episode = self.currentEpisode,
+               abs(time.seconds - self.lastSavedTime) >= 10 {
+                self.savePlaybackPosition(for: episode.id)
+                self.lastSavedTime = time.seconds
+            }
         }
     }
     
@@ -212,6 +255,11 @@ class AudioPlayerService: NSObject, ObservableObject {
         isPlaying = false
         currentTime = 0
         player?.seek(to: .zero)
+        
+        // Clear saved position when episode finishes
+        if let episode = currentEpisode {
+            clearPlaybackPosition(for: episode.id)
+        }
     }
     
     private func setupNowPlaying(episode: Episode) {
@@ -274,10 +322,46 @@ class AudioPlayerService: NSObject, ObservableObject {
         }
     }
     
+    // MARK: - Playback Position Persistence
+    
+    private func savePlaybackPosition(for episodeID: UUID) {
+        var positions = getPlaybackPositions()
+        positions[episodeID.uuidString] = currentTime
+        UserDefaults.standard.set(positions, forKey: playbackPositionsKey)
+        print("[AudioPlayerService] Saved position: \(currentTime)s for episode \(episodeID)")
+    }
+    
+    private func getPlaybackPosition(for episodeID: UUID) -> TimeInterval {
+        let positions = getPlaybackPositions()
+        return positions[episodeID.uuidString] ?? 0
+    }
+    
+    private func getPlaybackPositions() -> [String: TimeInterval] {
+        return UserDefaults.standard.dictionary(forKey: playbackPositionsKey) as? [String: TimeInterval] ?? [:]
+    }
+    
+    func clearPlaybackPosition(for episodeID: UUID) {
+        var positions = getPlaybackPositions()
+        positions.removeValue(forKey: episodeID.uuidString)
+        UserDefaults.standard.set(positions, forKey: playbackPositionsKey)
+    }
+    
+    @objc private func savePositionOnBackground() {
+        if let episode = currentEpisode {
+            savePlaybackPosition(for: episode.id)
+        }
+    }
+    
     deinit {
         if let timeObserver = timeObserver {
             player?.removeTimeObserver(timeObserver)
         }
+        
+        // Save position before cleanup
+        if let episode = currentEpisode {
+            savePlaybackPosition(for: episode.id)
+        }
+        
         NotificationCenter.default.removeObserver(self)
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
         
