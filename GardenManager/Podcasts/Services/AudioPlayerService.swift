@@ -13,26 +13,111 @@ class AudioPlayerService: NSObject, ObservableObject {
     private var timeObserver: Any?
     private var seekWorkItem: DispatchWorkItem?
     private var isSeeking = false
+    private var isAudioSessionConfigured = false
     
     override init() {
         super.init()
-        setupAudioSession()
+        configureAudioSession()
+        setupRemoteCommandCenter()
+        setupInterruptionHandling()
     }
     
-    private func setupAudioSession() {
+    private func configureAudioSession() {
         do {
-            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .spokenAudio, options: [])
-            try AVAudioSession.sharedInstance().setActive(true)
+            let audioSession = AVAudioSession.sharedInstance()
+            try audioSession.setCategory(
+                .playback,
+                mode: .spokenAudio,
+                options: [.allowAirPlay, .allowBluetooth, .allowBluetoothA2DP]
+            )
+            try audioSession.setActive(true, options: [])
+            isAudioSessionConfigured = true
+            print("[AudioPlayerService] Audio session configured for background playback")
         } catch {
-            print("Failed to set up audio session: \(error)")
+            print("[AudioPlayerService] Failed to configure audio session: \(error)")
+        }
+    }
+    
+    private func activateAudioSession() {
+        do {
+            try AVAudioSession.sharedInstance().setActive(true, options: [])
+            print("[AudioPlayerService] Audio session activated")
+        } catch {
+            print("[AudioPlayerService] Failed to activate audio session: \(error)")
+        }
+    }
+    
+    private func setupInterruptionHandling() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleInterruption),
+            name: AVAudioSession.interruptionNotification,
+            object: AVAudioSession.sharedInstance()
+        )
+        
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleRouteChange),
+            name: AVAudioSession.routeChangeNotification,
+            object: AVAudioSession.sharedInstance()
+        )
+    }
+    
+    @objc private func handleInterruption(notification: Notification) {
+        guard let userInfo = notification.userInfo,
+              let typeValue = userInfo[AVAudioSessionInterruptionTypeKey] as? UInt,
+              let type = AVAudioSession.InterruptionType(rawValue: typeValue) else {
+            return
+        }
+        
+        switch type {
+        case .began:
+            print("[AudioPlayerService] Audio interruption began")
+            pause()
+        case .ended:
+            print("[AudioPlayerService] Audio interruption ended")
+            guard let optionsValue = userInfo[AVAudioSessionInterruptionOptionKey] as? UInt else { return }
+            let options = AVAudioSession.InterruptionOptions(rawValue: optionsValue)
+            if options.contains(.shouldResume) {
+                activateAudioSession()
+                if let episode = currentEpisode {
+                    play(episode: episode)
+                }
+            }
+        @unknown default:
+            break
+        }
+    }
+    
+    @objc private func handleRouteChange(notification: Notification) {
+        guard let userInfo = notification.userInfo,
+              let reasonValue = userInfo[AVAudioSessionRouteChangeReasonKey] as? UInt,
+              let reason = AVAudioSession.RouteChangeReason(rawValue: reasonValue) else {
+            return
+        }
+        
+        switch reason {
+        case .oldDeviceUnavailable:
+            print("[AudioPlayerService] Audio route changed - old device unavailable, pausing")
+            pause()
+        default:
+            break
         }
     }
     
     func play(episode: Episode) {
+        // Always ensure audio session is active before playing
+        if !isAudioSessionConfigured {
+            configureAudioSession()
+        }
+        activateAudioSession()
+        
         if currentEpisode?.id != episode.id {
             currentEpisode = episode
-            let playerItem = AVPlayerItem(url: episode.audioURL)
+            let audioURL = episode.localFileURL ?? episode.audioURL
+            let playerItem = AVPlayerItem(url: audioURL)
             player = AVPlayer(playerItem: playerItem)
+            player?.automaticallyWaitsToMinimizeStalling = true
             setupTimeObserver()
             setupNowPlaying(episode: episode)
             
@@ -47,6 +132,7 @@ class AudioPlayerService: NSObject, ObservableObject {
         player?.play()
         isPlaying = true
         updateNowPlayingPlaybackState()
+        print("[AudioPlayerService] Playing: \(episode.title)")
     }
     
     func pause() {
@@ -194,5 +280,11 @@ class AudioPlayerService: NSObject, ObservableObject {
         }
         NotificationCenter.default.removeObserver(self)
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nil
+        
+        do {
+            try AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+        } catch {
+            print("[AudioPlayerService] Failed to deactivate audio session: \(error)")
+        }
     }
 }

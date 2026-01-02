@@ -21,7 +21,9 @@
 		III111111111111111111111 /* PodcastListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = III222222222222222222222 /* PodcastListView.swift */; };
 		JJJ111111111111111111111 /* EpisodeListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = JJJ222222222222222222222 /* EpisodeListView.swift */; };
 		KKK111111111111111111111 /* MiniPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = KKK222222222222222222222 /* MiniPlayerView.swift */; };
-		LLL111111111111111111111 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = LLL222222222222222222222 /* RootView.swift */; };
+		MMM111111111111111111111 /* DownloadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = MMM222222222222222222222 /* DownloadManager.swift */; };
+		NNN111111111111111111111 /* DownloadsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = NNN222222222222222222222 /* DownloadsView.swift */; };
+		OOO111111111111111111111 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = OOO222222222222222222222 /* AppDelegate.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -40,7 +42,9 @@
 		III222222222222222222222 /* PodcastListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PodcastListView.swift; sourceTree = "<group>"; };
 		JJJ222222222222222222222 /* EpisodeListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EpisodeListView.swift; sourceTree = "<group>"; };
 		KKK222222222222222222222 /* MiniPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiniPlayerView.swift; sourceTree = "<group>"; };
-		LLL222222222222222222222 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		MMM222222222222222222222 /* DownloadManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadManager.swift; sourceTree = "<group>"; };
+		NNN222222222222222222222 /* DownloadsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadsView.swift; sourceTree = "<group>"; };
+		OOO222222222222222222222 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -66,9 +70,9 @@
 			isa = PBXGroup;
 			children = (
 				A22222222222222222222222 /* GardenManagerApp.swift */,
-				B22888888888888888888888 /* Views */,
-				B33999999999999999999999 /* Models */,
-				B44AAAAAAAAAAAAAAAAAAAAA /* Services */,
+				OOO222222222222222222222 /* AppDelegate.swift */,
+				PPP111111111111111111111 /* Podcasts */,
+				PPP222222222222222222222 /* Tools */,
 				A66666666666666666666666 /* Assets.xcassets */,
 			);
 			path = GardenManager;
@@ -82,36 +86,78 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		B22888888888888888888888 /* Views */ = {
+		PPP111111111111111111111 /* Podcasts */ = {
 			isa = PBXGroup;
 			children = (
-				A44444444444444444444444 /* ContentView.swift */,
-				ACC222222222222222222222 /* ToolParameterSheet.swift */,
+				PPP333333333333333333333 /* Views */,
+				PPP444444444444444444444 /* Models */,
+				PPP555555555555555555555 /* Services */,
+			);
+			path = Podcasts;
+			sourceTree = "<group>";
+		};
+		PPP333333333333333333333 /* Views */ = {
+			isa = PBXGroup;
+			children = (
 				III222222222222222222222 /* PodcastListView.swift */,
 				JJJ222222222222222222222 /* EpisodeListView.swift */,
 				KKK222222222222222222222 /* MiniPlayerView.swift */,
-				LLL222222222222222222222 /* RootView.swift */,
+				NNN222222222222222222222 /* DownloadsView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
 		};
-		B33999999999999999999999 /* Models */ = {
+		PPP444444444444444444444 /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				A88888888888888888888888 /* Tool.swift */,
 				FFF222222222222222222222 /* Podcast.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
 		};
-		B44AAAAAAAAAAAAAAAAAAAAA /* Services */ = {
+		PPP555555555555555555555 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				HHH222222222222222222222 /* AudioPlayerService.swift */,
+				GGG222222222222222222222 /* RSSFeedParser.swift */,
+				MMM222222222222222222222 /* DownloadManager.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		PPP222222222222222222222 /* Tools */ = {
+			isa = PBXGroup;
+			children = (
+				PPP666666666666666666666 /* Views */,
+				PPP777777777777777777777 /* Models */,
+				PPP888888888888888888888 /* Services */,
+			);
+			path = Tools;
+			sourceTree = "<group>";
+		};
+		PPP666666666666666666666 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				A44444444444444444444444 /* ContentView.swift */,
+				ACC222222222222222222222 /* ToolParameterSheet.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		PPP777777777777777777777 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				A88888888888888888888888 /* Tool.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		PPP888888888888888888888 /* Services */ = {
 			isa = PBXGroup;
 			children = (
 				AAA000000000000000000000 /* ToolService.swift */,
 				DDD222222222222222222222 /* SpeechRecognizer.swift */,
 				EEE222222222222222222222 /* CommandParser.swift */,
-				GGG222222222222222222222 /* RSSFeedParser.swift */,
-				HHH222222222222222222222 /* AudioPlayerService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -198,7 +244,9 @@
 				III111111111111111111111 /* PodcastListView.swift in Sources */,
 				JJJ111111111111111111111 /* EpisodeListView.swift in Sources */,
 				KKK111111111111111111111 /* MiniPlayerView.swift in Sources */,
-				LLL111111111111111111111 /* RootView.swift in Sources */,
+				MMM111111111111111111111 /* DownloadManager.swift in Sources */,
+				NNN111111111111111111111 /* DownloadsView.swift in Sources */,
+				OOO111111111111111111111 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -335,11 +383,12 @@
 				DEVELOPMENT_TEAM = C545RG9LW8;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "This app needs network access to download podcast episodes.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Garden Manager needs microphone access to listen to your voice commands.";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Garden Manager uses speech recognition to understand your voice commands and execute garden tools.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UIBackgroundModes = audio;
+				INFOPLIST_KEY_UIBackgroundModes = "audio fetch";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -368,11 +417,12 @@
 				DEVELOPMENT_TEAM = C545RG9LW8;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "This app needs network access to download podcast episodes.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Garden Manager needs microphone access to listen to your voice commands.";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Garden Manager uses speech recognition to understand your voice commands and execute garden tools.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UIBackgroundModes = audio;
+				INFOPLIST_KEY_UIBackgroundModes = "audio fetch";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";

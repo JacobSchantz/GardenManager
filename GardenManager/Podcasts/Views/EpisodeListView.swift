@@ -3,15 +3,24 @@ import SwiftUI
 struct EpisodeListView: View {
     let podcast: Podcast
     @EnvironmentObject var audioPlayer: AudioPlayerService
+    @EnvironmentObject var downloadManager: DownloadManager
     
     var body: some View {
         List(podcast.episodes) { episode in
-            Button(action: {
-                audioPlayer.play(episode: episode)
-            }) {
-                EpisodeRow(episode: episode, isPlaying: audioPlayer.currentEpisode?.id == episode.id && audioPlayer.isPlaying)
-            }
-            .buttonStyle(PlainButtonStyle())
+            EpisodeRow(
+                episode: episode,
+                isPlaying: audioPlayer.currentEpisode?.id == episode.id && audioPlayer.isPlaying,
+                onPlay: {
+                    if downloadManager.isDownloaded(episode),
+                       let localURL = downloadManager.getLocalURL(for: episode) {
+                        var localEpisode = episode
+                        localEpisode.localFileURL = localURL
+                        audioPlayer.play(episode: localEpisode)
+                    } else {
+                        audioPlayer.play(episode: episode)
+                    }
+                }
+            )
         }
         .navigationTitle(podcast.title)
         .navigationBarTitleDisplayMode(.inline)
@@ -19,8 +28,10 @@ struct EpisodeListView: View {
 }
 
 struct EpisodeRow: View {
+    @EnvironmentObject var downloadManager: DownloadManager
     let episode: Episode
     let isPlaying: Bool
+    let onPlay: () -> Void
     
     var body: some View {
         HStack(spacing: 12) {
@@ -62,8 +73,14 @@ struct EpisodeRow: View {
                 Image(systemName: "speaker.wave.2.fill")
                     .foregroundColor(.blue)
             }
+            
+            DownloadButton(episode: episode)
         }
         .padding(.vertical, 4)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            onPlay()
+        }
     }
     
     private func formatDuration(_ duration: TimeInterval) -> String {
@@ -162,6 +179,42 @@ struct PlayerControlsView: View {
             return String(format: "%d:%02d:%02d", hours, minutes, seconds)
         } else {
             return String(format: "%d:%02d", minutes, seconds)
+        }
+    }
+}
+
+struct DownloadButton: View {
+    @EnvironmentObject var downloadManager: DownloadManager
+    let episode: Episode
+    
+    var body: some View {
+        Group {
+            if downloadManager.isDownloaded(episode) {
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundColor(.green)
+                    .font(.title3)
+            } else if let progress = downloadManager.downloadingEpisodes[episode.id] {
+                ZStack {
+                    Circle()
+                        .stroke(Color.gray.opacity(0.3), lineWidth: 2)
+                        .frame(width: 24, height: 24)
+                    
+                    Circle()
+                        .trim(from: 0, to: progress)
+                        .stroke(Color.blue, lineWidth: 2)
+                        .frame(width: 24, height: 24)
+                        .rotationEffect(.degrees(-90))
+                }
+            } else {
+                Button(action: {
+                    downloadManager.downloadEpisode(episode)
+                }) {
+                    Image(systemName: "arrow.down.circle")
+                        .foregroundColor(.blue)
+                        .font(.title3)
+                }
+                .buttonStyle(PlainButtonStyle())
+            }
         }
     }
 }

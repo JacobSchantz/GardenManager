@@ -28,8 +28,11 @@ struct Episode: Identifiable, Codable {
     var duration: TimeInterval
     var publishDate: Date
     var imageURL: URL?
+    var isDownloaded: Bool
+    var localFileURL: URL?
+    var downloadProgress: Double
     
-    init(id: UUID = UUID(), title: String, description: String, audioURL: URL, duration: TimeInterval = 0, publishDate: Date, imageURL: URL? = nil) {
+    init(id: UUID = UUID(), title: String, description: String, audioURL: URL, duration: TimeInterval = 0, publishDate: Date, imageURL: URL? = nil, isDownloaded: Bool = false, localFileURL: URL? = nil, downloadProgress: Double = 0) {
         self.id = id
         self.title = title
         self.description = description
@@ -37,5 +40,8 @@ struct Episode: Identifiable, Codable {
         self.duration = duration
         self.publishDate = publishDate
         self.imageURL = imageURL
+        self.isDownloaded = isDownloaded
+        self.localFileURL = localFileURL
+        self.downloadProgress = downloadProgress
     }
 }
