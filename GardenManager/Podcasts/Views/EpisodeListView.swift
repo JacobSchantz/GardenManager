@@ -7,19 +7,10 @@ struct EpisodeListView: View {
     
     var body: some View {
         List(podcast.episodes) { episode in
-            EpisodeRow(
+            PodcastItemView(
+                podcast: nil,
                 episode: episode,
-                isPlaying: audioPlayer.currentEpisode?.id == episode.id && audioPlayer.isPlaying,
-                onPlay: {
-                    if downloadManager.isDownloaded(episode),
-                       let localURL = downloadManager.getLocalURL(for: episode) {
-                        var localEpisode = episode
-                        localEpisode.localFileURL = localURL
-                        audioPlayer.play(episode: localEpisode)
-                    } else {
-                        audioPlayer.play(episode: episode)
-                    }
-                }
+                style: .compact
             )
         }
         .navigationTitle(podcast.title)
@@ -27,74 +18,6 @@ struct EpisodeListView: View {
     }
 }
 
-struct EpisodeRow: View {
-    @EnvironmentObject var downloadManager: DownloadManager
-    let episode: Episode
-    let isPlaying: Bool
-    let onPlay: () -> Void
-    
-    var body: some View {
-        HStack(spacing: 12) {
-            AsyncImage(url: episode.imageURL) { image in
-                image
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-            } placeholder: {
-                Rectangle()
-                    .fill(Color.gray.opacity(0.3))
-                    .overlay(
-                        Image(systemName: isPlaying ? "waveform" : "mic.fill")
-                            .foregroundColor(isPlaying ? .blue : .gray)
-                    )
-            }
-            .frame(width: 50, height: 50)
-            .cornerRadius(6)
-            
-            VStack(alignment: .leading, spacing: 4) {
-                Text(episode.title)
-                    .font(.headline)
-                    .lineLimit(2)
-                    .foregroundColor(isPlaying ? .blue : .primary)
-                
-                Text(episode.publishDate.formatted(date: .abbreviated, time: .omitted))
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                
-                if episode.duration > 0 {
-                    Text(formatDuration(episode.duration))
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-            }
-            
-            Spacer()
-            
-            if isPlaying {
-                Image(systemName: "speaker.wave.2.fill")
-                    .foregroundColor(.blue)
-            }
-            
-            DownloadButton(episode: episode)
-        }
-        .padding(.vertical, 4)
-        .contentShape(Rectangle())
-        .onTapGesture {
-            onPlay()
-        }
-    }
-    
-    private func formatDuration(_ duration: TimeInterval) -> String {
-        let hours = Int(duration) / 3600
-        let minutes = (Int(duration) % 3600) / 60
-        let seconds = Int(duration) % 60
-        
-        if hours > 0 {
-            return String(format: "%d:%02d:%02d", hours, minutes, seconds)
-        } else {
-            return String(format: "%d:%02d", minutes, seconds)
-        }
-    }
-}
 
 struct PlayerControlsView: View {
     @ObservedObject var audioPlayer: AudioPlayerService
@@ -183,38 +106,3 @@ struct PlayerControlsView: View {
     }
 }
 
-struct DownloadButton: View {
-    @EnvironmentObject var downloadManager: DownloadManager
-    let episode: Episode
-    
-    var body: some View {
-        Group {
-            if downloadManager.isDownloaded(episode) {
-                Image(systemName: "checkmark.circle.fill")
-                    .foregroundColor(.green)
-                    .font(.title3)
-            } else if let progress = downloadManager.downloadingEpisodes[episode.id] {
-                ZStack {
-                    Circle()
-                        .stroke(Color.gray.opacity(0.3), lineWidth: 2)
-                        .frame(width: 24, height: 24)
-                    
-                    Circle()
-                        .trim(from: 0, to: progress)
-                        .stroke(Color.blue, lineWidth: 2)
-                        .frame(width: 24, height: 24)
-                        .rotationEffect(.degrees(-90))
-                }
-            } else {
-                Button(action: {
-                    downloadManager.downloadEpisode(episode)
-                }) {
-                    Image(systemName: "arrow.down.circle")
-                        .foregroundColor(.blue)
-                        .font(.title3)
-                }
-                .buttonStyle(PlainButtonStyle())
-            }
-        }
-    }
-}

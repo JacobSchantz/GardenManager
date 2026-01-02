@@ -28,7 +28,7 @@ class AudioPlayerService: NSObject, ObservableObject {
             try audioSession.setCategory(
                 .playback,
                 mode: .spokenAudio,
-                options: [.allowAirPlay, .allowBluetooth, .allowBluetoothA2DP]
+                options: [.allowAirPlay, .allowBluetooth]
             )
             try audioSession.setActive(true, options: [])
             isAudioSessionConfigured = true

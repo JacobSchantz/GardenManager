@@ -18,7 +18,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
             try audioSession.setCategory(
                 .playback,
                 mode: .spokenAudio,
-                options: [.allowAirPlay, .allowBluetooth, .allowBluetoothA2DP]
+                options: [.allowAirPlay, .allowBluetooth]
             )
             try audioSession.setActive(true, options: [])
             print("[AppDelegate] Audio session configured for background playback")

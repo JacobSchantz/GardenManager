@@ -24,6 +24,7 @@
 		MMM111111111111111111111 /* DownloadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = MMM222222222222222222222 /* DownloadManager.swift */; };
 		NNN111111111111111111111 /* DownloadsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = NNN222222222222222222222 /* DownloadsView.swift */; };
 		OOO111111111111111111111 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = OOO222222222222222222222 /* AppDelegate.swift */; };
+		PPP999999999999999999999 /* PodcastItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = QQQ111111111111111111111 /* PodcastItemView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -45,6 +46,7 @@
 		MMM222222222222222222222 /* DownloadManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadManager.swift; sourceTree = "<group>"; };
 		NNN222222222222222222222 /* DownloadsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadsView.swift; sourceTree = "<group>"; };
 		OOO222222222222222222222 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		QQQ111111111111111111111 /* PodcastItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PodcastItemView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -103,6 +105,7 @@
 				JJJ222222222222222222222 /* EpisodeListView.swift */,
 				KKK222222222222222222222 /* MiniPlayerView.swift */,
 				NNN222222222222222222222 /* DownloadsView.swift */,
+				QQQ111111111111111111111 /* PodcastItemView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -247,6 +250,7 @@
 				MMM111111111111111111111 /* DownloadManager.swift in Sources */,
 				NNN111111111111111111111 /* DownloadsView.swift in Sources */,
 				OOO111111111111111111111 /* AppDelegate.swift in Sources */,
+				PPP999999999999999999999 /* PodcastItemView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

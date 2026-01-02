@@ -1,19 +1,70 @@
 import SwiftUI
 
+enum EpisodeRowStyle {
+    case standard
+    case compact
+}
+
 struct PodcastItemView: View {
+    @EnvironmentObject var audioPlayer: AudioPlayerService
+    @EnvironmentObject var downloadManager: DownloadManager
+    
+    let podcast: Podcast?
     let episode: Episode
-    let podcastTitle: String?
-    let podcastImageURL: URL?
-    var isPlaying: Bool = false
-    var isDownloaded: Bool = false
-    var isDownloading: Bool = false
-    var downloadProgress: Double = 0
-    var onTap: (() -> Void)? = nil
-    var trailingContent: (() -> AnyView)? = nil
+    var style: EpisodeRowStyle = .standard
+    var showDownloadButton: Bool = true
+    var showCancelButton: Bool = false
+    
+    private var imageSize: CGFloat {
+        style == .compact ? 50 : 60
+    }
+    
+    private var cornerRadius: CGFloat {
+        style == .compact ? 6 : 8
+    }
+    
+    private var isPlaying: Bool {
+        audioPlayer.currentEpisode?.id == episode.id && audioPlayer.isPlaying
+    }
+    
+    private var isDownloaded: Bool {
+        downloadManager.isDownloaded(episode)
+    }
+    
+    private var isDownloading: Bool {
+        downloadManager.downloadingEpisodes[episode.id] != nil
+    }
+    
+    private var downloadProgress: Double {
+        downloadManager.downloadingEpisodes[episode.id] ?? 0
+    }
+    
+    private func handleTap() {
+        
+        if isDownloaded, let localURL = downloadManager.getLocalURL(for: episode) {
+            var localEpisode = episode
+            localEpisode.localFileURL = localURL
+            audioPlayer.play(episode: localEpisode)
+        } else {
+            audioPlayer.play(episode: episode)
+        }
+    }
+    
+    private func handleDownload() {
+        downloadManager.downloadEpisode(episode)
+    }
+    
+    private func handleDelete() {
+        downloadManager.deleteDownload(episode)
+    }
+    
+    private func handleCancel() {
+        downloadManager.cancelDownload(episode)
+    }
     
     var body: some View {
         HStack(spacing: 12) {
-            AsyncImage(url: episode.imageURL ?? podcastImageURL) { image in
+            AsyncImage(url: episode.imageURL ?? podcast?.imageURL) { image in
                 image
                     .resizable()
                     .aspectRatio(contentMode: .fill)
@@ -25,8 +76,8 @@ struct PodcastItemView: View {
                             .foregroundColor(isPlaying ? .blue : .gray)
                     )
             }
-            .frame(width: 60, height: 60)
-            .cornerRadius(8)
+            .frame(width: imageSize, height: imageSize)
+            .cornerRadius(cornerRadius)
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(episode.title)
@@ -34,8 +85,8 @@ struct PodcastItemView: View {
                     .lineLimit(2)
                     .foregroundColor(isPlaying ? .blue : .primary)
                 
-                if let podcastTitle = podcastTitle {
-                    Text(podcastTitle)
+                if let podcast = podcast {
+                    Text(podcast.title)
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                         .lineLimit(1)
@@ -44,7 +95,7 @@ struct PodcastItemView: View {
                 HStack(spacing: 8) {
                     if isDownloading {
                         ProgressView(value: downloadProgress)
-                            .frame(width: 80)
+                            .frame(width: style == .compact ? 100 : 80)
                         Text("\(Int(downloadProgress * 100))%")
                             .font(.caption)
                             .foregroundColor(.secondary)
@@ -78,14 +129,26 @@ struct PodcastItemView: View {
                     .foregroundColor(.blue)
             }
             
-            if let trailingContent = trailingContent {
-                trailingContent()
+            if showCancelButton {
+                Button(action: handleCancel) {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.title2)
+                        .foregroundColor(.gray)
+                }
+                .buttonStyle(PlainButtonStyle())
+        
             }
+            DownloadButtonView(
+                isDownloaded: isDownloaded,
+                isDownloading: isDownloading,
+                downloadProgress: downloadProgress,
+                onDownload: handleDownload
+            )
         }
         .padding(.vertical, 4)
         .contentShape(Rectangle())
         .onTapGesture {
-            onTap?()
+            handleTap()
         }
     }
     
@@ -98,6 +161,44 @@ struct PodcastItemView: View {
             return String(format: "%d:%02d:%02d", hours, minutes, seconds)
         } else {
             return String(format: "%d:%02d", minutes, seconds)
+        }
+    }
+}
+
+struct DownloadButtonView: View {
+    let isDownloaded: Bool
+    let isDownloading: Bool
+    let downloadProgress: Double
+    let onDownload: (() -> Void)?
+    
+    var body: some View {
+        Group {
+            if isDownloaded {
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundColor(.green)
+                    .font(.title3)
+            } else if isDownloading {
+                ZStack {
+                    Circle()
+                        .stroke(Color.gray.opacity(0.3), lineWidth: 2)
+                        .frame(width: 24, height: 24)
+                    
+                    Circle()
+                        .trim(from: 0, to: downloadProgress)
+                        .stroke(Color.blue, lineWidth: 2)
+                        .frame(width: 24, height: 24)
+                        .rotationEffect(.degrees(-90))
+                }
+            } else {
+                Button(action: {
+                    onDownload?()
+                }) {
+                    Image(systemName: "arrow.down.circle")
+                        .foregroundColor(.blue)
+                        .font(.title3)
+                }
+                .buttonStyle(PlainButtonStyle())
+            }
         }
     }
 }

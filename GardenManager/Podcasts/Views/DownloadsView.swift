@@ -56,9 +56,10 @@ struct DownloadsView: View {
                     if !downloadingEpisodes.isEmpty {
                         Section("Downloading") {
                             ForEach(downloadingEpisodes, id: \.episode.id) { item in
-                                DownloadingEpisodeRow(
+                                PodcastItemView(
                                     podcast: item.podcast,
-                                    episode: item.episode
+                                    episode: item.episode,
+                                    showCancelButton: true
                                 )
                             }
                         }
@@ -67,9 +68,9 @@ struct DownloadsView: View {
                     if !downloadedEpisodes.isEmpty {
                         Section("Downloaded") {
                             ForEach(downloadedEpisodes, id: \.episode.id) { item in
-                                DownloadedEpisodeRow(
+                                PodcastItemView(
                                     podcast: item.podcast,
-                                    episode: item.episode
+                                    episode: item.episode,
                                 )
                             }
                         }
@@ -81,134 +82,3 @@ struct DownloadsView: View {
     }
 }
 
-struct DownloadedEpisodeRow: View {
-    @EnvironmentObject var downloadManager: DownloadManager
-    @EnvironmentObject var audioPlayer: AudioPlayerService
-    let podcast: Podcast
-    let episode: Episode
-    
-    var body: some View {
-        HStack(spacing: 12) {
-            AsyncImage(url: episode.imageURL ?? podcast.imageURL) { image in
-                image
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-            } placeholder: {
-                Rectangle()
-                    .fill(Color.gray.opacity(0.3))
-                    .overlay(
-                        Image(systemName: "mic.fill")
-                            .foregroundColor(.gray)
-                    )
-            }
-            .frame(width: 60, height: 60)
-            .cornerRadius(8)
-            
-            VStack(alignment: .leading, spacing: 4) {
-                Text(episode.title)
-                    .font(.headline)
-                    .lineLimit(2)
-                
-                Text(podcast.title)
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                    .lineLimit(1)
-                
-                HStack {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundColor(.green)
-                        .font(.caption)
-                    Text("Downloaded")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-            }
-            
-            Spacer()
-            
-            Menu {
-                Button(action: {
-                    if let localURL = downloadManager.getLocalURL(for: episode) {
-                        var localEpisode = episode
-                        localEpisode.localFileURL = localURL
-                        audioPlayer.play(episode: localEpisode)
-                    }
-                }) {
-                    Label("Play", systemImage: "play.fill")
-                }
-                
-                Button(role: .destructive, action: {
-                    downloadManager.deleteDownload(episode)
-                }) {
-                    Label("Delete Download", systemImage: "trash")
-                }
-            } label: {
-                Image(systemName: "ellipsis.circle")
-                    .font(.title2)
-                    .foregroundColor(.blue)
-            }
-        }
-        .padding(.vertical, 4)
-    }
-}
-
-struct DownloadingEpisodeRow: View {
-    @EnvironmentObject var downloadManager: DownloadManager
-    let podcast: Podcast
-    let episode: Episode
-    
-    var progress: Double {
-        downloadManager.downloadingEpisodes[episode.id] ?? 0
-    }
-    
-    var body: some View {
-        HStack(spacing: 12) {
-            AsyncImage(url: episode.imageURL ?? podcast.imageURL) { image in
-                image
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-            } placeholder: {
-                Rectangle()
-                    .fill(Color.gray.opacity(0.3))
-                    .overlay(
-                        Image(systemName: "mic.fill")
-                            .foregroundColor(.gray)
-                    )
-            }
-            .frame(width: 60, height: 60)
-            .cornerRadius(8)
-            
-            VStack(alignment: .leading, spacing: 4) {
-                Text(episode.title)
-                    .font(.headline)
-                    .lineLimit(2)
-                
-                Text(podcast.title)
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                    .lineLimit(1)
-                
-                HStack(spacing: 8) {
-                    ProgressView(value: progress)
-                        .frame(width: 100)
-                    
-                    Text("\(Int(progress * 100))%")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-            }
-            
-            Spacer()
-            
-            Button(action: {
-                downloadManager.cancelDownload(episode)
-            }) {
-                Image(systemName: "xmark.circle.fill")
-                    .font(.title2)
-                    .foregroundColor(.gray)
-            }
-            .buttonStyle(PlainButtonStyle())
-        }
-        .padding(.vertical, 4)
-    }
-}
