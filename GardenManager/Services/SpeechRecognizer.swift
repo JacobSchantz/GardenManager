@@ -21,13 +21,13 @@ class SpeechRecognizer: NSObject, ObservableObject, SFSpeechRecognizerDelegate {
         stopListening()
         
         SFSpeechRecognizer.requestAuthorization { [weak self] status in
-            DispatchQueue.main.async {
-                if status != .authorized {
-                    self?.errorMessage = "Speech not authorized"
-                    return
-                }
-                self?.startRecording()
-            }
+//            DispatchQueue.main.async {
+//                if status != .authorized {
+//                    self?.errorMessage = "Speech not authorized"
+//                    return
+//                }
+//                self?.startRecording()
+//            }
         }
     }
     
@@ -74,12 +74,12 @@ class SpeechRecognizer: NSObject, ObservableObject, SFSpeechRecognizerDelegate {
         
         task = recognizer.recognitionTask(with: request) { [weak self] result, error in
             DispatchQueue.main.async {
-                if let result = result {
-                    self?.transcript = result.bestTranscription.formattedString
-                }
-                if error != nil || result?.isFinal == true {
-                    self?.stopListening()
-                }
+//                if let result = result {
+//                    self?.transcript = result.bestTranscription.formattedString
+//                }
+//                if error != nil || result?.isFinal == true {
+//                    self?.stopListening()
+//                }
             }
         }
     }
