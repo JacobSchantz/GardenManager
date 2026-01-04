@@ -4,17 +4,8 @@ typealias Acceleration = (x: Double, y: Double, z: Double)
 
 struct MotionEvent: Identifiable {
     let id = UUID()
-    let type: MotionEventType
-    let value: Double
-    let date: Date
     let acceleration: Acceleration
-    
-    init(type: MotionEventType, value: Double, date: Date, acceleration: Acceleration = (x: 0, y: 0, z: 0)) {
-        self.type = type
-        self.value = value
-        self.date = date
-        self.acceleration = acceleration
-    }
+    let timestamp: Date
 }
 
 enum MotionEventType {

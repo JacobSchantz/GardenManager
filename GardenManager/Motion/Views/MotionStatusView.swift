@@ -33,40 +33,6 @@ struct MotionStatusView: View {
                         Text(String(format: "%.3f", motionTracker.totalVelocityLast5Seconds))
                             .foregroundStyle(motionTracker.totalVelocityLast5Seconds > motionTracker.movementThreshold ? .green : .secondary)
                     }
-                    
-                    LabeledContent("Time until reset") {
-                        Text(String(format: "%.1f", motionTracker.timeUntilNextReset))
-                    }
-                    
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Acceleration")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                        
-                        HStack {
-                            Text("X: \(String(format: "%.3f", motionTracker.currentAcceleration.x))")
-                            Spacer()
-                            Text("Y: \(String(format: "%.3f", motionTracker.currentAcceleration.y))")
-                            Spacer()
-                            Text("Z: \(String(format: "%.3f", motionTracker.currentAcceleration.z))")
-                        }
-                        .font(.caption.monospaced())
-                    }
-                    
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Velocity (m/s)")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                        
-                        HStack {
-                            Text("X: \(String(format: "%.3f", motionTracker.currentVelocity.x))")
-                            Spacer()
-                            Text("Y: \(String(format: "%.3f", motionTracker.currentVelocity.y))")
-                            Spacer()
-                            Text("Z: \(String(format: "%.3f", motionTracker.currentVelocity.z))")
-                        }
-                        .font(.caption.monospaced())
-                    }
                 }
                 
                 // Configuration Section
@@ -84,47 +50,6 @@ struct MotionStatusView: View {
                                 showingThresholdSlider = true
                             }
                             .buttonStyle(.bordered)
-                        }
-                    }
-                }
-                
-                // Motion Data Section
-                Section("Motion Data") {
-                    if motionTracker.motionEvents.isEmpty {
-                        Text("No events yet")
-                            .foregroundStyle(.secondary)
-                    } else {
-                        ForEach(Array(motionTracker.motionEvents.reversed().enumerated()), id: \.element.id) { index, event in
-                            HStack {
-                                Image(systemName: event.type.icon)
-                                    .foregroundStyle(Color(event.type.color))
-                                    .frame(width: 20)
-                                
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(event.type.displayName)
-                                        .font(.caption)
-                                        .fontWeight(.medium)
-                                    
-                                    Text(event.date.formatted(date: .omitted, time: .standard))
-                                        .font(.caption2)
-                                        .foregroundStyle(.secondary)
-                                }
-                                
-                                Spacer()
-                                
-                                VStack(alignment: .trailing, spacing: 2) {
-                                    Text(String(format: "%.3f", event.value))
-                                        .font(.caption.monospaced())
-                                        .fontWeight(.medium)
-                                    
-                                    if event.type != .thresholdChanged {
-                                        Text("(\(String(format: "%.2f", event.acceleration.x)), \(String(format: "%.2f", event.acceleration.y)), \(String(format: "%.2f", event.acceleration.z)))")
-                                            .font(.caption2)
-                                            .foregroundStyle(.secondary)
-                                    }
-                                }
-                            }
-                            .padding(.vertical, 2)
                         }
                     }
                 }
