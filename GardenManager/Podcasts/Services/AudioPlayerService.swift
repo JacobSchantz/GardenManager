@@ -1,4 +1,5 @@
 import Foundation
+import UIKit
 import AVFoundation
 import Combine
 import MediaPlayer
@@ -17,6 +18,7 @@ class AudioPlayerService: NSObject, ObservableObject {
     private var lastSavedTime: TimeInterval = 0
     
     private let playbackPositionsKey = "PlaybackPositions"
+    private let lastPlayedEpisodeIDKey = "LastPlayedEpisodeID"
     
     override init() {
         super.init()
@@ -30,6 +32,7 @@ class AudioPlayerService: NSObject, ObservableObject {
             object: nil
         )
     }
+
     
     private func configureAudioSession() {
         guard !isAudioSessionConfigured else { return }
@@ -39,7 +42,7 @@ class AudioPlayerService: NSObject, ObservableObject {
             try audioSession.setCategory(
                 .playback,
                 mode: .spokenAudio,
-                options: [.allowAirPlay, .allowBluetooth]
+                options: [.allowAirPlay, AVAudioSession.CategoryOptions.allowBluetoothHFP]
             )
             isAudioSessionConfigured = true
             print("[AudioPlayerService] Audio session configured for background playback")
@@ -120,14 +123,34 @@ class AudioPlayerService: NSObject, ObservableObject {
         configureAudioSession()
         activateAudioSession()
         
+        saveLastPlayedEpisodeID(episode.id)
+        
         let isNewEpisode = currentEpisode?.id != episode.id
         
         if isNewEpisode {
+            seekWorkItem?.cancel()
+            seekWorkItem = nil
+            isSeeking = false
+            lastSavedTime = 0
+
+            if let timeObserver = timeObserver {
+                player?.removeTimeObserver(timeObserver)
+                self.timeObserver = nil
+            }
+
+            NotificationCenter.default.removeObserver(
+                self,
+                name: .AVPlayerItemDidPlayToEndTime,
+                object: nil
+            )
+
             // Save position of previous episode before switching
             if let prevEpisode = currentEpisode {
                 savePlaybackPosition(for: prevEpisode.id)
             }
             
+            currentTime = 0
+            duration = 0
             currentEpisode = episode
             let audioURL = episode.localFileURL ?? episode.audioURL
             let playerItem = AVPlayerItem(url: audioURL)
@@ -174,6 +197,7 @@ class AudioPlayerService: NSObject, ObservableObject {
         // Save playback position when pausing
         if let episode = currentEpisode {
             savePlaybackPosition(for: episode.id)
+            saveLastPlayedEpisodeID(episode.id)
         }
     }
     
@@ -229,6 +253,11 @@ class AudioPlayerService: NSObject, ObservableObject {
     }
     
     private func setupTimeObserver() {
+        if let timeObserver = timeObserver {
+            player?.removeTimeObserver(timeObserver)
+            self.timeObserver = nil
+        }
+
         let interval = CMTime(seconds: 0.5, preferredTimescale: 600)
         timeObserver = player?.addPeriodicTimeObserver(forInterval: interval, queue: .main) { [weak self] time in
             guard let self = self else { return }
@@ -300,7 +329,11 @@ class AudioPlayerService: NSObject, ObservableObject {
         let commandCenter = MPRemoteCommandCenter.shared()
         
         commandCenter.playCommand.addTarget { [weak self] _ in
-            self?.play(episode: self?.currentEpisode ?? Episode(title: "", description: "", audioURL: URL(string: "https://example.com")!, publishDate: Date()))
+            if let episode = self?.currentEpisode {
+                self?.play(episode: episode)
+            } else {
+                self?.resume()
+            }
             return .success
         }
         
@@ -318,6 +351,15 @@ class AudioPlayerService: NSObject, ObservableObject {
         commandCenter.skipBackwardCommand.preferredIntervals = [15]
         commandCenter.skipBackwardCommand.addTarget { [weak self] _ in
             self?.skipBackward()
+            return .success
+        }
+
+        commandCenter.changePlaybackPositionCommand.isEnabled = true
+        commandCenter.changePlaybackPositionCommand.addTarget { [weak self] event in
+            guard let event = event as? MPChangePlaybackPositionCommandEvent else {
+                return .commandFailed
+            }
+            self?.seek(to: event.positionTime)
             return .success
         }
     }
@@ -349,17 +391,45 @@ class AudioPlayerService: NSObject, ObservableObject {
     @objc private func savePositionOnBackground() {
         if let episode = currentEpisode {
             savePlaybackPosition(for: episode.id)
+            saveLastPlayedEpisodeID(episode.id)
+        }
+    }
+    
+    private func saveLastPlayedEpisodeID(_ episodeID: UUID) {
+        UserDefaults.standard.set(episodeID.uuidString, forKey: lastPlayedEpisodeIDKey)
+    }
+    
+    private func getLastPlayedEpisodeID() -> UUID? {
+        guard let raw = UserDefaults.standard.string(forKey: lastPlayedEpisodeIDKey) else {
+            return nil
+        }
+        return UUID(uuidString: raw)
+    }
+    
+    func restoreLastPlayedEpisode(
+        podcasts: [Podcast],
+        resolveLocalURL: ((Episode) -> URL?)? = nil
+    ) {
+        guard currentEpisode == nil else { return }
+        guard let episodeID = getLastPlayedEpisodeID() else { return }
+        
+        for podcast in podcasts {
+            if let found = podcast.episodes.first(where: { $0.id == episodeID }) {
+                var episode = found
+                if let resolveLocalURL = resolveLocalURL {
+                    episode.localFileURL = resolveLocalURL(episode)
+                }
+                currentEpisode = episode
+                currentTime = getPlaybackPosition(for: episodeID)
+                print("[AudioPlayerService] Restored last played episode: \(episode.title)")
+                return
+            }
         }
     }
     
     deinit {
         if let timeObserver = timeObserver {
             player?.removeTimeObserver(timeObserver)
-        }
-        
-        // Save position before cleanup
-        if let episode = currentEpisode {
-            savePlaybackPosition(for: episode.id)
         }
         
         NotificationCenter.default.removeObserver(self)

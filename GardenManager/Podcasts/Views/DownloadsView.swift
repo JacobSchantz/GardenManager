@@ -54,30 +54,58 @@ struct DownloadsView: View {
                     .padding(.vertical, 60)
                 } else {
                     if !downloadingEpisodes.isEmpty {
-                        Section("Downloading") {
-                            ForEach(downloadingEpisodes, id: \.episode.id) { item in
-                                PodcastItemView(
-                                    podcast: item.podcast,
-                                    episode: item.episode,
-                                    showCancelButton: true
-                                )
-                            }
+                        ForEach(downloadingEpisodes, id: \.episode.id) { item in
+                            PodcastItemView(
+                                podcast: item.podcast,
+                                episode: item.episode,
+                                showCancelButton: true
+                            )
                         }
+                        .onDelete(perform: deleteDownloadingEpisodes)
                     }
                     
                     if !downloadedEpisodes.isEmpty {
-                        Section("Downloaded") {
-                            ForEach(downloadedEpisodes, id: \.episode.id) { item in
-                                PodcastItemView(
-                                    podcast: item.podcast,
-                                    episode: item.episode,
-                                )
-                            }
+                        ForEach(downloadedEpisodes, id: \.episode.id) { item in
+                            PodcastItemView(
+                                podcast: item.podcast,
+                                episode: item.episode,
+                            )
                         }
+                        .onDelete(perform: deleteDownloadedEpisodes)
                     }
                 }
             }
             .navigationTitle("Downloads")
+        }
+    }
+
+    private func deleteDownloadingEpisodes(at offsets: IndexSet) {
+        let itemsToDelete = offsets.compactMap { idx in
+            downloadingEpisodes.indices.contains(idx) ? downloadingEpisodes[idx] : nil
+        }
+
+        for item in itemsToDelete {
+            downloadManager.cancelDownload(item.episode)
+            downloadManager.deleteDownload(item.episode)
+            if audioPlayer.currentEpisode?.id == item.episode.id {
+                audioPlayer.pause()
+            }
+            podcastViewModel.deleteEpisode(podcastID: item.podcast.id, episodeID: item.episode.id)
+        }
+    }
+
+    private func deleteDownloadedEpisodes(at offsets: IndexSet) {
+        let itemsToDelete = offsets.compactMap { idx in
+            downloadedEpisodes.indices.contains(idx) ? downloadedEpisodes[idx] : nil
+        }
+
+        for item in itemsToDelete {
+            downloadManager.cancelDownload(item.episode)
+            downloadManager.deleteDownload(item.episode)
+            if audioPlayer.currentEpisode?.id == item.episode.id {
+                audioPlayer.pause()
+            }
+            podcastViewModel.deleteEpisode(podcastID: item.podcast.id, episodeID: item.episode.id)
         }
     }
 }

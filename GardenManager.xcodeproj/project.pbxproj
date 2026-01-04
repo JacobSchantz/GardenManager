@@ -25,6 +25,11 @@
 		NNN111111111111111111111 /* DownloadsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = NNN222222222222222222222 /* DownloadsView.swift */; };
 		OOO111111111111111111111 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = OOO222222222222222222222 /* AppDelegate.swift */; };
 		PPP999999999999999999999 /* PodcastItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = QQQ111111111111111111111 /* PodcastItemView.swift */; };
+		MOT111111111111111111111 /* MotionTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = MOT222222222222222222222 /* MotionTracker.swift */; };
+		MOT333333333333333333333 /* MotionStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = MOT444444444444444444444 /* MotionStatusView.swift */; };
+		MOT555555555555555555555 /* MotionAudioCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = MOT666666666666666666666 /* MotionAudioCoordinator.swift */; };
+		MOTAAA111111111111111111 /* MotionEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = MOT888888888888888888888 /* MotionEvent.swift */; };
+		MOTBBB111111111111111111 /* MotionTabContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = MOT999999999999999999999 /* MotionTabContainerView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -48,6 +53,11 @@
 		NNN222222222222222222222 /* DownloadsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadsView.swift; sourceTree = "<group>"; };
 		OOO222222222222222222222 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		QQQ111111111111111111111 /* PodcastItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PodcastItemView.swift; sourceTree = "<group>"; };
+		MOT222222222222222222222 /* MotionTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionTracker.swift; sourceTree = "<group>"; };
+		MOT444444444444444444444 /* MotionStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionStatusView.swift; sourceTree = "<group>"; };
+		MOT666666666666666666666 /* MotionAudioCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionAudioCoordinator.swift; sourceTree = "<group>"; };
+		MOT888888888888888888888 /* MotionEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionEvent.swift; sourceTree = "<group>"; };
+		MOT999999999999999999999 /* MotionTabContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionTabContainerView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -75,6 +85,7 @@
 				CCAAF83E2F082CA100D14C0E /* Info.plist */,
 				A22222222222222222222222 /* GardenManagerApp.swift */,
 				OOO222222222222222222222 /* AppDelegate.swift */,
+				MOTDDD111111111111111111 /* Motion */,
 				PPP111111111111111111111 /* Podcasts */,
 				PPP222222222222222222222 /* Tools */,
 				A66666666666666666666666 /* Assets.xcassets */,
@@ -98,6 +109,42 @@
 				PPP555555555555555555555 /* Services */,
 			);
 			path = Podcasts;
+			sourceTree = "<group>";
+		};
+		MOTDDD111111111111111111 /* Motion */ = {
+			isa = PBXGroup;
+			children = (
+				MOTAAA222222222222222222 /* Models */,
+				MOTBBB222222222222222222 /* Views */,
+				MOTCCC222222222222222222 /* Services */,
+			);
+			path = Motion;
+			sourceTree = "<group>";
+		};
+		MOTAAA222222222222222222 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				MOT888888888888888888888 /* MotionEvent.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		MOTBBB222222222222222222 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				MOT444444444444444444444 /* MotionStatusView.swift */,
+				MOT999999999999999999999 /* MotionTabContainerView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		MOTCCC222222222222222222 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				MOT222222222222222222222 /* MotionTracker.swift */,
+				MOT666666666666666666666 /* MotionAudioCoordinator.swift */,
+			);
+			path = Services;
 			sourceTree = "<group>";
 		};
 		PPP222222222222222222222 /* Tools */ = {
@@ -253,6 +300,11 @@
 				NNN111111111111111111111 /* DownloadsView.swift in Sources */,
 				OOO111111111111111111111 /* AppDelegate.swift in Sources */,
 				PPP999999999999999999999 /* PodcastItemView.swift in Sources */,
+				MOT111111111111111111111 /* MotionTracker.swift in Sources */,
+				MOT333333333333333333333 /* MotionStatusView.swift in Sources */,
+				MOT555555555555555555555 /* MotionAudioCoordinator.swift in Sources */,
+				MOTAAA111111111111111111 /* MotionEvent.swift in Sources */,
+				MOTBBB111111111111111111 /* MotionTabContainerView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

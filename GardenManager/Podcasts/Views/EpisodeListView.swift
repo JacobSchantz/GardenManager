@@ -1,20 +1,47 @@
 import SwiftUI
 
 struct EpisodeListView: View {
-    let podcast: Podcast
+    let podcastID: UUID
     @EnvironmentObject var audioPlayer: AudioPlayerService
     @EnvironmentObject var downloadManager: DownloadManager
+    @EnvironmentObject var podcastViewModel: PodcastListViewModel
+
+    private var podcast: Podcast? {
+        podcastViewModel.podcasts.first(where: { $0.id == podcastID })
+    }
     
     var body: some View {
-        List(podcast.episodes) { episode in
-            PodcastItemView(
-                podcast: nil,
-                episode: episode,
-                style: .compact
-            )
+        List {
+            if let podcast = podcast {
+                ForEach(podcast.episodes) { episode in
+                    PodcastItemView(
+                        podcast: nil,
+                        episode: episode,
+                        style: .compact
+                    )
+                }
+                .onDelete(perform: deleteEpisodes)
+            }
         }
-        .navigationTitle(podcast.title)
+        .navigationTitle(podcast?.title ?? "Episodes")
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private func deleteEpisodes(at offsets: IndexSet) {
+        guard let podcast = podcast else { return }
+        let episodesToDelete = offsets.compactMap { idx in
+            podcast.episodes.indices.contains(idx) ? podcast.episodes[idx] : nil
+        }
+
+        for episode in episodesToDelete {
+            downloadManager.cancelDownload(episode)
+            downloadManager.deleteDownload(episode)
+            if audioPlayer.currentEpisode?.id == episode.id {
+                audioPlayer.pause()
+            }
+        }
+
+        podcastViewModel.deleteEpisodes(podcastID: podcastID, at: offsets)
     }
 }
 

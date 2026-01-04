@@ -23,7 +23,7 @@ struct PodcastListView: View {
                 } else {
                     List {
                         ForEach(viewModel.podcasts) { podcast in
-                            NavigationLink(destination: EpisodeListView(podcast: podcast)) {
+                            NavigationLink(destination: EpisodeListView(podcastID: podcast.id)) {
                                 PodcastRow(podcast: podcast)
                             }
                         }
@@ -172,6 +172,18 @@ class PodcastListViewModel: ObservableObject {
     
     func deletePodcast(at offsets: IndexSet) {
         podcasts.remove(atOffsets: offsets)
+        savePodcasts()
+    }
+
+    func deleteEpisode(podcastID: UUID, episodeID: UUID) {
+        guard let podcastIndex = podcasts.firstIndex(where: { $0.id == podcastID }) else { return }
+        podcasts[podcastIndex].episodes.removeAll(where: { $0.id == episodeID })
+        savePodcasts()
+    }
+
+    func deleteEpisodes(podcastID: UUID, at offsets: IndexSet) {
+        guard let podcastIndex = podcasts.firstIndex(where: { $0.id == podcastID }) else { return }
+        podcasts[podcastIndex].episodes.remove(atOffsets: offsets)
         savePodcasts()
     }
     

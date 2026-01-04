@@ -57,9 +57,6 @@ struct MiniPlayerView: View {
                     .padding(.vertical, 8)
                 }
                 .buttonStyle(PlainButtonStyle())
-                
-                ProgressView(value: audioPlayer.currentTime, total: max(audioPlayer.duration, 1))
-                    .progressViewStyle(LinearProgressViewStyle())
             }
             .background(Color(UIColor.systemBackground))
             .sheet(isPresented: $showFullPlayer) {

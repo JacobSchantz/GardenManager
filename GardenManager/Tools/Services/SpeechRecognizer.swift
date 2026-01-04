@@ -19,16 +19,8 @@ class SpeechRecognizer: NSObject, ObservableObject, SFSpeechRecognizerDelegate {
     
     func startListening() {
         stopListening()
+       
         
-        SFSpeechRecognizer.requestAuthorization { [weak self] status in
-//            DispatchQueue.main.async {
-//                if status != .authorized {
-//                    self?.errorMessage = "Speech not authorized"
-//                    return
-//                }
-//                self?.startRecording()
-//            }
-        }
     }
     
     private func startRecording() {
