@@ -3,7 +3,6 @@ import Charts
 
 struct MotionStatusView: View {
     @EnvironmentObject var motionTracker: MotionTracker
-    
     @State private var showingThresholdSlider = false
     @State private var tempThreshold: Double = 0.03
     
@@ -30,43 +29,52 @@ struct MotionStatusView: View {
                 // Real-time Data Section
                 Section("Real-time Data") {
                     LabeledContent("Total Velocity (5s)") {
-                        Text(String(format: "%.3f", motionTracker.totalVelocityLast5Seconds))
-                            .foregroundStyle(motionTracker.totalVelocityLast5Seconds > motionTracker.movementThreshold ? .green : .secondary)
+                        Text(String(format: "%.3f", motionTracker.totalVelocity))
                     }
                 }
+                
+                // Motion Events Section
+
+                ForEach(motionTracker.motionEvents) { event in
+                    VStack{
+                        Text("X: \(String(format: "%.3f", event.timestamp.timeIntervalSince1970))")
+                        HStack {
+                            Text("X: \(String(format: "%.3f", event.acceleration.x))")
+                            Spacer()
+                            Text("Y: \(String(format: "%.3f", event.acceleration.y))")
+                            Spacer()
+                            Text("Z: \(String(format: "%.3f", event.acceleration.z))")
+                        }
+                    }
+        
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+                    .cornerRadius(6)
+                    .animation(nil)
+                }
+                
                 
                 // Configuration Section
                 Section("Configuration") {
                     LabeledContent("Recent window (s)") {
-                        Text(String(format: "%.0f", motionTracker.recentWindow))
+                        Text(String(format: "%.0f", motionTracker.secondsBetweenCalculations))
                     }
                     
                     LabeledContent("Movement threshold") {
                         HStack {
-                            Text(String(format: "%.3f", motionTracker.movementThreshold))
+                            Text(String(format: "%.3f", motionTracker.minimumVelocity))
                             Spacer()
                             Button("Adjust") {
-                                tempThreshold = motionTracker.movementThreshold
+                                tempThreshold = motionTracker.minimumVelocity
                                 showingThresholdSlider = true
                             }
                             .buttonStyle(.bordered)
+                            .tint(.blue)
                         }
                     }
                 }
             }
-            .navigationTitle("Motion")
-            .sheet(isPresented: $showingThresholdSlider) {
-                ThresholdSliderView(
-                    currentThreshold: $tempThreshold,
-                    onConfirm: {
-                        motionTracker.movementThreshold = tempThreshold
-                        showingThresholdSlider = false
-                    },
-                    onCancel: {
-                        showingThresholdSlider = false
-                    }
-                )
-            }
+            .padding()
         }
     }
 }
@@ -87,6 +95,7 @@ struct ThresholdSliderView: View {
                         Text("Adjust the sensitivity of motion detection. Lower values detect smaller movements, higher values require more significant movement.")
                             .font(.caption)
                             .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.leading)
                         
                         VStack(spacing: 8) {
                             HStack {
@@ -126,20 +135,19 @@ struct ThresholdSliderView: View {
                             }
                         }
                         .buttonStyle(.plain)
+                        .tint(.blue)
                     }
                 }
             }
+            .padding()
             .navigationTitle("Adjust Threshold")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel", action: onCancel)
-                }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done", action: onConfirm)
-                        .fontWeight(.semibold)
-                }
-            }
         }
+    }
+}
+
+struct MotionStatusView_Previews: PreviewProvider {
+    static var previews: some View {
+        MotionStatusView()
     }
 }
