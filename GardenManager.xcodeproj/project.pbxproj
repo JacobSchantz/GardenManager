@@ -13,6 +13,7 @@
 		A77777777777777777777777 /* Tool.swift in Sources */ = {isa = PBXBuildFile; fileRef = A88888888888888888888888 /* Tool.swift */; };
 		A99999999999999999999999 /* ToolService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA000000000000000000000 /* ToolService.swift */; };
 		ABB111111111111111111111 /* ToolParameterSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACC222222222222222222222 /* ToolParameterSheet.swift */; };
+		CC2D86EC2F0A4A3E00EA33F5 /* MotionGraphsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2D86EB2F0A4A3E00EA33F5 /* MotionGraphsView.swift */; };
 		DDD111111111111111111111 /* SpeechRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDD222222222222222222222 /* SpeechRecognizer.swift */; };
 		EEE111111111111111111111 /* CommandParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEE222222222222222222222 /* CommandParser.swift */; };
 		FFF111111111111111111111 /* Podcast.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFF222222222222222222222 /* Podcast.swift */; };
@@ -22,14 +23,14 @@
 		JJJ111111111111111111111 /* EpisodeListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = JJJ222222222222222222222 /* EpisodeListView.swift */; };
 		KKK111111111111111111111 /* MiniPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = KKK222222222222222222222 /* MiniPlayerView.swift */; };
 		MMM111111111111111111111 /* DownloadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = MMM222222222222222222222 /* DownloadManager.swift */; };
-		NNN111111111111111111111 /* DownloadsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = NNN222222222222222222222 /* DownloadsView.swift */; };
-		OOO111111111111111111111 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = OOO222222222222222222222 /* AppDelegate.swift */; };
-		PPP999999999999999999999 /* PodcastItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = QQQ111111111111111111111 /* PodcastItemView.swift */; };
 		MOT111111111111111111111 /* MotionTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = MOT222222222222222222222 /* MotionTracker.swift */; };
 		MOT333333333333333333333 /* MotionStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = MOT444444444444444444444 /* MotionStatusView.swift */; };
 		MOT555555555555555555555 /* MotionAudioCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = MOT666666666666666666666 /* MotionAudioCoordinator.swift */; };
 		MOTAAA111111111111111111 /* MotionEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = MOT888888888888888888888 /* MotionEvent.swift */; };
 		MOTBBB111111111111111111 /* MotionTabContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = MOT999999999999999999999 /* MotionTabContainerView.swift */; };
+		NNN111111111111111111111 /* DownloadsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = NNN222222222222222222222 /* DownloadsView.swift */; };
+		OOO111111111111111111111 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = OOO222222222222222222222 /* AppDelegate.swift */; };
+		PPP999999999999999999999 /* PodcastItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = QQQ111111111111111111111 /* PodcastItemView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -40,6 +41,7 @@
 		AAA000000000000000000000 /* ToolService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolService.swift; sourceTree = "<group>"; };
 		ACC222222222222222222222 /* ToolParameterSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolParameterSheet.swift; sourceTree = "<group>"; };
 		ADD333333333333333333333 /* GardenManager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GardenManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CC2D86EB2F0A4A3E00EA33F5 /* MotionGraphsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionGraphsView.swift; sourceTree = "<group>"; };
 		CCAAF83E2F082CA100D14C0E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		DDD222222222222222222222 /* SpeechRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechRecognizer.swift; sourceTree = "<group>"; };
 		EEE222222222222222222222 /* CommandParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandParser.swift; sourceTree = "<group>"; };
@@ -50,14 +52,14 @@
 		JJJ222222222222222222222 /* EpisodeListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EpisodeListView.swift; sourceTree = "<group>"; };
 		KKK222222222222222222222 /* MiniPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiniPlayerView.swift; sourceTree = "<group>"; };
 		MMM222222222222222222222 /* DownloadManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadManager.swift; sourceTree = "<group>"; };
-		NNN222222222222222222222 /* DownloadsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadsView.swift; sourceTree = "<group>"; };
-		OOO222222222222222222222 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		QQQ111111111111111111111 /* PodcastItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PodcastItemView.swift; sourceTree = "<group>"; };
 		MOT222222222222222222222 /* MotionTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionTracker.swift; sourceTree = "<group>"; };
 		MOT444444444444444444444 /* MotionStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionStatusView.swift; sourceTree = "<group>"; };
 		MOT666666666666666666666 /* MotionAudioCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionAudioCoordinator.swift; sourceTree = "<group>"; };
 		MOT888888888888888888888 /* MotionEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionEvent.swift; sourceTree = "<group>"; };
 		MOT999999999999999999999 /* MotionTabContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionTabContainerView.swift; sourceTree = "<group>"; };
+		NNN222222222222222222222 /* DownloadsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadsView.swift; sourceTree = "<group>"; };
+		OOO222222222222222222222 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		QQQ111111111111111111111 /* PodcastItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PodcastItemView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -101,26 +103,6 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		PPP111111111111111111111 /* Podcasts */ = {
-			isa = PBXGroup;
-			children = (
-				PPP333333333333333333333 /* Views */,
-				PPP444444444444444444444 /* Models */,
-				PPP555555555555555555555 /* Services */,
-			);
-			path = Podcasts;
-			sourceTree = "<group>";
-		};
-		MOTDDD111111111111111111 /* Motion */ = {
-			isa = PBXGroup;
-			children = (
-				MOTAAA222222222222222222 /* Models */,
-				MOTBBB222222222222222222 /* Views */,
-				MOTCCC222222222222222222 /* Services */,
-			);
-			path = Motion;
-			sourceTree = "<group>";
-		};
 		MOTAAA222222222222222222 /* Models */ = {
 			isa = PBXGroup;
 			children = (
@@ -132,6 +114,7 @@
 		MOTBBB222222222222222222 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				CC2D86EB2F0A4A3E00EA33F5 /* MotionGraphsView.swift */,
 				MOT444444444444444444444 /* MotionStatusView.swift */,
 				MOT999999999999999999999 /* MotionTabContainerView.swift */,
 			);
@@ -145,6 +128,26 @@
 				MOT666666666666666666666 /* MotionAudioCoordinator.swift */,
 			);
 			path = Services;
+			sourceTree = "<group>";
+		};
+		MOTDDD111111111111111111 /* Motion */ = {
+			isa = PBXGroup;
+			children = (
+				MOTAAA222222222222222222 /* Models */,
+				MOTBBB222222222222222222 /* Views */,
+				MOTCCC222222222222222222 /* Services */,
+			);
+			path = Motion;
+			sourceTree = "<group>";
+		};
+		PPP111111111111111111111 /* Podcasts */ = {
+			isa = PBXGroup;
+			children = (
+				PPP333333333333333333333 /* Views */,
+				PPP444444444444444444444 /* Models */,
+				PPP555555555555555555555 /* Services */,
+			);
+			path = Podcasts;
 			sourceTree = "<group>";
 		};
 		PPP222222222222222222222 /* Tools */ = {
@@ -298,6 +301,7 @@
 				KKK111111111111111111111 /* MiniPlayerView.swift in Sources */,
 				MMM111111111111111111111 /* DownloadManager.swift in Sources */,
 				NNN111111111111111111111 /* DownloadsView.swift in Sources */,
+				CC2D86EC2F0A4A3E00EA33F5 /* MotionGraphsView.swift in Sources */,
 				OOO111111111111111111111 /* AppDelegate.swift in Sources */,
 				PPP999999999999999999999 /* PodcastItemView.swift in Sources */,
 				MOT111111111111111111111 /* MotionTracker.swift in Sources */,

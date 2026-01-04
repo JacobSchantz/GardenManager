@@ -7,7 +7,8 @@ struct MotionStatusView: View {
     @State private var tempThreshold: Double = 0.03
     
     var body: some View {
-        NavigationView {
+        TabView {
+            NavigationView {
             Form {
                 Section("Current Status") {
                     LabeledContent("Has moved recently") {
@@ -46,6 +47,21 @@ struct MotionStatusView: View {
                             Text("Y: \(String(format: "%.3f", motionTracker.currentAcceleration.y))")
                             Spacer()
                             Text("Z: \(String(format: "%.3f", motionTracker.currentAcceleration.z))")
+                        }
+                        .font(.caption.monospaced())
+                    }
+                    
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Velocity (m/s)")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        
+                        HStack {
+                            Text("X: \(String(format: "%.3f", motionTracker.currentVelocity.x))")
+                            Spacer()
+                            Text("Y: \(String(format: "%.3f", motionTracker.currentVelocity.y))")
+                            Spacer()
+                            Text("Z: \(String(format: "%.3f", motionTracker.currentVelocity.z))")
                         }
                         .font(.caption.monospaced())
                     }
@@ -109,19 +125,28 @@ struct MotionStatusView: View {
                     }
                 }
             }
-            .navigationTitle("Motion")
-            .sheet(isPresented: $showingThresholdSlider) {
-                ThresholdSliderView(
-                    currentThreshold: $tempThreshold,
-                    onConfirm: {
-                        motionTracker.movementThreshold = tempThreshold
-                        showingThresholdSlider = false
-                    },
-                    onCancel: {
-                        showingThresholdSlider = false
-                    }
-                )
+                .navigationTitle("Motion")
+                .sheet(isPresented: $showingThresholdSlider) {
+                    ThresholdSliderView(
+                        currentThreshold: $tempThreshold,
+                        onConfirm: {
+                            motionTracker.movementThreshold = tempThreshold
+                            showingThresholdSlider = false
+                        },
+                        onCancel: {
+                            showingThresholdSlider = false
+                        }
+                    )
+                }
             }
+            .tabItem {
+                Label("Status", systemImage: "gauge")
+            }
+            
+            MotionGraphsView()
+                .tabItem {
+                    Label("Graphs", systemImage: "chart.xyaxis.line")
+                }
         }
     }
 }
