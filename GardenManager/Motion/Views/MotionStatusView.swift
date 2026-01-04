@@ -1,4 +1,5 @@
 import SwiftUI
+import Charts
 
 struct MotionStatusView: View {
     @EnvironmentObject var motionTracker: MotionTracker
@@ -7,9 +8,9 @@ struct MotionStatusView: View {
     @State private var tempThreshold: Double = 0.03
     
     var body: some View {
-        TabView {
-            NavigationView {
-            Form {
+        NavigationView {
+            List {
+                // Current Status Section
                 Section("Current Status") {
                     LabeledContent("Has moved recently") {
                         Text(motionTracker.hasMovedRecently ? "Yes" : "No")
@@ -26,14 +27,15 @@ struct MotionStatusView: View {
                     }
                 }
                 
+                // Real-time Data Section
                 Section("Real-time Data") {
-                    LabeledContent("Magnitude") {
-                        Text(String(format: "%.3f", motionTracker.currentMagnitude))
+                    LabeledContent("Total Velocity (5s)") {
+                        Text(String(format: "%.3f", motionTracker.totalVelocityLast5Seconds))
+                            .foregroundStyle(motionTracker.totalVelocityLast5Seconds > motionTracker.movementThreshold ? .green : .secondary)
                     }
                     
-                    LabeledContent("Last Change") {
-                        Text(String(format: "%.3f", motionTracker.lastMagnitudeChange))
-                            .foregroundStyle(motionTracker.lastMagnitudeChange > motionTracker.movementThreshold ? .green : .secondary)
+                    LabeledContent("Time until reset") {
+                        Text(String(format: "%.1f", motionTracker.timeUntilNextReset))
                     }
                     
                     VStack(alignment: .leading, spacing: 4) {
@@ -67,6 +69,7 @@ struct MotionStatusView: View {
                     }
                 }
                 
+                // Configuration Section
                 Section("Configuration") {
                     LabeledContent("Recent window (s)") {
                         Text(String(format: "%.0f", motionTracker.recentWindow))
@@ -85,7 +88,8 @@ struct MotionStatusView: View {
                     }
                 }
                 
-                Section("Motion Events") {
+                // Motion Data Section
+                Section("Motion Data") {
                     if motionTracker.motionEvents.isEmpty {
                         Text("No events yet")
                             .foregroundStyle(.secondary)
@@ -125,28 +129,19 @@ struct MotionStatusView: View {
                     }
                 }
             }
-                .navigationTitle("Motion")
-                .sheet(isPresented: $showingThresholdSlider) {
-                    ThresholdSliderView(
-                        currentThreshold: $tempThreshold,
-                        onConfirm: {
-                            motionTracker.movementThreshold = tempThreshold
-                            showingThresholdSlider = false
-                        },
-                        onCancel: {
-                            showingThresholdSlider = false
-                        }
-                    )
-                }
+            .navigationTitle("Motion")
+            .sheet(isPresented: $showingThresholdSlider) {
+                ThresholdSliderView(
+                    currentThreshold: $tempThreshold,
+                    onConfirm: {
+                        motionTracker.movementThreshold = tempThreshold
+                        showingThresholdSlider = false
+                    },
+                    onCancel: {
+                        showingThresholdSlider = false
+                    }
+                )
             }
-            .tabItem {
-                Label("Status", systemImage: "gauge")
-            }
-            
-            MotionGraphsView()
-                .tabItem {
-                    Label("Graphs", systemImage: "chart.xyaxis.line")
-                }
         }
     }
 }

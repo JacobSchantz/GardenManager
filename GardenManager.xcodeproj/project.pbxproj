@@ -134,8 +134,8 @@
 			isa = PBXGroup;
 			children = (
 				MOTAAA222222222222222222 /* Models */,
-				MOTBBB222222222222222222 /* Views */,
 				MOTCCC222222222222222222 /* Services */,
+				MOTBBB222222222222222222 /* Views */,
 			);
 			path = Motion;
 			sourceTree = "<group>";

@@ -22,6 +22,7 @@ enum MotionEventType {
     case initialReading
     case statusUpdate
     case thresholdChanged
+    case velocityReset
     
     var displayName: String {
         switch self {
@@ -33,6 +34,8 @@ enum MotionEventType {
             return "Status Update"
         case .thresholdChanged:
             return "Threshold Changed"
+        case .velocityReset:
+            return "Velocity Reset"
         }
     }
     
@@ -46,6 +49,8 @@ enum MotionEventType {
             return "clock"
         case .thresholdChanged:
             return "slider.horizontal.3"
+        case .velocityReset:
+            return "arrow.counterclockwise"
         }
     }
     
@@ -59,6 +64,8 @@ enum MotionEventType {
             return "gray"
         case .thresholdChanged:
             return "orange"
+        case .velocityReset:
+            return "purple"
         }
     }
 }
