@@ -50,20 +50,22 @@ struct RootView: View {
                     .environmentObject(audioPlayer)
                     .environmentObject(downloadManager)
                     .environmentObject(podcastViewModel)
-                     .environmentObject(motionTracker)
-                
+                    .environmentObject(motionTracker)
                 MiniPlayerView()
                     .environmentObject(audioPlayer)
             }
             .tabItem {
                 Label("Downloads", systemImage: "arrow.down.circle")
             }
-
-             MotionStatusView()
-                 .environmentObject(motionTracker)
-                 .tabItem {
-                     Label("Motion", systemImage: "figure.walk")
-                 }
+            VStack(spacing: 0) {
+                MotionStatusView()
+                    .environmentObject(motionTracker)
+                MiniPlayerView()
+                    .environmentObject(audioPlayer)
+            }
+            .tabItem {
+                Label("Motion", systemImage: "figure.walk")
+            }
         }
         .onReceive(podcastViewModel.$podcasts) { podcasts in
             audioPlayer.restoreLastPlayedEpisode(

@@ -31,6 +31,14 @@
 		NNN111111111111111111111 /* DownloadsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = NNN222222222222222222222 /* DownloadsView.swift */; };
 		OOO111111111111111111111 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = OOO222222222222222222222 /* AppDelegate.swift */; };
 		PPP999999999999999999999 /* PodcastItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = QQQ111111111111111111111 /* PodcastItemView.swift */; };
+		VIS222222222222222222222 /* VisionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = VIS111111111111111111111 /* VisionService.swift */; };
+		TXT222222222222222222222 /* TextProcessingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = TXT111111111111111111111 /* TextProcessingService.swift */; };
+		IMG222222222222222222222 /* ImagePodcastImportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = IMG111111111111111111111 /* ImagePodcastImportView.swift */; };
+		IMV222222222222222222222 /* ImagePodcastImportViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = IMV111111111111111111111 /* ImagePodcastImportViewModel.swift */; };
+		SRCH22222222222222222222 /* PodcastSearchResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = SRCH11111111111111111111 /* PodcastSearchResult.swift */; };
+		SRVC22222222222222222222 /* PodcastSearchService.swift in Sources */ = {isa = PBXBuildFile; fileRef = SRVC11111111111111111111 /* PodcastSearchService.swift */; };
+		VIS333333333333333333333 /* Vision.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = VIS444444444444444444444 /* Vision.framework */; };
+		PHO333333333333333333333 /* PhotosUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = PHO444444444444444444444 /* PhotosUI.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -60,6 +68,14 @@
 		NNN222222222222222222222 /* DownloadsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadsView.swift; sourceTree = "<group>"; };
 		OOO222222222222222222222 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		QQQ111111111111111111111 /* PodcastItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PodcastItemView.swift; sourceTree = "<group>"; };
+		SRCH11111111111111111111 /* PodcastSearchResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PodcastSearchResult.swift; sourceTree = "<group>"; };
+		SRVC11111111111111111111 /* PodcastSearchService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PodcastSearchService.swift; sourceTree = "<group>"; };
+		VIS111111111111111111111 /* VisionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionService.swift; sourceTree = "<group>"; };
+		TXT111111111111111111111 /* TextProcessingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextProcessingService.swift; sourceTree = "<group>"; };
+		IMG111111111111111111111 /* ImagePodcastImportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePodcastImportView.swift; sourceTree = "<group>"; };
+		IMV111111111111111111111 /* ImagePodcastImportViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePodcastImportViewModel.swift; sourceTree = "<group>"; };
+		VIS444444444444444444444 /* Vision.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Vision.framework; path = System/Library/Frameworks/Vision.framework; sourceTree = SDKROOT; };
+		PHO444444444444444444444 /* PhotosUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PhotosUI.framework; path = System/Library/Frameworks/PhotosUI.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -67,6 +83,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				VIS333333333333333333333 /* Vision.framework in Frameworks */,
+				PHO333333333333333333333 /* PhotosUI.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -168,6 +186,8 @@
 				KKK222222222222222222222 /* MiniPlayerView.swift */,
 				NNN222222222222222222222 /* DownloadsView.swift */,
 				QQQ111111111111111111111 /* PodcastItemView.swift */,
+				IMG111111111111111111111 /* ImagePodcastImportView.swift */,
+				IMV111111111111111111111 /* ImagePodcastImportViewModel.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -176,6 +196,7 @@
 			isa = PBXGroup;
 			children = (
 				FFF222222222222222222222 /* Podcast.swift */,
+				SRCH11111111111111111111 /* PodcastSearchResult.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -186,6 +207,9 @@
 				HHH222222222222222222222 /* AudioPlayerService.swift */,
 				GGG222222222222222222222 /* RSSFeedParser.swift */,
 				MMM222222222222222222222 /* DownloadManager.swift */,
+				SRVC11111111111111111111 /* PodcastSearchService.swift */,
+				VIS111111111111111111111 /* VisionService.swift */,
+				TXT111111111111111111111 /* TextProcessingService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -309,6 +333,12 @@
 				MOT555555555555555555555 /* MotionAudioCoordinator.swift in Sources */,
 				MOTAAA111111111111111111 /* MotionEvent.swift in Sources */,
 				MOTBBB111111111111111111 /* MotionTabContainerView.swift in Sources */,
+				VIS222222222222222222222 /* VisionService.swift in Sources */,
+				TXT222222222222222222222 /* TextProcessingService.swift in Sources */,
+				IMG222222222222222222222 /* ImagePodcastImportView.swift in Sources */,
+				IMV222222222222222222222 /* ImagePodcastImportViewModel.swift in Sources */,
+				SRCH22222222222222222222 /* PodcastSearchResult.swift in Sources */,
+				SRVC22222222222222222222 /* PodcastSearchService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -3,6 +3,7 @@ import SwiftUI
 struct PodcastListView: View {
     @StateObject private var viewModel = PodcastListViewModel()
     @State private var showingAddFeed = false
+    @State private var showingImageImport = false
     @State private var feedURLString = ""
     
     var body: some View {
@@ -34,13 +35,24 @@ struct PodcastListView: View {
             .navigationTitle("Podcasts")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: { showingAddFeed = true }) {
+                    Menu {
+                        Button(action: { showingAddFeed = true }) {
+                            Label("Add by URL", systemImage: "link")
+                        }
+                        
+                        Button(action: { showingImageImport = true }) {
+                            Label("Import from Image", systemImage: "photo")
+                        }
+                    } label: {
                         Image(systemName: "plus")
                     }
                 }
             }
             .sheet(isPresented: $showingAddFeed) {
                 AddFeedView(viewModel: viewModel, isPresented: $showingAddFeed)
+            }
+            .sheet(isPresented: $showingImageImport) {
+                ImagePodcastImportView(podcastListViewModel: viewModel)
             }
             .alert("Error", isPresented: $viewModel.showError) {
                 Button("OK", role: .cancel) { }
@@ -187,7 +199,7 @@ class PodcastListViewModel: ObservableObject {
         savePodcasts()
     }
     
-    private func savePodcasts() {
+    func savePodcasts() {
         if let encoded = try? JSONEncoder().encode(podcasts) {
             UserDefaults.standard.set(encoded, forKey: "savedPodcasts")
         }
