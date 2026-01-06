@@ -29,7 +29,7 @@ actor TextProcessingService {
         return uniqueCandidates
     }
     
-    func findMatchingPodcasts(for podcastNames: [String], progressHandler: @escaping @Sendable (Int, Int) -> Void) async -> [(name: String, podcast: PodcastSearchResult?)] {
+    func findMatchingPodcasts(for podcastNames: [String], progressHandler: @escaping @Sendable (Int, Int) -> Void) async -> [(name: String, podcast: Podcast?)] {
         var results: [(String, PodcastSearchResult?)] = []
         
         for (index, name) in podcastNames.enumerated() {
@@ -38,8 +38,8 @@ actor TextProcessingService {
             do {
                 let searchResponse = try await podcastSearchService.searchPodcasts(query: name, limit: 5)
                 // Take the best match (first result if available)
-                let bestMatch = searchResponse.results.first
-                results.append((name, bestMatch))
+                let bestMatch = searchResponse.feeds.first
+                results.append((name, bestMatch?.toPodcast()))
             } catch {
                 // If search fails, add with nil
                 results.append((name, nil))

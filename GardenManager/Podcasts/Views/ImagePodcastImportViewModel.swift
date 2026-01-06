@@ -13,7 +13,7 @@ class ImagePodcastImportViewModel: ObservableObject {
     @Published var selectedImage: UIImage?
     @Published var processingState: ProcessingState = .idle
     @Published var processingStatus = ""
-    @Published var podcastResults: [(name: String, podcast: PodcastSearchResult?)] = []
+    @Published var podcastResults: [(name: String, podcast: Podcast?)] = []
     @Published var showImportSuccess = false
     @Published var showImportError = false
     @Published var importSuccessMessage = ""
@@ -103,22 +103,18 @@ class ImagePodcastImportViewModel: ObservableObject {
         }
         
         // Check if podcast already exists
-        if podcastListViewModel.podcasts.contains(where: { $0.feedURL.absoluteString == podcastResult.rss }) {
+        if podcastListViewModel.podcasts.contains(where: { $0.feedURL.absoluteString == podcastResult.feedURL.absoluteString }) {
             importErrorMessage = "\"\(podcastResult.title)\" is already in your library."
             showImportError = true
             return
         }
         
         do {
-            // Import the podcast using RSS parsing
-            let rssURL = URL(string: podcastResult.rss)!
-            let parser = RSSFeedParser(feedURL: rssURL)
-            let podcast = try await parser.parse()
-            
-            podcastListViewModel.podcasts.append(podcast)
+            // The podcast is already in the correct format, just add it
+            podcastListViewModel.podcasts.append(podcastResult)
             podcastListViewModel.savePodcasts()
             
-            importSuccessMessage = "\"\(podcast.title)\" has been added to your library."
+            importSuccessMessage = "\"\(podcastResult.title)\" has been added to your library."
             showImportSuccess = true
             
         } catch {
