@@ -10,6 +10,11 @@
     "modulePath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/swift\/iphoneos\/prebuilt-modules\/26.2\/AVFoundation.swiftmodule\/arm64e-apple-ios.swiftmodule"
   },
   {
+    "isFramework" : false,
+    "moduleName" : "Accelerate",
+    "modulePath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/swift\/iphoneos\/prebuilt-modules\/26.2\/Accelerate.swiftmodule\/arm64e-apple-ios.swiftmodule"
+  },
+  {
     "isFramework" : true,
     "moduleName" : "Accessibility",
     "modulePath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/swift\/iphoneos\/prebuilt-modules\/26.2\/Accessibility.swiftmodule\/arm64e-apple-ios.swiftmodule"
@@ -23,6 +28,11 @@
     "isFramework" : true,
     "moduleName" : "BackgroundAssets",
     "modulePath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/swift\/iphoneos\/prebuilt-modules\/26.2\/BackgroundAssets.swiftmodule\/arm64e-apple-ios.swiftmodule"
+  },
+  {
+    "isFramework" : true,
+    "moduleName" : "Charts",
+    "modulePath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/swift\/iphoneos\/prebuilt-modules\/26.2\/Charts.swiftmodule\/arm64e-apple-ios.swiftmodule"
   },
   {
     "isFramework" : true,
@@ -56,13 +66,28 @@
   },
   {
     "isFramework" : false,
+    "moduleName" : "CoreLocation",
+    "modulePath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/swift\/iphoneos\/prebuilt-modules\/26.2\/CoreLocation.swiftmodule\/arm64e-apple-ios.swiftmodule"
+  },
+  {
+    "isFramework" : false,
     "moduleName" : "CoreMIDI",
     "modulePath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/swift\/iphoneos\/prebuilt-modules\/26.2\/CoreMIDI.swiftmodule\/arm64e-apple-ios.swiftmodule"
+  },
+  {
+    "isFramework" : true,
+    "moduleName" : "CoreML",
+    "modulePath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/swift\/iphoneos\/prebuilt-modules\/26.2\/CoreML.swiftmodule\/arm64e-apple-ios.swiftmodule"
   },
   {
     "isFramework" : false,
     "moduleName" : "CoreMedia",
     "modulePath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/swift\/iphoneos\/prebuilt-modules\/26.2\/CoreMedia.swiftmodule\/arm64e-apple-ios.swiftmodule"
+  },
+  {
+    "isFramework" : true,
+    "moduleName" : "CoreMotion",
+    "modulePath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/swift\/iphoneos\/prebuilt-modules\/26.2\/CoreMotion.swiftmodule\/arm64e-apple-ios.swiftmodule"
   },
   {
     "isFramework" : true,
@@ -125,6 +150,11 @@
     "modulePath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/swift\/iphoneos\/prebuilt-modules\/26.2\/FoundationModels.swiftmodule\/arm64e-apple-ios.swiftmodule"
   },
   {
+    "isFramework" : true,
+    "moduleName" : "MediaPlayer",
+    "modulePath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/swift\/iphoneos\/prebuilt-modules\/26.2\/MediaPlayer.swiftmodule\/arm64e-apple-ios.swiftmodule"
+  },
+  {
     "isFramework" : false,
     "moduleName" : "Metal",
     "modulePath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/swift\/iphoneos\/prebuilt-modules\/26.2\/Metal.swiftmodule\/arm64e-apple-ios.swiftmodule"
@@ -148,6 +178,16 @@
     "isFramework" : false,
     "moduleName" : "Observation",
     "modulePath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/swift\/iphoneos\/prebuilt-modules\/26.2\/Observation.swiftmodule\/arm64e-apple-ios.swiftmodule"
+  },
+  {
+    "isFramework" : true,
+    "moduleName" : "Photos",
+    "modulePath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/swift\/iphoneos\/prebuilt-modules\/26.2\/Photos.swiftmodule\/arm64e-apple-ios.swiftmodule"
+  },
+  {
+    "isFramework" : true,
+    "moduleName" : "PhotosUI",
+    "modulePath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/swift\/iphoneos\/prebuilt-modules\/26.2\/PhotosUI.swiftmodule\/arm64e-apple-ios.swiftmodule"
   },
   {
     "isFramework" : false,
@@ -205,6 +245,11 @@
     "modulePath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/swift\/iphoneos\/prebuilt-modules\/26.2\/UniformTypeIdentifiers.swiftmodule\/arm64e-apple-ios.swiftmodule"
   },
   {
+    "isFramework" : true,
+    "moduleName" : "Vision",
+    "modulePath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/swift\/iphoneos\/prebuilt-modules\/26.2\/Vision.swiftmodule\/arm64e-apple-ios.swiftmodule"
+  },
+  {
     "isFramework" : false,
     "moduleName" : "XPC",
     "modulePath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/swift\/iphoneos\/prebuilt-modules\/26.2\/XPC.swiftmodule\/arm64e-apple-ios.swiftmodule"
@@ -233,6 +278,11 @@
     "isFramework" : false,
     "moduleName" : "_DarwinFoundation3",
     "modulePath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/swift\/iphoneos\/prebuilt-modules\/26.2\/_DarwinFoundation3.swiftmodule\/arm64e-apple-ios.swiftmodule"
+  },
+  {
+    "isFramework" : true,
+    "moduleName" : "_PhotosUI_SwiftUI",
+    "modulePath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/swift\/iphoneos\/prebuilt-modules\/26.2\/_PhotosUI_SwiftUI.swiftmodule\/arm64e-apple-ios.swiftmodule"
   },
   {
     "isFramework" : false,
@@ -271,6 +321,13 @@
     "moduleName" : "AVRouting"
   },
   {
+    "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/System\/Library\/Frameworks\/Accelerate.framework\/Modules\/module.modulemap",
+    "clangModulePath" : "\/Users\/jakeschantz\/GardenManager\/build\/DerivedData\/ModuleCache.noindex\/Accelerate-A0DIHXIAHJ8D92GW4G5L13YXW.pcm",
+    "isBridgingHeaderDependency" : false,
+    "isFramework" : false,
+    "moduleName" : "Accelerate"
+  },
+  {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/System\/Library\/Frameworks\/Accessibility.framework\/Modules\/module.modulemap",
     "clangModulePath" : "\/Users\/jakeschantz\/GardenManager\/build\/DerivedData\/ModuleCache.noindex\/Accessibility-4XAZIV150743F2K0SGRIF860X.pcm",
     "isBridgingHeaderDependency" : false,
@@ -297,6 +354,13 @@
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "CFNetwork"
+  },
+  {
+    "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/usr\/include\/CommonCrypto\/module.modulemap",
+    "clangModulePath" : "\/Users\/jakeschantz\/GardenManager\/build\/DerivedData\/ModuleCache.noindex\/CommonCrypto-48ZQNJOSEF68AYHVU80PY229Z.pcm",
+    "isBridgingHeaderDependency" : false,
+    "isFramework" : false,
+    "moduleName" : "CommonCrypto"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/System\/Library\/Frameworks\/CoreAudio.framework\/Modules\/module.modulemap",
@@ -341,6 +405,13 @@
     "moduleName" : "CoreImage"
   },
   {
+    "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/System\/Library\/Frameworks\/CoreLocation.framework\/Modules\/module.modulemap",
+    "clangModulePath" : "\/Users\/jakeschantz\/GardenManager\/build\/DerivedData\/ModuleCache.noindex\/CoreLocation-1NH0GDGR6XNJNM6ZXFCYW1Y32.pcm",
+    "isBridgingHeaderDependency" : false,
+    "isFramework" : false,
+    "moduleName" : "CoreLocation"
+  },
+  {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/System\/Library\/Frameworks\/CoreMIDI.framework\/Modules\/module.modulemap",
     "clangModulePath" : "\/Users\/jakeschantz\/GardenManager\/build\/DerivedData\/ModuleCache.noindex\/CoreMIDI-20ZOSAXJQ6EELT0GSN58NBY6E.pcm",
     "isBridgingHeaderDependency" : false,
@@ -348,11 +419,25 @@
     "moduleName" : "CoreMIDI"
   },
   {
+    "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/System\/Library\/Frameworks\/CoreML.framework\/Modules\/module.modulemap",
+    "clangModulePath" : "\/Users\/jakeschantz\/GardenManager\/build\/DerivedData\/ModuleCache.noindex\/CoreML-5F3GRK3RJAY8C77UCPU83NBPS.pcm",
+    "isBridgingHeaderDependency" : false,
+    "isFramework" : false,
+    "moduleName" : "CoreML"
+  },
+  {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/System\/Library\/Frameworks\/CoreMedia.framework\/Modules\/module.modulemap",
     "clangModulePath" : "\/Users\/jakeschantz\/GardenManager\/build\/DerivedData\/ModuleCache.noindex\/CoreMedia-B1S0MRYOTSF8VUDJ7ZV4NCN6I.pcm",
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "CoreMedia"
+  },
+  {
+    "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/System\/Library\/Frameworks\/CoreMotion.framework\/Modules\/module.modulemap",
+    "clangModulePath" : "\/Users\/jakeschantz\/GardenManager\/build\/DerivedData\/ModuleCache.noindex\/CoreMotion-BTI8TOQ7DY2CWKMJSJQ85JIFY.pcm",
+    "isBridgingHeaderDependency" : false,
+    "isFramework" : false,
+    "moduleName" : "CoreMotion"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/System\/Library\/Frameworks\/CoreText.framework\/Modules\/module.modulemap",
@@ -446,6 +531,13 @@
     "moduleName" : "MachO"
   },
   {
+    "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/System\/Library\/Frameworks\/MediaPlayer.framework\/Modules\/module.modulemap",
+    "clangModulePath" : "\/Users\/jakeschantz\/GardenManager\/build\/DerivedData\/ModuleCache.noindex\/MediaPlayer-5TADWEOEFH63JXZHKO1Y5T0CA.pcm",
+    "isBridgingHeaderDependency" : false,
+    "isFramework" : false,
+    "moduleName" : "MediaPlayer"
+  },
+  {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/System\/Library\/Frameworks\/MediaToolbox.framework\/Modules\/module.modulemap",
     "clangModulePath" : "\/Users\/jakeschantz\/GardenManager\/build\/DerivedData\/ModuleCache.noindex\/MediaToolbox-5PRD7XNT12F65WG9G4BTRK5WD.pcm",
     "isBridgingHeaderDependency" : false,
@@ -486,6 +578,20 @@
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "OpenGLES"
+  },
+  {
+    "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/System\/Library\/Frameworks\/Photos.framework\/Modules\/module.modulemap",
+    "clangModulePath" : "\/Users\/jakeschantz\/GardenManager\/build\/DerivedData\/ModuleCache.noindex\/Photos-3MYIRW9SP07LBWOBSFMIKTOV3.pcm",
+    "isBridgingHeaderDependency" : false,
+    "isFramework" : false,
+    "moduleName" : "Photos"
+  },
+  {
+    "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/System\/Library\/Frameworks\/PhotosUI.framework\/Modules\/module.modulemap",
+    "clangModulePath" : "\/Users\/jakeschantz\/GardenManager\/build\/DerivedData\/ModuleCache.noindex\/PhotosUI-7K0PI0D7YXZP3WMP3UNFAT301.pcm",
+    "isBridgingHeaderDependency" : false,
+    "isFramework" : false,
+    "moduleName" : "PhotosUI"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/System\/Library\/Frameworks\/QuartzCore.framework\/Modules\/module.modulemap",
@@ -570,6 +676,13 @@
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "UserNotifications"
+  },
+  {
+    "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/System\/Library\/Frameworks\/Vision.framework\/Modules\/module.modulemap",
+    "clangModulePath" : "\/Users\/jakeschantz\/GardenManager\/build\/DerivedData\/ModuleCache.noindex\/Vision-2HKOCIQ05CYAPER0MY0BOLQ5U.pcm",
+    "isBridgingHeaderDependency" : false,
+    "isFramework" : false,
+    "moduleName" : "Vision"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/usr\/include\/xpc.modulemap",
@@ -675,6 +788,13 @@
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "_DarwinFoundation3"
+  },
+  {
+    "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/System\/Library\/Frameworks\/_LocationEssentials.framework\/Modules\/module.modulemap",
+    "clangModulePath" : "\/Users\/jakeschantz\/GardenManager\/build\/DerivedData\/ModuleCache.noindex\/_LocationEssentials-76JFG0FXK00OWSNUWK8MV6TQL.pcm",
+    "isBridgingHeaderDependency" : false,
+    "isFramework" : false,
+    "moduleName" : "_LocationEssentials"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/usr\/lib\/swift\/shims\/module.modulemap",
