@@ -2,8 +2,14 @@ import SwiftUI
 
 struct MiniPlayerView: View {
     @EnvironmentObject var audioPlayer: AudioPlayerService
-    @EnvironmentObject var downloadManager: DownloadManager
     @State private var showFullPlayer = false
+    
+    // Helper to get local image URL
+    private func getLocalImageURL(for episode: Episode) -> URL? {
+        let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        let imagePath = documentsPath.appendingPathComponent("Downloads").appendingPathComponent("\(episode.id.uuidString).jpg")
+        return FileManager.default.fileExists(atPath: imagePath.path) ? imagePath : nil
+    }
     
     var body: some View {
         if let episode = audioPlayer.currentEpisode {
@@ -16,7 +22,7 @@ struct MiniPlayerView: View {
                     HStack(spacing: 12) {
                         CachedAsyncImage(
                             url: episode.displayImageURL,
-                            localURL: downloadManager.getLocalImageURL(for: episode)
+                            localURL: getLocalImageURL(for: episode)
                         ) {
                             Rectangle()
                                 .fill(Color.gray.opacity(0.3))
@@ -91,7 +97,7 @@ struct FullPlayerView: View {
                 if let episode = audioPlayer.currentEpisode {
                     CachedAsyncImage(
                         url: episode.displayImageURL,
-                        localURL: downloadManager.getLocalImageURL(for: episode)
+                        localURL: getLocalImageURL(for: episode)
                     ) {
                         Rectangle()
                             .fill(Color.gray.opacity(0.3))

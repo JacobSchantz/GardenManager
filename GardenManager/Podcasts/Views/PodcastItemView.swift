@@ -15,6 +15,13 @@ struct PodcastItemView: View {
     var showDownloadButton: Bool = true
     var showCancelButton: Bool = false
     
+    // Helper to get local image URL
+    private func getLocalImageURL(for episode: Episode) -> URL? {
+        let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        let imagePath = documentsPath.appendingPathComponent("Downloads").appendingPathComponent("\(episode.id.uuidString).jpg")
+        return FileManager.default.fileExists(atPath: imagePath.path) ? imagePath : nil
+    }
+    
     private var imageSize: CGFloat {
         style == .compact ? 50 : 60
     }
@@ -66,7 +73,7 @@ struct PodcastItemView: View {
         HStack(spacing: 12) {
             CachedAsyncImage(
                 url: episode.displayImageURL,
-                localURL: downloadManager.getLocalImageURL(for: episode)
+                localURL: getLocalImageURL(for: episode)
             ) {
                 Rectangle()
                     .fill(Color.gray.opacity(0.3))
