@@ -2,6 +2,7 @@ import SwiftUI
 
 struct MiniPlayerView: View {
     @EnvironmentObject var audioPlayer: AudioPlayerService
+    @EnvironmentObject var downloadManager: DownloadManager
     @State private var showFullPlayer = false
     
     var body: some View {
