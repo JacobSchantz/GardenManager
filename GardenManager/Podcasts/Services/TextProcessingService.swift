@@ -30,7 +30,7 @@ actor TextProcessingService {
     }
     
     func findMatchingPodcasts(for podcastNames: [String], progressHandler: @escaping @Sendable (Int, Int) -> Void) async -> [(name: String, podcast: Podcast?)] {
-        var results: [(String, PodcastSearchResult?)] = []
+        var results: [(String, Podcast?)] = []
         
         for (index, name) in podcastNames.enumerated() {
             progressHandler(index, podcastNames.count)
@@ -88,3 +88,4 @@ actor TextProcessingService {
         return false
     }
 }
+
