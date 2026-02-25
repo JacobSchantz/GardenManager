@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct PodcastListView: View {
-    @StateObject private var viewModel = PodcastListViewModel()
+    @EnvironmentObject var viewModel: PodcastListViewModel
     @State private var showingAddFeed = false
     @State private var showingImageImport = false
     @State private var feedURLString = ""

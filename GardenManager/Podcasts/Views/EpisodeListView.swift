@@ -23,6 +23,7 @@ struct EpisodeListView: View {
                 .onDelete(perform: deleteEpisodes)
             }
         }
+        .id(podcastID)  // Force refresh when podcast changes
         .navigationTitle(podcast?.title ?? "Episodes")
         .navigationBarTitleDisplayMode(.inline)
     }
