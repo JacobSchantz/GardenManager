@@ -51,4 +51,11 @@ struct Episode: Identifiable, Codable {
     var displayImageURL: URL? {
         imageURL ?? podcastImageURL
     }
+    
+    // Local image URL if episode is downloaded
+    var localImageURL: URL? {
+        let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        let imagePath = documentsPath.appendingPathComponent("Downloads").appendingPathComponent("\(id.uuidString).jpg")
+        return FileManager.default.fileExists(atPath: imagePath.path) ? imagePath : nil
+    }
 }
