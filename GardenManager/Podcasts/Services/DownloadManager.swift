@@ -1,4 +1,5 @@
 import Foundation
+import UIKit
 
 @MainActor
 class DownloadManager: NSObject, ObservableObject {
@@ -7,6 +8,9 @@ class DownloadManager: NSObject, ObservableObject {
     
     private var activeDownloads: [UUID: URLSessionDownloadTask] = [:]
     private var downloadSession: URLSession!
+    
+    // Track episodes that need image downloads
+    private var pendingImageDownloads: Set<UUID> = []
     
     override init() {
         super.init()
@@ -23,7 +27,50 @@ class DownloadManager: NSObject, ObservableObject {
         activeDownloads[episode.id] = task
         downloadingEpisodes[episode.id] = 0
         task.resume()
+        
+        // Also download the image if available
+        if let imageURL = episode.displayImageURL {
+            downloadEpisodeImage(episodeID: episode.id, imageURL: imageURL)
+        }
+        
         print("Started download for episode: \(episode.title)")
+    }
+    
+    private func downloadEpisodeImage(episodeID: UUID, imageURL: URL) {
+        pendingImageDownloads.insert(episodeID)
+        
+        Task {
+            do {
+                let (data, _) = try await URLSession.shared.data(from: imageURL)
+                if let image = UIImage(data: data) {
+                    saveImageLocally(episodeID: episodeID, image: image)
+                }
+            } catch {
+                print("Failed to download episode image: \(error)")
+            }
+            pendingImageDownloads.remove(episodeID)
+        }
+    }
+    
+    private func saveImageLocally(episodeID: UUID, image: UIImage) {
+        let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        let episodeFolder = documentsPath.appendingPathComponent("Downloads")
+        
+        try? FileManager.default.createDirectory(at: episodeFolder, withIntermediateDirectories: true)
+        
+        let imagePath = episodeFolder.appendingPathComponent("\(episodeID.uuidString).jpg")
+        if let data = image.jpegData(compressionQuality: 0.8) {
+            try? data.write(to: imagePath)
+            print("Saved image to: \(imagePath.path)")
+        }
+    }
+    
+    func getLocalImageURL(for episode: Episode) -> URL? {
+        let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        let episodeFolder = documentsPath.appendingPathComponent("Downloads")
+        let imagePath = episodeFolder.appendingPathComponent("\(episode.id.uuidString).jpg")
+        
+        return FileManager.default.fileExists(atPath: imagePath.path) ? imagePath : nil
     }
     
     func cancelDownload(_ episode: Episode) {
@@ -33,8 +80,13 @@ class DownloadManager: NSObject, ObservableObject {
     }
     
     func deleteDownload(_ episode: Episode) {
+        // Delete audio file
         if let localURL = getLocalURL(for: episode) {
             try? FileManager.default.removeItem(at: localURL)
+        }
+        // Delete image file
+        if let imageURL = getLocalImageURL(for: episode) {
+            try? FileManager.default.removeItem(at: imageURL)
         }
         downloadedEpisodes.remove(episode.id)
         saveDownloadedEpisodes()

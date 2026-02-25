@@ -61,16 +61,18 @@ actor ImageCache {
 
 struct CachedAsyncImage: View {
     let url: URL?
+    let localURL: URL?  // Local file URL (e.g., from downloaded episode)
     let placeholder: AnyView
     
-    init(url: URL?, @ViewBuilder placeholder: () -> some View = { Color.gray.opacity(0.3).overlay(Image(systemName: "mic.fill").foregroundColor(.gray)) } ) {
+    init(url: URL?, localURL: URL? = nil, @ViewBuilder placeholder: () -> some View = { Color.gray.opacity(0.3).overlay(Image(systemName: "mic.fill").foregroundColor(.gray)) } ) {
         self.url = url
+        self.localURL = localURL
         self.placeholder = AnyView(placeholder())
     }
     
     var body: some View {
         if let url = url {
-            CachedAsyncImageInner(url: url, placeholder: placeholder)
+            CachedAsyncImageInner(url: url, localURL: localURL, placeholder: placeholder)
         } else {
             placeholder
         }
@@ -79,6 +81,7 @@ struct CachedAsyncImage: View {
 
 struct CachedAsyncImageInner: View {
     let url: URL
+    let localURL: URL?
     let placeholder: AnyView
     
     @State private var image: UIImage?
@@ -104,11 +107,24 @@ struct CachedAsyncImageInner: View {
     private func loadImage() async {
         guard !isLoading else { return }
         isLoading = true
+        
+        // First check: local downloaded file
+        if let localURL = localURL,
+           let data = try? Data(contentsOf: localURL),
+           let localImage = UIImage(data: data) {
+            withAnimation { self.image = localImage }
+            isLoading = false
+            return
+        }
+        
+        // Second check: memory cache
         if let cached = await ImageCache.shared.image(for: url) {
             withAnimation { self.image = cached }
             isLoading = false
             return
         }
+        
+        // Third check: download from remote
         if let downloaded = await ImageCache.shared.loadImage(from: url) {
             await MainActor.run {
                 withAnimation { self.image = downloaded }

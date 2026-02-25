@@ -64,7 +64,10 @@ struct PodcastItemView: View {
     
     var body: some View {
         HStack(spacing: 12) {
-            CachedAsyncImage(url: episode.displayImageURL) {
+            CachedAsyncImage(
+                url: episode.displayImageURL,
+                localURL: downloadManager.getLocalImageURL(for: episode)
+            ) {
                 Rectangle()
                     .fill(Color.gray.opacity(0.3))
                     .overlay(
