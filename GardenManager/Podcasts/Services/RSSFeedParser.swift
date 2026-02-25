@@ -15,6 +15,8 @@ class RSSFeedParser: NSObject, XMLParserDelegate {
     private var podcastDescription = ""
     private var podcastImageURL: URL?
     private var isInItem = false
+    private var isInImage = false
+    private var currentImageURLString = ""
     private let feedURL: URL
     
     init(feedURL: URL) {
@@ -53,14 +55,32 @@ class RSSFeedParser: NSObject, XMLParserDelegate {
             currentDuration = 0
         }
         
+        // Handle <image><url> structure (non-itunes feeds)
+        if elementName == "image" && !isInItem {
+            isInImage = true
+            currentImageURLString = ""
+        }
+        
         if elementName == "enclosure" {
             if let urlString = attributeDict["url"], let url = URL(string: urlString) {
                 currentAudioURL = url
             }
         }
         
-        if elementName == "itunes:image" || elementName == "image" {
-            if let urlString = attributeDict["href"] ?? attributeDict["url"], let url = URL(string: urlString) {
+        // Handle itunes:image with href attribute
+        if elementName == "itunes:image" {
+            if let urlString = attributeDict["href"], let url = URL(string: urlString) {
+                if isInItem {
+                    currentImageURL = url
+                } else {
+                    podcastImageURL = url
+                }
+            }
+        }
+        
+        // Handle standard RSS <image> with url attribute
+        if elementName == "image" {
+            if let urlString = attributeDict["url"], let url = URL(string: urlString) {
                 if isInItem {
                     currentImageURL = url
                 } else {
@@ -73,6 +93,12 @@ class RSSFeedParser: NSObject, XMLParserDelegate {
     func parser(_ parser: XMLParser, foundCharacters string: String) {
         let trimmed = string.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
+        
+        // Handle <image><url>text</url></image> structure
+        if isInImage && currentElement == "url" {
+            currentImageURLString += trimmed
+            return
+        }
         
         switch currentElement {
         case "title":
@@ -97,6 +123,12 @@ class RSSFeedParser: NSObject, XMLParserDelegate {
                 dateFormatter.dateFormat = "EEE, dd MMM yyyy HH:mm:ss Z"
                 if let date = dateFormatter.date(from: trimmed) {
                     currentPubDate = date
+                } else {
+                    // Try alternative format
+                    dateFormatter.dateFormat = "EEE, dd MMM yyyy HH:mm:ss zzz"
+                    if let date = dateFormatter.date(from: trimmed) {
+                        currentPubDate = date
+                    }
                 }
             }
         case "itunes:duration":
@@ -123,16 +155,29 @@ class RSSFeedParser: NSObject, XMLParserDelegate {
     }
     
     func parser(_ parser: XMLParser, didEndElement elementName: String, namespaceURI: String?, qualifiedName qName: String?) {
+        // Handle closing of <image><url> structure
+        if elementName == "image" && isInImage {
+            isInImage = false
+            if !currentImageURLString.isEmpty, let url = URL(string: currentImageURLString) {
+                if !isInItem {
+                    podcastImageURL = url
+                }
+            }
+            currentImageURLString = ""
+        }
+        
         if elementName == "item" {
             isInItem = false
             if let audioURL = currentAudioURL {
+                // Use episode image if available, otherwise fallback to podcast image
+                let episodeImageURL = currentImageURL ?? podcastImageURL
                 let episode = Episode(
                     title: currentTitle,
                     description: currentDescription,
                     audioURL: audioURL,
                     duration: currentDuration,
                     publishDate: currentPubDate ?? Date(),
-                    imageURL: currentImageURL
+                    imageURL: episodeImageURL
                 )
                 episodes.append(episode)
             }

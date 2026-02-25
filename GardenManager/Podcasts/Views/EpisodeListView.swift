@@ -56,11 +56,7 @@ struct PlayerControlsView: View {
             VStack(spacing: 12) {
                 if let episode = audioPlayer.currentEpisode {
                     HStack(spacing: 12) {
-                        AsyncImage(url: episode.imageURL) { image in
-                            image
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
-                        } placeholder: {
+                        CachedAsyncImage(url: episode.imageURL) {
                             Rectangle()
                                 .fill(Color.gray.opacity(0.3))
                                 .overlay(

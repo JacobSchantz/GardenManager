@@ -68,11 +68,7 @@ struct PodcastRow: View {
     
     var body: some View {
         HStack(spacing: 12) {
-            AsyncImage(url: podcast.imageURL) { image in
-                image
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-            } placeholder: {
+            CachedAsyncImage(url: podcast.imageURL) {
                 Rectangle()
                     .fill(Color.gray.opacity(0.3))
                     .overlay(
