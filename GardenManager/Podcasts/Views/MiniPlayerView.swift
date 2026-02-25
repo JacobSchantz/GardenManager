@@ -13,7 +13,7 @@ struct MiniPlayerView: View {
                     showFullPlayer = true
                 }) {
                     HStack(spacing: 12) {
-                        CachedAsyncImage(url: episode.imageURL) {
+                        CachedAsyncImage(url: episode.displayImageURL) {
                             Rectangle()
                                 .fill(Color.gray.opacity(0.3))
                                 .overlay(
@@ -85,7 +85,7 @@ struct FullPlayerView: View {
                 Spacer()
                 
                 if let episode = audioPlayer.currentEpisode {
-                    CachedAsyncImage(url: episode.imageURL) {
+                    CachedAsyncImage(url: episode.displayImageURL) {
                         Rectangle()
                             .fill(Color.gray.opacity(0.3))
                             .overlay(

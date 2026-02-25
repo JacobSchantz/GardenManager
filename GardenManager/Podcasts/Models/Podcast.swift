@@ -28,11 +28,12 @@ struct Episode: Identifiable, Codable {
     var duration: TimeInterval
     var publishDate: Date
     var imageURL: URL?
+    var podcastImageURL: URL?  // Fallback image from parent podcast
     var isDownloaded: Bool
     var localFileURL: URL?
     var downloadProgress: Double
     
-    init(id: UUID = UUID(), title: String, description: String, audioURL: URL, duration: TimeInterval = 0, publishDate: Date, imageURL: URL? = nil, isDownloaded: Bool = false, localFileURL: URL? = nil, downloadProgress: Double = 0) {
+    init(id: UUID = UUID(), title: String, description: String, audioURL: URL, duration: TimeInterval = 0, publishDate: Date, imageURL: URL? = nil, podcastImageURL: URL? = nil, isDownloaded: Bool = false, localFileURL: URL? = nil, downloadProgress: Double = 0) {
         self.id = id
         self.title = title
         self.description = description
@@ -40,8 +41,14 @@ struct Episode: Identifiable, Codable {
         self.duration = duration
         self.publishDate = publishDate
         self.imageURL = imageURL
+        self.podcastImageURL = podcastImageURL
         self.isDownloaded = isDownloaded
         self.localFileURL = localFileURL
         self.downloadProgress = downloadProgress
+    }
+    
+    // Computed property for display - episode image with podcast fallback
+    var displayImageURL: URL? {
+        imageURL ?? podcastImageURL
     }
 }

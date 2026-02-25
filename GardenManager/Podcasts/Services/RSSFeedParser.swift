@@ -169,15 +169,14 @@ class RSSFeedParser: NSObject, XMLParserDelegate {
         if elementName == "item" {
             isInItem = false
             if let audioURL = currentAudioURL {
-                // Use episode image if available, otherwise fallback to podcast image
-                let episodeImageURL = currentImageURL ?? podcastImageURL
                 let episode = Episode(
                     title: currentTitle,
                     description: currentDescription,
                     audioURL: audioURL,
                     duration: currentDuration,
                     publishDate: currentPubDate ?? Date(),
-                    imageURL: episodeImageURL
+                    imageURL: currentImageURL,
+                    podcastImageURL: podcastImageURL  // Fallback to podcast image
                 )
                 episodes.append(episode)
             }
