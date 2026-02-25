@@ -3,8 +3,8 @@ import PhotosUI
 import UIKit
 
 // MARK: - Image Cache
-@unchecked Sendable
-class ImageCache {
+// NSCache is thread-safe, but we need proper isolation for Swift concurrency
+actor ImageCache {
     static let shared = ImageCache()
     
     private let cache = NSCache<NSURL, UIImage>()
@@ -35,7 +35,7 @@ class ImageCache {
     func store(_ image: UIImage, for url: URL) {
         cache.setObject(image, forKey: url as NSURL)
         let fileURL = diskCacheURL.appendingPathComponent(url.absoluteString.hashValue.description)
-        DispatchQueue.global(qos: .background).async {
+        Task.detached(priority: .background) {
             if let data = image.jpegData(compressionQuality: 0.8) {
                 try? data.write(to: fileURL)
             }
@@ -43,13 +43,13 @@ class ImageCache {
     }
     
     func loadImage(from url: URL) async -> UIImage? {
-        if let cached = ImageCache.shared.image(for: url) {
+        if let cached = await shared.image(for: url) {
             return cached
         }
         do {
             let (data, _) = try await URLSession.shared.data(from: url)
             if let image = UIImage(data: data) {
-                ImageCache.shared.store(image, for: url)
+                await shared.store(image, for: url)
                 return image
             }
         } catch {
@@ -104,7 +104,7 @@ struct CachedAsyncImageInner: View {
     private func loadImage() async {
         guard !isLoading else { return }
         isLoading = true
-        if let cached = ImageCache.shared.image(for: url) {
+        if let cached = await ImageCache.shared.image(for: url) {
             withAnimation { self.image = cached }
             isLoading = false
             return
