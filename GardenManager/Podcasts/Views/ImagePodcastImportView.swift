@@ -3,6 +3,7 @@ import PhotosUI
 import UIKit
 
 // MARK: - Image Cache
+@unchecked Sendable
 class ImageCache {
     static let shared = ImageCache()
     
