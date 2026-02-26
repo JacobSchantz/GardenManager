@@ -42,6 +42,11 @@ struct PodcastItemView: View {
         downloadManager.downloadingEpisodes[episode.id] ?? 0
     }
     
+    // Image URL with multiple fallbacks: episode image -> episode podcastImageURL -> podcast.imageURL
+    private var resolvedImageURL: URL? {
+        episode.imageURL ?? episode.podcastImageURL ?? podcast?.imageURL
+    }
+    
     private func handleTap() {
         
         if isDownloaded, let localURL = downloadManager.getLocalURL(for: episode) {
@@ -68,7 +73,7 @@ struct PodcastItemView: View {
     var body: some View {
         HStack(spacing: 12) {
             CachedAsyncImage(
-                url: episode.displayImageURL,
+                url: resolvedImageURL,
                 localURL: episode.localImageURL
             ) {
                 Rectangle()
