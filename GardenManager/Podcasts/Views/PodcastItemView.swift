@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 enum EpisodeRowStyle {
     case standard
@@ -14,6 +15,8 @@ struct PodcastItemView: View {
     var style: EpisodeRowStyle = .standard
     var showDownloadButton: Bool = true
     var showCancelButton: Bool = false
+    
+    @State private var showEpisodeOptions = false
     
     private var imageSize: CGFloat {
         style == .compact ? 50 : 60
@@ -149,6 +152,12 @@ struct PodcastItemView: View {
         .onTapGesture {
             handleTap()
         }
+        .onLongPressGesture {
+            showEpisodeOptions = true
+        }
+        .sheet(isPresented: $showEpisodeOptions) {
+            EpisodeOptionsSheet(episode: episode, podcast: podcast)
+        }
     }
     
     private func formatDuration(_ duration: TimeInterval) -> String {
@@ -198,6 +207,69 @@ struct DownloadButtonView: View {
                 }
                 .buttonStyle(PlainButtonStyle())
             }
+        }
+    }
+}
+
+struct EpisodeOptionsSheet: View {
+    let episode: Episode
+    let podcast: Podcast?
+    
+    @Environment(\.dismiss) var dismiss
+    @State private var showCopied = false
+    
+    var body: some View {
+        NavigationView {
+            List {
+                Section {
+                    Button(action: copyEpisodeURL) {
+                        Label(showCopied ? "Copied!" : "Copy Episode URL", systemImage: showCopied ? "checkmark" : "doc.on.doc")
+                    }
+                    
+                    Button(action: copyAudioURL) {
+                        Label("Copy Audio URL", systemImage: "doc.on.doc")
+                    }
+                    
+                    if let podcast = podcast {
+                        Button(action: copyPodcastURL) {
+                            Label("Copy Podcast RSS", systemImage: "doc.on.doc")
+                        }
+                    }
+                }
+                
+                Section {
+                    ShareLink(item: episode.audioURL) {
+                        Label("Share Episode", systemImage: "square.and.arrow.up")
+                    }
+                }
+            }
+            .navigationTitle(episode.title)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                }
+            }
+        }
+    }
+    
+    private func copyEpisodeURL() {
+        UIPasteboard.general.string = episode.audioURL.absoluteString
+        showCopied = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            showCopied = false
+        }
+    }
+    
+    private func copyAudioURL() {
+        UIPasteboard.general.string = episode.audioURL.absoluteString
+    }
+    
+    private func copyPodcastURL() {
+        if let podcast = podcast {
+            UIPasteboard.general.string = podcast.feedURL.absoluteString
         }
     }
 }
