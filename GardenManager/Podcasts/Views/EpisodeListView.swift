@@ -15,7 +15,7 @@ struct EpisodeListView: View {
             if let podcast = podcast {
                 ForEach(podcast.episodes) { episode in
                     PodcastItemView(
-                        podcast: nil,
+                        podcast: podcast,
                         episode: episode,
                         style: .compact
                     )
