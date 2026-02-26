@@ -43,13 +43,13 @@ actor ImageCache {
     }
     
     func loadImage(from url: URL) async -> UIImage? {
-        if let cached = await shared.image(for: url) {
+        if let cached = self.image(for: url) {
             return cached
         }
         do {
             let (data, _) = try await URLSession.shared.data(from: url)
             if let image = UIImage(data: data) {
-                await shared.store(image, for: url)
+                await self.store(image, for: url)
                 return image
             }
         } catch {
@@ -320,3 +320,4 @@ struct ImagePodcastImportView: View {
         }
     }
 }
+
