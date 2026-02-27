@@ -470,6 +470,9 @@ class AudioPlayerService: NSObject, ObservableObject {
                 currentEpisode = episode
                 currentTime = getPlaybackPosition(for: episodeID)
                 print("[AudioPlayerService] Restored last played episode: \(episode.title)")
+                
+                // Auto-play after restoring
+                play(episode: episode)
                 return
             }
         }
