@@ -55,7 +55,7 @@ struct DownloadsView: View {
                 } else {
                     if !downloadingEpisodes.isEmpty {
                         ForEach(downloadingEpisodes, id: \.episode.id) { item in
-                            PodcastItemView(
+                            EpisodeListItem(
                                 podcast: item.podcast,
                                 episode: item.episode,
                                 showCancelButton: true
@@ -66,7 +66,7 @@ struct DownloadsView: View {
                     
                     if !downloadedEpisodes.isEmpty {
                         ForEach(downloadedEpisodes, id: \.episode.id) { item in
-                            PodcastItemView(
+                            EpisodeListItem(
                                 podcast: item.podcast,
                                 episode: item.episode,
                             )

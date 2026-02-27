@@ -14,12 +14,15 @@
 		A99999999999999999999999 /* ToolService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA000000000000000000000 /* ToolService.swift */; };
 		ABB111111111111111111111 /* ToolParameterSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACC222222222222222222222 /* ToolParameterSheet.swift */; };
 		CC2D86EC2F0A4A3E00EA33F5 /* MotionGraphsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2D86EB2F0A4A3E00EA33F5 /* MotionGraphsView.swift */; };
+		CCE334E52F521672008F3749 /* EpisodeListItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCE334E42F521672008F3749 /* EpisodeListItem.swift */; };
 		DDD111111111111111111111 /* SpeechRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDD222222222222222222222 /* SpeechRecognizer.swift */; };
 		EEE111111111111111111111 /* CommandParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEE222222222222222222222 /* CommandParser.swift */; };
 		FFF111111111111111111111 /* Podcast.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFF222222222222222222222 /* Podcast.swift */; };
 		GGG111111111111111111111 /* RSSFeedParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = GGG222222222222222222222 /* RSSFeedParser.swift */; };
 		HHH111111111111111111111 /* AudioPlayerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = HHH222222222222222222222 /* AudioPlayerService.swift */; };
 		III111111111111111111111 /* PodcastListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = III222222222222222222222 /* PodcastListView.swift */; };
+		IMG222222222222222222222 /* ImagePodcastImportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = IMG111111111111111111111 /* ImagePodcastImportView.swift */; };
+		IMV222222222222222222222 /* ImagePodcastImportViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = IMV111111111111111111111 /* ImagePodcastImportViewModel.swift */; };
 		JJJ111111111111111111111 /* EpisodeListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = JJJ222222222222222222222 /* EpisodeListView.swift */; };
 		KKK111111111111111111111 /* MiniPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = KKK222222222222222222222 /* MiniPlayerView.swift */; };
 		MMM111111111111111111111 /* DownloadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = MMM222222222222222222222 /* DownloadManager.swift */; };
@@ -30,16 +33,13 @@
 		MOTBBB111111111111111111 /* MotionTabContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = MOT999999999999999999999 /* MotionTabContainerView.swift */; };
 		NNN111111111111111111111 /* DownloadsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = NNN222222222222222222222 /* DownloadsView.swift */; };
 		OOO111111111111111111111 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = OOO222222222222222222222 /* AppDelegate.swift */; };
-		PPP999999999999999999999 /* PodcastItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = QQQ111111111111111111111 /* PodcastItemView.swift */; };
-		VIS222222222222222222222 /* VisionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = VIS111111111111111111111 /* VisionService.swift */; };
-		TXT222222222222222222222 /* TextProcessingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = TXT111111111111111111111 /* TextProcessingService.swift */; };
-		IMG222222222222222222222 /* ImagePodcastImportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = IMG111111111111111111111 /* ImagePodcastImportView.swift */; };
-		IMV222222222222222222222 /* ImagePodcastImportViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = IMV111111111111111111111 /* ImagePodcastImportViewModel.swift */; };
-		SRCH22222222222222222222 /* PodcastSearchResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = SRCH11111111111111111111 /* PodcastSearchResult.swift */; };
-		PIDX22222222222222222222 /* PodcastIndexModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = PIDX11111111111111111111 /* PodcastIndexModels.swift */; };
-		SRVC22222222222222222222 /* PodcastSearchService.swift in Sources */ = {isa = PBXBuildFile; fileRef = SRVC11111111111111111111 /* PodcastSearchService.swift */; };
-		VIS333333333333333333333 /* Vision.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = VIS444444444444444444444 /* Vision.framework */; };
 		PHO333333333333333333333 /* PhotosUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = PHO444444444444444444444 /* PhotosUI.framework */; };
+		PIDX22222222222222222222 /* PodcastIndexModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = PIDX11111111111111111111 /* PodcastIndexModels.swift */; };
+		SRCH22222222222222222222 /* PodcastSearchResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = SRCH11111111111111111111 /* PodcastSearchResult.swift */; };
+		SRVC22222222222222222222 /* PodcastSearchService.swift in Sources */ = {isa = PBXBuildFile; fileRef = SRVC11111111111111111111 /* PodcastSearchService.swift */; };
+		TXT222222222222222222222 /* TextProcessingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = TXT111111111111111111111 /* TextProcessingService.swift */; };
+		VIS222222222222222222222 /* VisionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = VIS111111111111111111111 /* VisionService.swift */; };
+		VIS333333333333333333333 /* Vision.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = VIS444444444444444444444 /* Vision.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -52,12 +52,15 @@
 		ADD333333333333333333333 /* GardenManager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GardenManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CC2D86EB2F0A4A3E00EA33F5 /* MotionGraphsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionGraphsView.swift; sourceTree = "<group>"; };
 		CCAAF83E2F082CA100D14C0E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		CCE334E42F521672008F3749 /* EpisodeListItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EpisodeListItem.swift; sourceTree = "<group>"; };
 		DDD222222222222222222222 /* SpeechRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechRecognizer.swift; sourceTree = "<group>"; };
 		EEE222222222222222222222 /* CommandParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandParser.swift; sourceTree = "<group>"; };
 		FFF222222222222222222222 /* Podcast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Podcast.swift; sourceTree = "<group>"; };
 		GGG222222222222222222222 /* RSSFeedParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RSSFeedParser.swift; sourceTree = "<group>"; };
 		HHH222222222222222222222 /* AudioPlayerService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPlayerService.swift; sourceTree = "<group>"; };
 		III222222222222222222222 /* PodcastListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PodcastListView.swift; sourceTree = "<group>"; };
+		IMG111111111111111111111 /* ImagePodcastImportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePodcastImportView.swift; sourceTree = "<group>"; };
+		IMV111111111111111111111 /* ImagePodcastImportViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePodcastImportViewModel.swift; sourceTree = "<group>"; };
 		JJJ222222222222222222222 /* EpisodeListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EpisodeListView.swift; sourceTree = "<group>"; };
 		KKK222222222222222222222 /* MiniPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiniPlayerView.swift; sourceTree = "<group>"; };
 		MMM222222222222222222222 /* DownloadManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadManager.swift; sourceTree = "<group>"; };
@@ -68,16 +71,13 @@
 		MOT999999999999999999999 /* MotionTabContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionTabContainerView.swift; sourceTree = "<group>"; };
 		NNN222222222222222222222 /* DownloadsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadsView.swift; sourceTree = "<group>"; };
 		OOO222222222222222222222 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		QQQ111111111111111111111 /* PodcastItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PodcastItemView.swift; sourceTree = "<group>"; };
-		SRCH11111111111111111111 /* PodcastSearchResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PodcastSearchResult.swift; sourceTree = "<group>"; };
-		PIDX11111111111111111111 /* PodcastIndexModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PodcastIndexModels.swift; sourceTree = "<group>"; };
-		SRVC11111111111111111111 /* PodcastSearchService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PodcastSearchService.swift; sourceTree = "<group>"; };
-		VIS111111111111111111111 /* VisionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionService.swift; sourceTree = "<group>"; };
-		TXT111111111111111111111 /* TextProcessingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextProcessingService.swift; sourceTree = "<group>"; };
-		IMG111111111111111111111 /* ImagePodcastImportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePodcastImportView.swift; sourceTree = "<group>"; };
-		IMV111111111111111111111 /* ImagePodcastImportViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePodcastImportViewModel.swift; sourceTree = "<group>"; };
-		VIS444444444444444444444 /* Vision.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Vision.framework; path = System/Library/Frameworks/Vision.framework; sourceTree = SDKROOT; };
 		PHO444444444444444444444 /* PhotosUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PhotosUI.framework; path = System/Library/Frameworks/PhotosUI.framework; sourceTree = SDKROOT; };
+		PIDX11111111111111111111 /* PodcastIndexModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PodcastIndexModels.swift; sourceTree = "<group>"; };
+		SRCH11111111111111111111 /* PodcastSearchResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PodcastSearchResult.swift; sourceTree = "<group>"; };
+		SRVC11111111111111111111 /* PodcastSearchService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PodcastSearchService.swift; sourceTree = "<group>"; };
+		TXT111111111111111111111 /* TextProcessingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextProcessingService.swift; sourceTree = "<group>"; };
+		VIS111111111111111111111 /* VisionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionService.swift; sourceTree = "<group>"; };
+		VIS444444444444444444444 /* Vision.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Vision.framework; path = System/Library/Frameworks/Vision.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -98,6 +98,7 @@
 			children = (
 				B00666666666666666666666 /* GardenManager */,
 				B11777777777777777777777 /* Products */,
+				CCE334E12F5209E6008F3749 /* Recovered References */,
 			);
 			sourceTree = "<group>";
 		};
@@ -121,6 +122,15 @@
 				ADD333333333333333333333 /* GardenManager.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		CCE334E12F5209E6008F3749 /* Recovered References */ = {
+			isa = PBXGroup;
+			children = (
+				VIS444444444444444444444 /* Vision.framework */,
+				PHO444444444444444444444 /* PhotosUI.framework */,
+			);
+			name = "Recovered References";
 			sourceTree = "<group>";
 		};
 		MOTAAA222222222222222222 /* Models */ = {
@@ -187,8 +197,8 @@
 				JJJ222222222222222222222 /* EpisodeListView.swift */,
 				KKK222222222222222222222 /* MiniPlayerView.swift */,
 				NNN222222222222222222222 /* DownloadsView.swift */,
-				QQQ111111111111111111111 /* PodcastItemView.swift */,
 				IMG111111111111111111111 /* ImagePodcastImportView.swift */,
+				CCE334E42F521672008F3749 /* EpisodeListItem.swift */,
 				IMV111111111111111111111 /* ImagePodcastImportViewModel.swift */,
 			);
 			path = Views;
@@ -327,10 +337,10 @@
 				JJJ111111111111111111111 /* EpisodeListView.swift in Sources */,
 				KKK111111111111111111111 /* MiniPlayerView.swift in Sources */,
 				MMM111111111111111111111 /* DownloadManager.swift in Sources */,
+				CCE334E52F521672008F3749 /* EpisodeListItem.swift in Sources */,
 				NNN111111111111111111111 /* DownloadsView.swift in Sources */,
 				CC2D86EC2F0A4A3E00EA33F5 /* MotionGraphsView.swift in Sources */,
 				OOO111111111111111111111 /* AppDelegate.swift in Sources */,
-				PPP999999999999999999999 /* PodcastItemView.swift in Sources */,
 				MOT111111111111111111111 /* MotionTracker.swift in Sources */,
 				MOT333333333333333333333 /* MotionStatusView.swift in Sources */,
 				MOT555555555555555555555 /* MotionAudioCoordinator.swift in Sources */,
