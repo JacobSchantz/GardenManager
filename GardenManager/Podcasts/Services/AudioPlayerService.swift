@@ -56,11 +56,7 @@ class AudioPlayerService: NSObject, ObservableObject {
         
         do {
             let audioSession = AVAudioSession.sharedInstance()
-            try audioSession.setCategory(
-                .playback,
-                mode: .spokenAudio,
-                options: [.allowAirPlay, AVAudioSession.CategoryOptions.allowBluetoothHFP]
-            )
+            try audioSession.setCategory(.playback, mode: .spokenAudio)
             isAudioSessionConfigured = true
             print("[AudioPlayerService] Audio session configured for background playback")
         } catch {
