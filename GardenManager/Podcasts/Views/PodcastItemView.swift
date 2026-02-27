@@ -6,11 +6,6 @@ enum EpisodeRowStyle {
     case compact
 }
 
-enum ItemOptionsType {
-    case podcast(Podcast)
-    case episode(Episode, Podcast?)
-}
-
 struct PodcastItemView: View {
     @EnvironmentObject var audioPlayer: AudioPlayerService
     @EnvironmentObject var downloadManager: DownloadManager
@@ -169,9 +164,7 @@ struct PodcastItemView: View {
             showEpisodeOptions = true
         }
         .sheet(isPresented: $showEpisodeOptions) {
-            ItemOptionsSheet(
-                type: .episode(episode, podcast)
-            )
+            EpisodeOptionsSheet(episode: episode, podcast: podcast)
         }
     }
     
