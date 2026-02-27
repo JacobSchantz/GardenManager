@@ -107,6 +107,7 @@ struct CachedAsyncImageInner: View {
     private func loadImage() async {
         guard !isLoading else { return }
         isLoading = true
+        print("[CachedAsyncImage] Loading image from: \(url)")
         
         // First check: local downloaded file
         if let localURL = localURL,

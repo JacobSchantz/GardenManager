@@ -6,6 +6,9 @@ struct MiniPlayerView: View {
     
     var body: some View {
         if let episode = audioPlayer.currentEpisode {
+            let imageURL = episode.displayImageURL
+            print("[MiniPlayerView] Episode: \(episode.title), imageURL: \(imageURL?.absoluteString ?? "nil")")
+            
             VStack(spacing: 0) {
                 Divider()
                 
