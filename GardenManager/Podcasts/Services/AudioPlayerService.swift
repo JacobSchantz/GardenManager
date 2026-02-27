@@ -136,14 +136,14 @@ class AudioPlayerService: NSObject, ObservableObject {
         }
     }
     
-    func play(episode: Episode) {
+    func play(episode: Episode, restoredFromPosition: TimeInterval? = nil) {
         print("[AudioPlayerService] play() called for: \(episode.title), URL: \(episode.localFileURL ?? episode.audioURL)")
         configureAudioSession()
         activateAudioSession()
         
         saveLastPlayedEpisodeID(episode.id)
         
-        let isNewEpisode = currentEpisode?.id != episode.id
+        let isNewEpisode = currentEpisode?.id != episode.id || player == nil
         
         if isNewEpisode {
             seekWorkItem?.cancel()
@@ -198,8 +198,8 @@ class AudioPlayerService: NSObject, ObservableObject {
                 object: playerItem
             )
             
-            // Restore saved position for this episode
-            let savedPosition = getPlaybackPosition(for: episode.id)
+            // Restore saved position - either from parameter or from storage
+            let savedPosition = restoredFromPosition ?? getPlaybackPosition(for: episode.id)
             if savedPosition > 0 {
                 let cmTime = CMTime(seconds: savedPosition, preferredTimescale: 600)
                 player?.seek(to: cmTime)
@@ -483,14 +483,15 @@ class AudioPlayerService: NSObject, ObservableObject {
                 if let resolveLocalURL = resolveLocalURL {
                     episode.localFileURL = resolveLocalURL(episode)
                 }
-                currentEpisode = episode
                 currentTime = getPlaybackPosition(for: episodeID)
-                print("[AudioPlayerService] Restored last played episode: \(episode.title), will auto-play in 0.5s")
+                print("[AudioPlayerService] Restoring episode: \(found.title), position: \(currentTime)")
                 
-                // Small delay to ensure audio session is ready
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-                    self?.play(episode: episode)
-                }
+                // Don't set currentEpisode here - let play() handle it so it creates a new player
+                // Use a flag to indicate this is a restore
+                let savedPosition = currentTime
+                
+                // Call play which will create the player and restore position
+                play(episode: episode, restoredFromPosition: savedPosition)
                 return
             }
         }
