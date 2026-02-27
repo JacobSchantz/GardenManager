@@ -164,7 +164,7 @@ struct EpisodeListItem: View {
             showEpisodeOptions = true
         }
         .sheet(isPresented: $showEpisodeOptions) {
-            EpisodeOptionsSheet(episode: episode, podcast: podcast)
+            EpisodeOptionsSheet(episode: episode)
         }
     }
     
@@ -221,7 +221,6 @@ struct DownloadButtonView: View {
 
 struct EpisodeOptionsSheet: View {
     let episode: Episode
-    let podcast: Podcast?
     @Environment(\.dismiss) var dismiss
     @State private var showCopied = false
     
@@ -232,18 +231,7 @@ struct EpisodeOptionsSheet: View {
                     Button(action: copyEpisodeURL) {
                         Label(showCopied ? "Copied!" : "Copy Episode URL", systemImage: showCopied ? "checkmark" : "doc.on.doc")
                     }
-                    
-                    Button(action: copyAudioURL) {
-                        Label("Copy Audio URL", systemImage: "doc.on.doc")
-                    }
-                    
-                    if let podcast = podcast {
-                        Button(action: copyPodcastURL) {
-                            Label("Copy Podcast RSS", systemImage: "doc.on.doc")
-                        }
-                    }
                 }
-                
                 Section {
                     ShareLink(item: episode.audioURL) {
                         Label("Share Episode", systemImage: "square.and.arrow.up")
@@ -273,11 +261,5 @@ struct EpisodeOptionsSheet: View {
     
     private func copyAudioURL() {
         UIPasteboard.general.string = episode.audioURL.absoluteString
-    }
-    
-    private func copyPodcastURL() {
-        if let podcast = podcast {
-            UIPasteboard.general.string = podcast.feedURL.absoluteString
-        }
     }
 }
