@@ -48,12 +48,15 @@ struct PodcastItemView: View {
     }
     
     private func handleTap() {
+        print("[PodcastItemView] Tapped episode: \(episode.title), isDownloaded: \(isDownloaded)")
         
         if isDownloaded, let localURL = downloadManager.getLocalURL(for: episode) {
+            print("[PodcastItemView] Playing from local URL: \(localURL)")
             var localEpisode = episode
             localEpisode.localFileURL = localURL
             audioPlayer.play(episode: localEpisode)
         } else {
+            print("[PodcastItemView] Playing from remote URL: \(episode.audioURL)")
             audioPlayer.play(episode: episode)
         }
     }

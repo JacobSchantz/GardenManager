@@ -136,6 +136,7 @@ class AudioPlayerService: NSObject, ObservableObject {
     }
     
     func play(episode: Episode) {
+        print("[AudioPlayerService] play() called for: \(episode.title)")
         configureAudioSession()
         activateAudioSession()
         

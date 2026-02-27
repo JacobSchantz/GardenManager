@@ -93,12 +93,15 @@ struct PodcastRow: View {
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
+            
+            Spacer()
         }
         .padding(.vertical, 4)
-        .contentShape(Rectangle())
-        .onLongPressGesture {
-            showPodcastOptions = true
-        }
+        .simultaneousGesture(
+            LongPressGesture(minimumDuration: 0.5).onEnded { _ in
+                showPodcastOptions = true
+            }
+        )
         .sheet(isPresented: $showPodcastOptions) {
             PodcastOptionsSheet(podcast: podcast)
         }
