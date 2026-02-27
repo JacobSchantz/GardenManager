@@ -57,7 +57,7 @@ struct MotionStatusView: View {
                 // Configuration Section
                 Section("Configuration") {
                     LabeledContent("Recent window (s)") {
-                        Text(String(format: "%.0f", motionTracker.secondsBetweenCalculations))
+                        Text(String(format: "%d", motionTracker.secondsBetweenCalculations))
                     }
                     
                     LabeledContent("Movement threshold") {
