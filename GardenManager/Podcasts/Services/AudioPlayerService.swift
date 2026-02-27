@@ -18,6 +18,7 @@ class AudioPlayerService: NSObject, ObservableObject {
     private var lastSavedTime: TimeInterval = 0
     private var wasPlayingBeforeBackground = false
     private var isInBackground = false
+    private var cancellables = Set<AnyCancellable>()
     
     private let playbackPositionsKey = "PlaybackPositions"
     private let lastPlayedEpisodeIDKey = "LastPlayedEpisodeID"
@@ -136,7 +137,7 @@ class AudioPlayerService: NSObject, ObservableObject {
     }
     
     func play(episode: Episode) {
-        print("[AudioPlayerService] play() called for: \(episode.title)")
+        print("[AudioPlayerService] play() called for: \(episode.title), URL: \(episode.localFileURL ?? episode.audioURL)")
         configureAudioSession()
         activateAudioSession()
         
@@ -170,9 +171,23 @@ class AudioPlayerService: NSObject, ObservableObject {
             duration = 0
             currentEpisode = episode
             let audioURL = episode.localFileURL ?? episode.audioURL
+            print("[AudioPlayerService] Creating player with URL: \(audioURL)")
             let playerItem = AVPlayerItem(url: audioURL)
             player = AVPlayer(playerItem: playerItem)
             player?.automaticallyWaitsToMinimizeStalling = true
+            
+            // Observe when player item is ready
+            playerItem.publisher(for: \.status)
+                .sink { [weak self] status in
+                    print("[AudioPlayerService] PlayerItem status: \(status.rawValue)")
+                    if status == .readyToPlay {
+                        print("[AudioPlayerService] PlayerItem ready to play")
+                    } else if status == .failed {
+                        print("[AudioPlayerService] PlayerItem failed: \(playerItem.error?.localizedDescription ?? "unknown")")
+                    }
+                }
+                .store(in: &cancellables)
+            
             setupTimeObserver()
             setupNowPlaying(episode: episode)
             
@@ -193,10 +208,11 @@ class AudioPlayerService: NSObject, ObservableObject {
             }
         }
         
+        print("[AudioPlayerService] Calling player.play(), isPlaying will be set to true")
         player?.play()
         isPlaying = true
         updateNowPlayingPlaybackState()
-        print("[AudioPlayerService] Playing: \(episode.title)")
+        print("[AudioPlayerService] Playing: \(episode.title), player rate: \(player?.rate ?? 0)")
     }
     
     func resume() {
