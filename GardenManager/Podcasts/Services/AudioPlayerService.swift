@@ -469,10 +469,12 @@ class AudioPlayerService: NSObject, ObservableObject {
                 }
                 currentEpisode = episode
                 currentTime = getPlaybackPosition(for: episodeID)
-                print("[AudioPlayerService] Restored last played episode: \(episode.title)")
+                print("[AudioPlayerService] Restored last played episode: \(episode.title), will auto-play in 0.5s")
                 
-                // Auto-play after restoring
-                play(episode: episode)
+                // Small delay to ensure audio session is ready
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+                    self?.play(episode: episode)
+                }
                 return
             }
         }
