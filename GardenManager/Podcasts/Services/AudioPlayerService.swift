@@ -335,9 +335,7 @@ class AudioPlayerService: NSObject, ObservableObject {
         nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = 0
         nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = 1.0
         
-        // Use episode image or fall back to podcast image
-        let imageURL = episode.imageURL ?? episode.podcastImageURL
-        if let imageURL = imageURL {
+        if let imageURL = episode.imageURL {
             Task {
                 if let data = try? Data(contentsOf: imageURL),
                    let image = UIImage(data: data) {
