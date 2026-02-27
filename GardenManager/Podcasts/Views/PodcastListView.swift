@@ -103,7 +103,9 @@ struct PodcastRow: View {
             }
         )
         .sheet(isPresented: $showPodcastOptions) {
-            PodcastOptionsSheet(podcast: podcast)
+            ItemOptionsSheet(
+                type: .podcast(podcast)
+            )
         }
     }
 }
@@ -140,12 +142,132 @@ struct PodcastOptionsSheet: View {
         }
         .presentationDetents([.medium])
     }
+}
+
+struct AddFeedView: View {
+    let type: ItemOptionsType
+    @Environment(\.dismiss) var dismiss
+    @State private var showCopied = false
+    
+    private var title: String {
+        switch type {
+        case .podcast(let podcast):
+            return podcast.title
+        case .episode(let episode, _):
+            return episode.title
+        }
+    }
+    
+    var body: some View {
+        NavigationView {
+            List {
+                switch type {
+                case .podcast(let podcast):
+                    Section {
+                        Button(action: copyRSSURL) {
+                            Label(showCopied ? "Copied!" : "Copy RSS URL", systemImage: showCopied ? "checkmark" : "doc.on.doc")
+                        }
+                    }
+                    
+                    Section {
+                        ShareLink(item: podcast.feedURL) {
+                            Label("Share Podcast", systemImage: "square.and.arrow.up")
+                        }
+                    }
+                    
+                    Section("Info") {
+                        LabeledContent("Author", value: podcast.author)
+                        LabeledContent("Episodes", value: "\(podcast.episodes.count)")
+                    }
+                    
+                case .episode(let episode, let podcast):
+                    Section {
+                        Button(action: copyEpisodeURL) {
+                            Label(showCopied ? "Copied!" : "Copy Episode URL", systemImage: showCopied ? "checkmark" : "doc.on.doc")
+                        }
+                        Button(action: copyAudioURL) {
+                            Label("Copy Audio URL", systemImage: "doc.on.doc")
+                        }
+                        if let podcast = podcast {
+                            Button(action: copyPodcastURL) {
+                                Label("Copy Podcast RSS", systemImage: "doc.on.doc")
+                            }
+                        }
+                    }
+                    
+                    Section {
+                        ShareLink(item: episode.audioURL) {
+                            Label("Share Episode", systemImage: "square.and.arrow.up")
+                        }
+                    }
+                    
+                    if let podcast = podcast {
+                        Section("Info") {
+                            LabeledContent("Podcast", value: podcast.title)
+                            if episode.duration > 0 {
+                                LabeledContent("Duration", value: formatDuration(episode.duration))
+                            }
+                            if let date = Optional(episode.publishDate) {
+                                LabeledContent("Published", value: date.formatted(date: .abbreviated, time: .omitted))
+                            }
+                        }
+                    }
+                }
+            }
+            .navigationTitle(title)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                }
+            }
+        }
+        .presentationDetents([.medium])
+    }
     
     private func copyRSSURL() {
-        UIPasteboard.general.string = podcast.feedURL.absoluteString
-        showCopied = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            showCopied = false
+        if case .podcast(let podcast) = type {
+            UIPasteboard.general.string = podcast.feedURL.absoluteString
+            showCopied = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                showCopied = false
+            }
+        }
+    }
+    
+    private func copyEpisodeURL() {
+        if case .episode(let episode, _) = type {
+            UIPasteboard.general.string = episode.audioURL.absoluteString
+            showCopied = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                showCopied = false
+            }
+        }
+    }
+    
+    private func copyAudioURL() {
+        if case .episode(let episode, _) = type {
+            UIPasteboard.general.string = episode.audioURL.absoluteString
+        }
+    }
+    
+    private func copyPodcastURL() {
+        if case .episode(_, let podcast) = type, let podcast = podcast {
+            UIPasteboard.general.string = podcast.feedURL.absoluteString
+        }
+    }
+    
+    private func formatDuration(_ duration: TimeInterval) -> String {
+        let hours = Int(duration) / 3600
+        let minutes = (Int(duration) % 3600) / 60
+        let seconds = Int(duration) % 60
+        
+        if hours > 0 {
+            return String(format: "%d:%02d:%02d", hours, minutes, seconds)
+        } else {
+            return String(format: "%d:%02d", minutes, seconds)
         }
     }
 }
@@ -259,6 +381,134 @@ class PodcastListViewModel: ObservableObject {
         if let data = UserDefaults.standard.data(forKey: "savedPodcasts"),
            let decoded = try? JSONDecoder().decode([Podcast].self, from: data) {
             podcasts = decoded
+        }
+    }
+}
+
+struct ItemOptionsSheet: View {
+    let type: ItemOptionsType
+    @Environment(\.dismiss) var dismiss
+    @State private var showCopied = false
+    
+    private var title: String {
+        switch type {
+        case .podcast(let podcast):
+            return podcast.title
+        case .episode(let episode, _):
+            return episode.title
+        }
+    }
+    
+    var body: some View {
+        NavigationView {
+            List {
+                switch type {
+                case .podcast(let podcast):
+                    Section {
+                        Button(action: copyRSSURL) {
+                            Label(showCopied ? "Copied!" : "Copy RSS URL", systemImage: showCopied ? "checkmark" : "doc.on.doc")
+                        }
+                    }
+                    
+                    Section {
+                        ShareLink(item: podcast.feedURL) {
+                            Label("Share Podcast", systemImage: "square.and.arrow.up")
+                        }
+                    }
+                    
+                    Section("Info") {
+                        LabeledContent("Author", value: podcast.author)
+                        LabeledContent("Episodes", value: "\(podcast.episodes.count)")
+                    }
+                    
+                case .episode(let episode, let podcast):
+                    Section {
+                        Button(action: copyEpisodeURL) {
+                            Label(showCopied ? "Copied!" : "Copy Episode URL", systemImage: showCopied ? "checkmark" : "doc.on.doc")
+                        }
+                        Button(action: copyAudioURL) {
+                            Label("Copy Audio URL", systemImage: "doc.on.doc")
+                        }
+                        if let podcast = podcast {
+                            Button(action: copyPodcastURL) {
+                                Label("Copy Podcast RSS", systemImage: "doc.on.doc")
+                            }
+                        }
+                    }
+                    
+                    Section {
+                        ShareLink(item: episode.audioURL) {
+                            Label("Share Episode", systemImage: "square.and.arrow.up")
+                        }
+                    }
+                    
+                    if let podcast = podcast {
+                        Section("Info") {
+                            LabeledContent("Podcast", value: podcast.title)
+                            if episode.duration > 0 {
+                                LabeledContent("Duration", value: formatDuration(episode.duration))
+                            }
+                            if let date = Optional(episode.publishDate) {
+                                LabeledContent("Published", value: date.formatted(date: .abbreviated, time: .omitted))
+                            }
+                        }
+                    }
+                }
+            }
+            .navigationTitle(title)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                }
+            }
+        }
+        .presentationDetents([.medium])
+    }
+    
+    private func copyRSSURL() {
+        if case .podcast(let podcast) = type {
+            UIPasteboard.general.string = podcast.feedURL.absoluteString
+            showCopied = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                showCopied = false
+            }
+        }
+    }
+    
+    private func copyEpisodeURL() {
+        if case .episode(let episode, _) = type {
+            UIPasteboard.general.string = episode.audioURL.absoluteString
+            showCopied = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                showCopied = false
+            }
+        }
+    }
+    
+    private func copyAudioURL() {
+        if case .episode(let episode, _) = type {
+            UIPasteboard.general.string = episode.audioURL.absoluteString
+        }
+    }
+    
+    private func copyPodcastURL() {
+        if case .episode(_, let podcast) = type, let podcast = podcast {
+            UIPasteboard.general.string = podcast.feedURL.absoluteString
+        }
+    }
+    
+    private func formatDuration(_ duration: TimeInterval) -> String {
+        let hours = Int(duration) / 3600
+        let minutes = (Int(duration) % 3600) / 60
+        let seconds = Int(duration) % 60
+        
+        if hours > 0 {
+            return String(format: "%d:%02d:%02d", hours, minutes, seconds)
+        } else {
+            return String(format: "%d:%02d", minutes, seconds)
         }
     }
 }
