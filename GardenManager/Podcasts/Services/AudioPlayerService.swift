@@ -16,6 +16,8 @@ class AudioPlayerService: NSObject, ObservableObject {
     private var isSeeking = false
     private var isAudioSessionConfigured = false
     private var lastSavedTime: TimeInterval = 0
+    private var wasPlayingBeforeBackground = false
+    private var isInBackground = false
     
     private let playbackPositionsKey = "PlaybackPositions"
     private let lastPlayedEpisodeIDKey = "LastPlayedEpisodeID"
@@ -29,6 +31,20 @@ class AudioPlayerService: NSObject, ObservableObject {
             self,
             selector: #selector(savePositionOnBackground),
             name: UIApplication.willResignActiveNotification,
+            object: nil
+        )
+        
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleAppDidBecomeActive),
+            name: UIApplication.didBecomeActiveNotification,
+            object: nil
+        )
+        
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleAppDidEnterBackground),
+            name: UIApplication.didEnterBackgroundNotification,
             object: nil
         )
     }
@@ -87,7 +103,7 @@ class AudioPlayerService: NSObject, ObservableObject {
         switch type {
         case .began:
             print("[AudioPlayerService] Audio interruption began")
-            pause()
+            pause(reason: "interruption_began")
         case .ended:
             print("[AudioPlayerService] Audio interruption ended")
             guard let optionsValue = userInfo[AVAudioSessionInterruptionOptionKey] as? UInt else { return }
@@ -113,7 +129,7 @@ class AudioPlayerService: NSObject, ObservableObject {
         switch reason {
         case .oldDeviceUnavailable:
             print("[AudioPlayerService] Audio route changed - old device unavailable, pausing")
-            pause()
+            pause(reason: "route_change_old_device_unavailable")
         default:
             break
         }
@@ -189,7 +205,15 @@ class AudioPlayerService: NSObject, ObservableObject {
         updateNowPlayingPlaybackState()
     }
     
-    func pause() {
+    func pause(reason: String = "manual") {
+        // Don't pause from remote/UI commands while in background (except for real interruptions)
+        let allowedBackgroundPauses = ["interruption_began", "route_change_old_device_unavailable"]
+        if isInBackground && reason != "manual" && !allowedBackgroundPauses.contains(reason) {
+            print("[AudioPlayerService] Skipping pause in background - reason: \(reason)")
+            return
+        }
+        
+        print("[AudioPlayerService] pause() called - reason: \(reason), isPlaying: \(isPlaying), currentTime: \(currentTime)")
         player?.pause()
         isPlaying = false
         updateNowPlayingPlaybackState()
@@ -203,7 +227,7 @@ class AudioPlayerService: NSObject, ObservableObject {
     
     func togglePlayPause() {
         if isPlaying {
-            pause()
+            pause(reason: "togglePlayPause")
         } else if let episode = currentEpisode {
             play(episode: episode)
         }
@@ -338,7 +362,7 @@ class AudioPlayerService: NSObject, ObservableObject {
         }
         
         commandCenter.pauseCommand.addTarget { [weak self] _ in
-            self?.pause()
+            self?.pause(reason: "remote_command")
             return .success
         }
         
@@ -392,6 +416,29 @@ class AudioPlayerService: NSObject, ObservableObject {
         if let episode = currentEpisode {
             savePlaybackPosition(for: episode.id)
             saveLastPlayedEpisodeID(episode.id)
+        }
+    }
+    
+    @objc private func handleAppDidBecomeActive() {
+        isInBackground = false
+        // Check if player stopped unexpectedly while we were playing
+        if let player = player, wasPlayingBeforeBackground {
+            if player.rate == 0 && currentEpisode != nil {
+                print("[AudioPlayerService] Player stopped in background, attempting to resume")
+                activateAudioSession()
+                player.play()
+                isPlaying = true
+                updateNowPlayingPlaybackState()
+            }
+        }
+        wasPlayingBeforeBackground = false
+    }
+    
+    @objc private func handleAppDidEnterBackground() {
+        isInBackground = true
+        // Track that we were playing before going to background
+        if isPlaying {
+            wasPlayingBeforeBackground = true
         }
     }
     

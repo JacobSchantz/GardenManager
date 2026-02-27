@@ -65,6 +65,8 @@ struct PodcastListView: View {
 
 struct PodcastRow: View {
     let podcast: Podcast
+    @State private var showPodcastOptions = false
+    @State private var showCopied = false
     
     var body: some View {
         HStack(spacing: 12) {
@@ -93,6 +95,55 @@ struct PodcastRow: View {
             }
         }
         .padding(.vertical, 4)
+        .contentShape(Rectangle())
+        .onLongPressGesture {
+            showPodcastOptions = true
+        }
+        .sheet(isPresented: $showPodcastOptions) {
+            PodcastOptionsSheet(podcast: podcast)
+        }
+    }
+}
+
+struct PodcastOptionsSheet: View {
+    let podcast: Podcast
+    @Environment(\.dismiss) var dismiss
+    @State private var showCopied = false
+    
+    var body: some View {
+        NavigationView {
+            List {
+                Section {
+                    Button(action: copyRSSURL) {
+                        Label(showCopied ? "Copied!" : "Copy RSS URL", systemImage: showCopied ? "checkmark" : "doc.on.doc")
+                    }
+                }
+                
+                Section {
+                    ShareLink(item: podcast.feedURL) {
+                        Label("Share Podcast", systemImage: "square.and.arrow.up")
+                    }
+                }
+            }
+            .navigationTitle(podcast.title)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                }
+            }
+        }
+        .presentationDetents([.medium])
+    }
+    
+    private func copyRSSURL() {
+        UIPasteboard.general.string = podcast.feedURL.absoluteString
+        showCopied = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            showCopied = false
+        }
     }
 }
 

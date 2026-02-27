@@ -20,13 +20,14 @@ class MotionAudioCoordinator: ObservableObject {
             .sink { [weak self] hasMovedRecently in
                 guard let self = self else { return }
                 
-                if !hasMovedRecently && self.audioPlayerService.isPlaying {
-                    self.wasPlayingBeforeMotionPause = true
-                    self.audioPlayerService.pause()
-                } else if hasMovedRecently && self.wasPlayingBeforeMotionPause && !self.audioPlayerService.isPlaying {
-                    self.wasPlayingBeforeMotionPause = false
-                    self.audioPlayerService.resume()
-                }
+                // TEMPORARILY DISABLED - was pausing audio when motion stopped
+                // if !hasMovedRecently && self.audioPlayerService.isPlaying {
+                //     self.wasPlayingBeforeMotionPause = true
+                //     self.audioPlayerService.pause()
+                // } else if hasMovedRecently && self.wasPlayingBeforeMotionPause && !self.audioPlayerService.isPlaying {
+                //     self.wasPlayingBeforeMotionPause = false
+                //     self.audioPlayerService.resume()
+                // }
             }
             .store(in: &cancellables)
     }
