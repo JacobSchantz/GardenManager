@@ -486,15 +486,72 @@ class AudioPlayerService: NSObject, ObservableObject {
                 currentTime = getPlaybackPosition(for: episodeID)
                 print("[AudioPlayerService] Restoring episode: \(found.title), position: \(currentTime)")
                 
-                // Don't set currentEpisode here - let play() handle it so it creates a new player
-                // Use a flag to indicate this is a restore
-                let savedPosition = currentTime
-                
-                // Call play which will create the player and restore position
-                play(episode: episode, restoredFromPosition: savedPosition)
+                // Load the episode and set up player, but don't auto-play
+                loadEpisode(episode: episode, restoredFromPosition: currentTime)
                 return
             }
         }
+    }
+    
+    func loadEpisode(episode: Episode, restoredFromPosition: TimeInterval? = nil) {
+        print("[AudioPlayerService] loadEpisode() called for: \(episode.title)")
+        configureAudioSession()
+        
+        saveLastPlayedEpisodeID(episode.id)
+        
+        // Always create a new player on restore
+        seekWorkItem?.cancel()
+        seekWorkItem = nil
+        isSeeking = false
+        lastSavedTime = 0
+
+        if let timeObserver = timeObserver {
+            player?.removeTimeObserver(timeObserver)
+            self.timeObserver = nil
+        }
+
+        NotificationCenter.default.removeObserver(
+            self,
+            name: .AVPlayerItemDidPlayToEndTime,
+            object: nil
+        )
+
+        // Save position of previous episode before switching
+        if let prevEpisode = currentEpisode {
+            savePlaybackPosition(for: prevEpisode.id)
+        }
+        
+        currentTime = 0
+        duration = 0
+        currentEpisode = episode
+        let audioURL = episode.localFileURL ?? episode.audioURL
+        print("[AudioPlayerService] Creating player with URL: \(audioURL)")
+        let playerItem = AVPlayerItem(url: audioURL)
+        player = AVPlayer(playerItem: playerItem)
+        player?.automaticallyWaitsToMinimizeStalling = true
+        
+        setupTimeObserver()
+        setupNowPlaying(episode: episode)
+        
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(playerDidFinishPlaying),
+            name: .AVPlayerItemDidPlayToEndTime,
+            object: playerItem
+        )
+        
+        // Restore saved position
+        let savedPosition = restoredFromPosition ?? getPlaybackPosition(for: episode.id)
+        if savedPosition > 0 {
+            let cmTime = CMTime(seconds: savedPosition, preferredTimescale: 600)
+            player?.seek(to: cmTime)
+            currentTime = savedPosition
+            print("[AudioPlayerService] Restored position: \(savedPosition)s")
+        }
+        
+        // Don't auto-play - just ready to play
+        isPlaying = false
+        print("[AudioPlayerService] Episode loaded, ready to play: \(episode.title)")
     }
     
     deinit {
