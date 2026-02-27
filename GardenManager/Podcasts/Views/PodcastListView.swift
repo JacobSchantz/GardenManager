@@ -250,13 +250,19 @@ class PodcastListViewModel: ObservableObject {
     }
     
     func savePodcasts() {
+        let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        let podcastsFile = documentsPath.appendingPathComponent("podcasts.json")
+        
         if let encoded = try? JSONEncoder().encode(podcasts) {
-            UserDefaults.standard.set(encoded, forKey: "savedPodcasts")
+            try? encoded.write(to: podcastsFile)
         }
     }
     
     private func loadPodcasts() {
-        if let data = UserDefaults.standard.data(forKey: "savedPodcasts"),
+        let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        let podcastsFile = documentsPath.appendingPathComponent("podcasts.json")
+        
+        if let data = try? Data(contentsOf: podcastsFile),
            let decoded = try? JSONDecoder().decode([Podcast].self, from: data) {
             podcasts = decoded
         }
