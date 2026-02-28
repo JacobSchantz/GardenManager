@@ -140,8 +140,6 @@ class GrokVoiceService: NSObject, ObservableObject {
                 try await startAudioCapture()
             } catch {
                 debugLogs.append("[GrokVoice] Audio capture error: \(error.localizedDescription)")
-            }
-        }
     }
             sendMessage(jsonString)
         }
