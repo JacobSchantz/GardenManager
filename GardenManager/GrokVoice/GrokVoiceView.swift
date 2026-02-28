@@ -257,14 +257,9 @@ struct GrokVoiceView: View {
     
     private func toggleConnection() {
         if service.state == .disconnected || isErrorState {
+            service.state = .connecting
             Task {
-                do {
-                    try await service.connect()
-                } catch let error as GrokVoiceError {
-                    service.errorMessage = error.localizedDescription
-                } catch {
-                    service.errorMessage = error.localizedDescription
-                }
+                await service.connect()
             }
         } else {
             service.disconnect()
