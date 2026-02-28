@@ -241,16 +241,16 @@ class GrokVoiceService: NSObject, ObservableObject {
         
         do {
             let audioFormat = AVAudioFormat(standardFormatWithSampleRate: 24000, channels: 1)!
-            let audioPCMBuffer = AVAudioPCMBuffer(pcmFormat: audioFormat, frameCapacity: AVAudioFrameCount(audioData.count / 2))!
-            audioPCMBuffer.frameLength = AVAudioFrameCount(audioData.count / 2)
+            let frameCount = audioData.count / 2
+            let audioPCMBuffer = AVAudioPCMBuffer(pcmFormat: audioFormat, frameCapacity: AVAudioFrameCount(frameCount))!
+            audioPCMBuffer.frameLength = AVAudioFrameCount(frameCount)
             
-            var mutableData = audioData
-            mutableData.withUnsafeMutableBytes { rawBuffer in
+            audioData.withUnsafeBytes { rawBuffer in
                 if let baseAddress = rawBuffer.baseAddress {
-                    let floatBuffer = baseAddress.assumingMemoryBound(to: Int16.self)
+                    let int16Buffer = baseAddress.assumingMemoryBound(to: Int16.self)
                     let floatPtr = audioPCMBuffer.floatChannelData![0]
-                    for i in 0..<Int(audioPCMBuffer.frameLength) {
-                        floatPtr[i] = Float(floatBuffer[i]) / 32768.0
+                    for i in 0..<frameCount {
+                        floatPtr[i] = Float(int16Buffer[i]) / 32768.0
                     }
                 }
             }
