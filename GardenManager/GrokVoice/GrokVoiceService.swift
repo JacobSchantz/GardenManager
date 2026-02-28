@@ -18,7 +18,7 @@ enum GrokVoiceError: Error, LocalizedError {
     }
 }
 
-enum GrokVoiceState {
+enum GrokVoiceState: Equatable {
     case disconnected
     case connecting
     case listening
@@ -181,7 +181,7 @@ class GrokVoiceService: NSObject, ObservableObject {
         state = .speaking
         isPlaying = true
         
-        guard let audioData = Data(base64Encoded: base64Audio) else { return }
+        guard var audioData = Data(base64Encoded: base64Audio) else { return }
         
         do {
             let fmt = AVAudioFormat(standardFormatWithSampleRate: 24000, channels: 1)!
