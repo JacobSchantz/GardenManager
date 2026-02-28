@@ -66,6 +66,11 @@ struct RootView: View {
             .tabItem {
                 Label("Motion", systemImage: "figure.walk")
             }
+            
+            GrokVoiceView()
+            .tabItem {
+                Label("Grok", systemImage: "waveform")
+            }
         }
         .onReceive(podcastViewModel.$podcasts) { podcasts in
             audioPlayer.restoreLastPlayedEpisode(
