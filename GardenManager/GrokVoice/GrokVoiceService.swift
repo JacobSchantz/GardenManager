@@ -22,7 +22,7 @@ enum GrokVoiceError: Error, LocalizedError {
     }
 }
 
-enum GrokVoiceState: Equatable {
+enum GrokVoiceState {
     case disconnected
     case connecting
     case listening
@@ -57,7 +57,7 @@ class GrokVoiceService: NSObject, ObservableObject {
     
     let voices = ["Ara", "Rex", "Sal", "Eve", "Leo"]
     @Published var selectedVoice = "Ara"
-    @Published var systemInstructions = "You are a helpful gardening assistant. Help the user with their garden questions and tasks."
+    @Published var systemInstructions = "You are a helpful gardening assistant."
     
     override init() {
         super.init()
@@ -65,11 +65,9 @@ class GrokVoiceService: NSObject, ObservableObject {
     }
     
     private func loadAPIKey() {
-        // Set XAI_API_KEY in your scheme's environment variables
         apiKey = ProcessInfo.processInfo.environment["XAI_API_KEY"] ?? ""
-        
         if apiKey.isEmpty {
-            debugLogs.append("[GrokVoice] API key not found - set XAI_API_KEY in scheme environment")
+            debugLogs.append("[GrokVoice] API key not found - set XAI_API_KEY env var")
         } else {
             debugLogs.append("[GrokVoice] API key loaded")
         }
@@ -91,7 +89,7 @@ class GrokVoiceService: NSObject, ObservableObject {
         
         state = .connecting
         errorMessage = nil
-        debugLogs.append("[GrokVoice] Connecting to wss://api.x.ai/v1/realtime...")
+        debugLogs.append("[GrokVoice] Connecting...")
         
         guard let url = URL(string: "wss://api.x.ai/v1/realtime") else {
             throw GrokVoiceError.websocketError("Invalid URL")
@@ -99,47 +97,37 @@ class GrokVoiceService: NSObject, ObservableObject {
         
         var request = URLRequest(url: url)
         request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
         urlSession = URLSession(configuration: .default, delegate: self, delegateQueue: .main)
         webSocketTask = urlSession.webSocketTask(with: request)
         webSocketTask?.resume()
         
-        // Don't wait - just continue
-        debugLogs.append("[GrokVoice] Waiting for connection...")
+        debugLogs.append("[GrokVoice] WebSocket created, sending config...")
         
-        // Send session configuration immediately
         let sessionConfig: [String: Any] = [
             "type": "session.update",
             "session": [
                 "voice": selectedVoice,
-                "instructions": systemInstructions,
-                "audio": [
-                    "input": ["format": ["type": "audio/pcm", "rate": 24000]],
-                    "output": ["format": ["type": "audio/pcm", "rate": 24000]]
-                ]
+                "instructions": systemInstructions
             ]
         ]
         
         if let jsonData = try? JSONSerialization.data(withJSONObject: sessionConfig),
            let jsonString = String(data: jsonData, encoding: .utf8) {
-            // Wait a bit before sending config
-            try? await Task.sleep(nanoseconds: 200_000_000)
+            try? await Task.sleep(nanoseconds: 300_000_000)
             sendMessage(jsonString)
         }
         
         state = .listening
-        debugLogs.append("[GrokVoice] Session configured, ready to listen")
+        debugLogs.append("[GrokVoice] Ready")
         
-        // Start receiving messages
         receiveMessage()
         
-        // Start audio capture (don't await - let it run in background)
         Task {
             do {
                 try await startAudioCapture()
             } catch {
-                debugLogs.append("[GrokVoice] Audio capture error: \(error.localizedDescription)")
+                debugLogs.append("[GrokVoice] Audio error: \(error.localizedDescription)")
             }
         }
     }
@@ -155,11 +143,16 @@ class GrokVoiceService: NSObject, ObservableObject {
     }
     
     func sendMessage(_ message: String) {
+        guard let task = webSocketTask else {
+            errorMessage = "Not connected"
+            return
+        }
         let wsMessage = URLSessionWebSocketTask.Message.string(message)
-        webSocketTask?.send(wsMessage) { [weak self] error in
-            if let error = error {
-                Task { @MainActor in
+        task.send(wsMessage) { [weak self] error in
+            Task { @MainActor in
+                if let error = error {
                     self?.debugLogs.append("[GrokVoice] Send error: \(error.localizedDescription)")
+                    self?.errorMessage = "Send error: \(error.localizedDescription)"
                 }
             }
         }
@@ -175,8 +168,8 @@ class GrokVoiceService: NSObject, ObservableObject {
                     self.receiveMessage()
                 case .failure(let error):
                     self.debugLogs.append("[GrokVoice] Receive error: \(error.localizedDescription)")
+                    self.errorMessage = "Connection error: \(error.localizedDescription)"
                     self.state = .error(error.localizedDescription)
-                    self.errorMessage = error.localizedDescription
                 }
             }
         }
@@ -190,7 +183,7 @@ class GrokVoiceService: NSObject, ObservableObject {
         @unknown default: return
         }
         
-        debugLogs.append("[GrokVoice] Received: \(jsonString.prefix(100))...")
+        debugLogs.append("[GrokVoice] RX: \(jsonString.prefix(80))...")
         
         guard let data = jsonString.data(using: .utf8),
               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
@@ -207,27 +200,13 @@ class GrokVoiceService: NSObject, ObservableObject {
             }
         case "input_audio_buffer.speech_started":
             state = .listening
-            debugLogs.append("[GrokVoice] User started speaking")
-        case "conversation.item.added":
-            if let item = json["item"] as? [String: Any],
-               let itemType = item["type"] as? String, itemType == "message",
-               let content = item["content"] as? [[String: Any]] {
-                // ... code using content ...
-            for c in content {
-                if c["type"] as? String == "input_audio" {
-                    if let transcriptText = c["transcript"] as? String {
-                        transcript.append(GrokTranscriptEntry(role: "user", content: transcriptText, timestamp: Date()))
-                        debugLogs.append("[GrokVoice] User transcript: \(transcriptText)")
-                    }
-                }
-            }
-            } else {
-                return
-            }
-            
         case "response.done":
-            debugLogs.append("[GrokVoice] Response complete")
             state = .listening
+        case "error":
+            if let message = json["message"] as? String {
+                errorMessage = message
+                state = .error(message)
+            }
         default:
             break
         }
@@ -244,8 +223,7 @@ class GrokVoiceService: NSObject, ObservableObject {
             let audioPCMBuffer = AVAudioPCMBuffer(pcmFormat: audioFormat, frameCapacity: AVAudioFrameCount(audioData.count / 2))!
             audioPCMBuffer.frameLength = AVAudioFrameCount(audioData.count / 2)
             
-            var mutableData = audioData
-            mutableData.withUnsafeMutableBytes { rawBuffer in
+            audioData.withUnsafeMutableBytes { rawBuffer in
                 if let baseAddress = rawBuffer.baseAddress {
                     let floatBuffer = baseAddress.assumingMemoryBound(to: Int16.self)
                     let floatPtr = audioPCMBuffer.floatChannelData![0]
@@ -257,7 +235,7 @@ class GrokVoiceService: NSObject, ObservableObject {
             
             playAudioBuffer(audioPCMBuffer)
         } catch {
-            debugLogs.append("[GrokVoice] Error playing audio: \(error.localizedDescription)")
+            debugLogs.append("[GrokVoice] Play error: \(error.localizedDescription)")
         }
     }
     
@@ -301,9 +279,7 @@ class GrokVoiceService: NSObject, ObservableObject {
         try audioSession.setActive(true)
         
         audioEngine = AVAudioEngine()
-        guard let engine = audioEngine else {
-            throw GrokVoiceError.audioSetupFailed("Could not create audio engine")
-        }
+        guard let engine = audioEngine else { return }
         
         let inputNode = engine.inputNode
         let recordingFormat = inputNode.outputFormat(forBus: 0)
@@ -317,7 +293,7 @@ class GrokVoiceService: NSObject, ObservableObject {
         }
         
         try engine.start()
-        debugLogs.append("[GrokVoice] Audio capture started")
+        debugLogs.append("[GrokVoice] Mic started")
     }
     
     private func processInputAudio(_ buffer: AVAudioPCMBuffer) {
@@ -349,7 +325,6 @@ class GrokVoiceService: NSObject, ObservableObject {
         audioEngine?.inputNode.removeTap(onBus: 0)
         audioEngine?.stop()
         audioEngine = nil
-        debugLogs.append("[GrokVoice] Audio capture stopped")
     }
     
     func clearLogs() {
@@ -371,7 +346,7 @@ extension GrokVoiceService: URLSessionWebSocketDelegate {
     
     nonisolated func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didCloseWith closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?) {
         Task { @MainActor in
-            self.debugLogs.append("[GrokVoice] WebSocket closed with code: \(closeCode)")
+            self.debugLogs.append("[GrokVoice] WebSocket closed: \(closeCode)")
             self.state = .disconnected
         }
     }
