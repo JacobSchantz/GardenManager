@@ -105,10 +105,10 @@ class GrokVoiceService: NSObject, ObservableObject {
         webSocketTask = urlSession.webSocketTask(with: request)
         webSocketTask?.resume()
         
-        try await Task.sleep(nanoseconds: 500_000_000)
+        // Don't wait - just continue
+        debugLogs.append("[GrokVoice] Waiting for connection...")
         
-        debugLogs.append("[GrokVoice] Connection established, sending session config...")
-        
+        // Send session configuration immediately
         let sessionConfig: [String: Any] = [
             "type": "session.update",
             "session": [
@@ -123,6 +123,26 @@ class GrokVoiceService: NSObject, ObservableObject {
         
         if let jsonData = try? JSONSerialization.data(withJSONObject: sessionConfig),
            let jsonString = String(data: jsonData, encoding: .utf8) {
+            // Wait a bit before sending config
+            try? await Task.sleep(nanoseconds: 200_000_000)
+            sendMessage(jsonString)
+        }
+        
+        state = .listening
+        debugLogs.append("[GrokVoice] Session configured, ready to listen")
+        
+        // Start receiving messages
+        receiveMessage()
+        
+        // Start audio capture (don't await - let it run in background)
+        Task {
+            do {
+                try await startAudioCapture()
+            } catch {
+                debugLogs.append("[GrokVoice] Audio capture error: \(error.localizedDescription)")
+            }
+        }
+    }
             sendMessage(jsonString)
         }
         
