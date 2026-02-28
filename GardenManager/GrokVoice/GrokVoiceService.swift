@@ -65,11 +65,13 @@ class GrokVoiceService: NSObject, ObservableObject {
     }
     
     private func loadAPIKey() {
+        // Set XAI_API_KEY in your scheme's environment variables
         apiKey = ProcessInfo.processInfo.environment["XAI_API_KEY"] ?? ""
+        
         if apiKey.isEmpty {
-            debugLogs.append("[GrokVoice] API key not found in environment")
+            debugLogs.append("[GrokVoice] API key not found - set XAI_API_KEY in scheme environment")
         } else {
-            debugLogs.append("[GrokVoice] API key loaded successfully")
+            debugLogs.append("[GrokVoice] API key loaded")
         }
     }
     
