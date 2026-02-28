@@ -217,9 +217,7 @@ struct GrokVoiceView: View {
         case .error: return .red
         }
     }
-    
-}
-    
+
     private var stateText: String {
         switch service.state {
         case .disconnected: return "Disconnected"

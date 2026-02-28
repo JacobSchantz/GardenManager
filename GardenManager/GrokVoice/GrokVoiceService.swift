@@ -22,7 +22,7 @@ enum GrokVoiceError: Error, LocalizedError {
     }
 }
 
-enum GrokVoiceState {
+enum GrokVoiceState: Equatable {
     case disconnected
     case connecting
     case listening
@@ -197,18 +197,21 @@ class GrokVoiceService: NSObject, ObservableObject {
             debugLogs.append("[GrokVoice] User started speaking")
         case "conversation.item.added":
             if let item = json["item"] as? [String: Any],
-               let itemT}
                let itemType = item["type"] as? String, itemType == "message",
-               let content = item["content"] as? [[String: Any]] else { return }
-            
+               let content = item["content"] as? [[String: Any]] {
+                // ... code using content ...
             for c in content {
                 if c["type"] as? String == "input_audio" {
-                    if let transcript = c["transcript"] as? String {
-                        transcript.append(GrokTranscriptEntry(role: "user", content: transcript, timestamp: Date()))
-                        debugLogs.append("[GrokVoice] User transcript: \(transcript)")
+                    if let transcriptText = c["transcript"] as? String {
+                        transcript.append(GrokTranscriptEntry(role: "user", content: transcriptText, timestamp: Date()))
+                        debugLogs.append("[GrokVoice] User transcript: \(transcriptText)")
                     }
                 }
             }
+            } else {
+                return
+            }
+            
         case "response.done":
             debugLogs.append("[GrokVoice] Response complete")
             state = .listening
@@ -228,7 +231,7 @@ class GrokVoiceService: NSObject, ObservableObject {
             let audioPCMBuffer = AVAudioPCMBuffer(pcmFormat: audioFormat, frameCapacity: AVAudioFrameCount(audioData.count / 2))!
             audioPCMBuffer.frameLength = AVAudioFrameCount(audioData.count / 2)
             
-            let mutableData = audioData
+            var mutableData = audioData
             mutableData.withUnsafeMutableBytes { rawBuffer in
                 if let baseAddress = rawBuffer.baseAddress {
                     let floatBuffer = baseAddress.assumingMemoryBound(to: Int16.self)

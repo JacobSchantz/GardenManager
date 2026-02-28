@@ -14,6 +14,8 @@
 		A99999999999999999999999 /* ToolService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA000000000000000000000 /* ToolService.swift */; };
 		ABB111111111111111111111 /* ToolParameterSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACC222222222222222222222 /* ToolParameterSheet.swift */; };
 		CC2D86EC2F0A4A3E00EA33F5 /* MotionGraphsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2D86EB2F0A4A3E00EA33F5 /* MotionGraphsView.swift */; };
+		CCC20D892F536018008E96B9 /* GrokVoiceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCC20D862F536018008E96B9 /* GrokVoiceService.swift */; };
+		CCC20D8A2F536018008E96B9 /* GrokVoiceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCC20D872F536018008E96B9 /* GrokVoiceView.swift */; };
 		CCE334E52F521672008F3749 /* EpisodeListItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCE334E42F521672008F3749 /* EpisodeListItem.swift */; };
 		DDD111111111111111111111 /* SpeechRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDD222222222222222222222 /* SpeechRecognizer.swift */; };
 		EEE111111111111111111111 /* CommandParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEE222222222222222222222 /* CommandParser.swift */; };
@@ -52,6 +54,8 @@
 		ADD333333333333333333333 /* GardenManager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GardenManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CC2D86EB2F0A4A3E00EA33F5 /* MotionGraphsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionGraphsView.swift; sourceTree = "<group>"; };
 		CCAAF83E2F082CA100D14C0E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		CCC20D862F536018008E96B9 /* GrokVoiceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrokVoiceService.swift; sourceTree = "<group>"; };
+		CCC20D872F536018008E96B9 /* GrokVoiceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrokVoiceView.swift; sourceTree = "<group>"; };
 		CCE334E42F521672008F3749 /* EpisodeListItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EpisodeListItem.swift; sourceTree = "<group>"; };
 		DDD222222222222222222222 /* SpeechRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechRecognizer.swift; sourceTree = "<group>"; };
 		EEE222222222222222222222 /* CommandParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandParser.swift; sourceTree = "<group>"; };
@@ -105,6 +109,7 @@
 		B00666666666666666666666 /* GardenManager */ = {
 			isa = PBXGroup;
 			children = (
+				CCC20D882F536018008E96B9 /* GrokVoice */,
 				CCAAF83E2F082CA100D14C0E /* Info.plist */,
 				A22222222222222222222222 /* GardenManagerApp.swift */,
 				OOO222222222222222222222 /* AppDelegate.swift */,
@@ -122,6 +127,15 @@
 				ADD333333333333333333333 /* GardenManager.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		CCC20D882F536018008E96B9 /* GrokVoice */ = {
+			isa = PBXGroup;
+			children = (
+				CCC20D862F536018008E96B9 /* GrokVoiceService.swift */,
+				CCC20D872F536018008E96B9 /* GrokVoiceView.swift */,
+			);
+			path = GrokVoice;
 			sourceTree = "<group>";
 		};
 		CCE334E12F5209E6008F3749 /* Recovered References */ = {
@@ -323,6 +337,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CCC20D892F536018008E96B9 /* GrokVoiceService.swift in Sources */,
+				CCC20D8A2F536018008E96B9 /* GrokVoiceView.swift in Sources */,
 				A33333333333333333333333 /* ContentView.swift in Sources */,
 				A11111111111111111111111 /* GardenManagerApp.swift in Sources */,
 				A77777777777777777777777 /* Tool.swift in Sources */,
