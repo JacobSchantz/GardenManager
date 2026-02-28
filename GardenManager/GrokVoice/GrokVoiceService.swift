@@ -137,8 +137,9 @@ class GrokVoiceService: NSObject, ObservableObject {
         task.send(wsMessage) { [weak self] error in
             Task { @MainActor in
                 if let error = error {
-                    self?.debugLogs.append("Send error: \(error.localizedDescription)")
-                    self?.errorMessage = "Send error: \(error.localizedDescription)"
+                    let details = self?.formatError(error) ?? error.localizedDescription
+                    self?.debugLogs.append("Send error: \(details)")
+                    self?.errorMessage = "Send error: \(details)"
                 }
             }
         }
@@ -153,12 +154,27 @@ class GrokVoiceService: NSObject, ObservableObject {
                     self.handleMessage(msg)
                     self.receiveMessage()
                 case .failure(let error):
-                    self.debugLogs.append("RX error: \(error.localizedDescription)")
-                    self.errorMessage = "Connection error: \(error.localizedDescription)"
-                    self.state = .error(error.localizedDescription)
+                    let details = self.formatError(error)
+                    self.debugLogs.append("RX error: \(details)")
+                    self.errorMessage = details
+                    self.state = .error(details)
                 }
             }
         }
+    }
+    
+    private func formatError(_ error: Error) -> String {
+        var msg = error.localizedDescription
+        if let urlError = error as? URLError {
+            msg += " (code: \(urlError.code.rawValue))"
+            if let failingURL = urlError.failingURL?.absoluteString {
+                msg += ", URL: \(failingURL)"
+            }
+            if let reason = urlError.userInfo[_NSURLErrorWebSocketHandshakeFailureReasonKey] {
+                msg += ", reason: \(reason)"
+            }
+        }
+        return msg
     }
     
     private func handleMessage(_ message: URLSessionWebSocketTask.Message) {
