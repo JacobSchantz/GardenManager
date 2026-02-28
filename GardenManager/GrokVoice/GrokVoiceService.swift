@@ -140,15 +140,8 @@ class GrokVoiceService: NSObject, ObservableObject {
                 try await startAudioCapture()
             } catch {
                 debugLogs.append("[GrokVoice] Audio capture error: \(error.localizedDescription)")
-    }
-            sendMessage(jsonString)
+            }
         }
-        
-        state = .listening
-        debugLogs.append("[GrokVoice] Session configured, ready to listen")
-        
-        receiveMessage()
-        try await startAudioCapture()
     }
     
     func disconnect() {
