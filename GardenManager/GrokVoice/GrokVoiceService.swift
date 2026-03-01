@@ -75,7 +75,8 @@ class GrokVoiceService: NSObject, ObservableObject {
     }
     
     private func loadAPIKey() {
-        apiKey = ProcessInfo.processInfo.environment["XAI_API_KEY"] ?? ""
+        apiKey = (ProcessInfo.processInfo.environment["XAI_API_KEY"] ?? "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
         if apiKey.isEmpty {
             debugLogs.insert("API key not found", at: 0)
         } else {
@@ -83,7 +84,14 @@ class GrokVoiceService: NSObject, ObservableObject {
         }
     }
     
-    func setAPIKey(_ key: String) { apiKey = key }
+    func setAPIKey(_ key: String) {
+        apiKey = key.trimmingCharacters(in: .whitespacesAndNewlines)
+        if apiKey.isEmpty {
+            debugLogs.insert("API key is empty after trimming.", at: 0)
+        } else {
+            debugLogs.insert("API key updated from Settings.", at: 0)
+        }
+    }
 
     var hasMicrophonePermission: Bool {
         microphonePermissionStatus == .granted
@@ -162,12 +170,14 @@ class GrokVoiceService: NSObject, ObservableObject {
         
         var request = URLRequest(url: url)
         request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
         urlSession = URLSession(configuration: .default)
         webSocketTask = urlSession?.webSocketTask(with: request)
         webSocketTask?.resume()
 
         debugLogs.insert("WebSocket created, sending config...", at: 0)
+        debugLogs.insert("Handshake headers: Authorization(Bearer ...), Content-Type(application/json)", at: 0)
 
         let sessionConfig: [String: Any] = [
             "type": "session.update",
@@ -280,6 +290,10 @@ class GrokVoiceService: NSObject, ObservableObject {
             msg += " (code: \(urlError.code.rawValue))"
             if let failingURL = urlError.failingURL?.absoluteString {
                 msg += ", URL: \(failingURL)"
+            }
+
+            if urlError.code == .badServerResponse {
+                msg += ". WebSocket handshake was rejected by xAI. Verify API key, account access to Realtime/Voice Agent, and endpoint wss://api.x.ai/v1/realtime"
             }
         }
         return msg
