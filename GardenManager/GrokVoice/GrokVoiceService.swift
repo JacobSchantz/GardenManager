@@ -538,12 +538,30 @@ class GrokVoiceService: NSObject, ObservableObject {
         guard inputBufferCommitNeeded else { return }
         inputBufferCommitNeeded = false
         
+        // Commit the audio buffer
         let commitMsg: [String: Any] = ["type": "input_audio_buffer.commit"]
         guard let jsonData = try? JSONSerialization.data(withJSONObject: commitMsg),
               let jsonString = String(data: jsonData, encoding: .utf8) else { return }
         
         sendMessage(jsonString)
         debugLogs.insert("Audio buffer committed", at: 0)
+        
+        // Request a response
+        requestResponse()
+    }
+    
+    private func requestResponse() {
+        let responseMsg: [String: Any] = [
+            "type": "response.create",
+            "response": [
+                "modalities": ["audio", "text"]
+            ]
+        ]
+        guard let jsonData = try? JSONSerialization.data(withJSONObject: responseMsg),
+              let jsonString = String(data: jsonData, encoding: .utf8) else { return }
+        
+        sendMessage(jsonString)
+        debugLogs.insert("Response requested", at: 0)
     }
 
     nonisolated private func makeInputTapHandler() -> AVAudioNodeTapBlock {
