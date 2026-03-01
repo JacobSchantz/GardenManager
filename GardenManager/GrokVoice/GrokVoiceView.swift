@@ -12,6 +12,9 @@ struct GrokVoiceView: View {
             VStack(spacing: 20) {
                 // Status and Connect Button
                 statusSection
+
+                // Permission Status
+                permissionSection
                 
                 // Voice Selection
                 voiceSection
@@ -41,6 +44,12 @@ struct GrokVoiceView: View {
             .sheet(isPresented: $showSettings) {
                 settingsSheet
             }
+            .onAppear {
+                service.refreshPermissionStatus()
+            }
+            .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
+                service.refreshPermissionStatus()
+            }
         }
     }
     
@@ -68,8 +77,37 @@ struct GrokVoiceView: View {
                 .background(buttonColor)
                 .cornerRadius(12)
             }
-            .disabled(service.state == .connecting)
+            .disabled(service.state == .connecting || service.microphonePermissionStatus == .denied)
         }
+    }
+
+    private var permissionSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Permissions")
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+
+            HStack(spacing: 8) {
+                Image(systemName: microphonePermissionIcon)
+                    .foregroundColor(microphonePermissionColor)
+                Text("Microphone: \(service.microphonePermissionStatus.label)")
+                    .font(.body)
+            }
+
+            if service.microphonePermissionStatus == .denied {
+                Text("Microphone access is denied. Enable it in iOS Settings to use voice mode.")
+                    .font(.caption)
+                    .foregroundColor(.red)
+            } else if service.microphonePermissionStatus == .notDetermined || service.microphonePermissionStatus == .unknown {
+                Button("Request Microphone Access") {
+                    Task {
+                        _ = await service.requestPermission(.microphone)
+                    }
+                }
+                .font(.caption)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
     
     private var voiceSection: some View {
@@ -161,8 +199,8 @@ struct GrokVoiceView: View {
         DisclosureGroup("Debug Logs") {
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 4) {
-                    ForEach(service.debugLogs.indices, id: \.self) { index in
-                        Text(service.debugLogs[index])
+                    ForEach(Array(service.debugLogs.enumerated()), id: \.offset) { index, log in
+                        Text(log)
                             .font(.caption2)
                             .foregroundColor(.secondary)
                     }
@@ -254,10 +292,25 @@ struct GrokVoiceView: View {
         case .listening, .processing, .speaking: return .red
         }
     }
+
+    private var microphonePermissionIcon: String {
+        switch service.microphonePermissionStatus {
+        case .granted: return "mic.fill"
+        case .denied: return "mic.slash.fill"
+        case .notDetermined, .unknown: return "questionmark.circle"
+        }
+    }
+
+    private var microphonePermissionColor: Color {
+        switch service.microphonePermissionStatus {
+        case .granted: return .green
+        case .denied: return .red
+        case .notDetermined, .unknown: return .orange
+        }
+    }
     
     private func toggleConnection() {
         if service.state == .disconnected || isErrorState {
-            service.state = .connecting
             Task {
                 await service.connect()
             }

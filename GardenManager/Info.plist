@@ -12,6 +12,16 @@
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
+		<key>NSAllowsArbitraryLoadsForMedia</key>
+		<true/>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
 	</dict>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>To download new workouts and upload form videos</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>To capture audio from the camera</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>To transcribe voice commands for workout editing</string>
 </dict>
 </plist>
