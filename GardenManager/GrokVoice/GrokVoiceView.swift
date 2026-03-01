@@ -328,9 +328,8 @@ struct SettingsSheet: View {
             }
         }
     }
-    
-    // MARK: - Helpers
-    
+}
+
     private var stateColor: Color {
         switch service.state {
         case .disconnected: return .gray
