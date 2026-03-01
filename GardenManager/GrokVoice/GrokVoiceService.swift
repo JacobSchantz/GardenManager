@@ -52,6 +52,7 @@ class GrokVoiceService: NSObject, ObservableObject {
     @Published var state: GrokVoiceState = .disconnected
     @Published var currentOutput: String = ""
     @Published var responses: [String] = []
+    @Published var apiMessages: [String] = []  // All API messages for debugging
     @Published var debugLogs: [String] = []
     @Published var isPlaying = false
     @Published var errorMessage: String? = nil
@@ -313,6 +314,9 @@ class GrokVoiceService: NSObject, ObservableObject {
         case .data(let d): jsonString = String(data: d, encoding: .utf8) ?? ""
         @unknown default: return
         }
+        
+        // Store all API messages for debugging
+        apiMessages.insert(jsonString, at: 0)
         
         debugLogs.insert("RX: \(jsonString.prefix(60))...", at: 0)
 

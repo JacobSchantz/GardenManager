@@ -27,6 +27,9 @@ struct GrokVoiceView: View {
                     errorSection(error)
                 }
                 
+                // API Messages (debug)
+                apiMessagesSection
+                
                 Spacer()
             }
             .padding()
@@ -224,6 +227,47 @@ struct GrokVoiceView: View {
                 .background(Color.red.opacity(0.1))
                 .cornerRadius(12)
         }
+    }
+    
+    private var apiMessagesSection: some View {
+        DisclosureGroup("API Messages (\(service.apiMessages.count))") {
+            if service.apiMessages.isEmpty {
+                Text("No messages yet")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            } else {
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: 8) {
+                        ForEach(Array(service.apiMessages.enumerated()), id: \.offset) { index, msg in
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(formatAPIType(msg))
+                                    .font(.caption)
+                                    .fontWeight(.bold)
+                                    .foregroundColor(.blue)
+                                Text(msg)
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary)
+                                    .lineLimit(10)
+                            }
+                            .padding(8)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(Color(.systemGray6))
+                            .cornerRadius(8)
+                        }
+                    }
+                }
+                .frame(maxHeight: 300)
+            }
+        }
+    }
+    
+    private func formatAPIType(_ msg: String) -> String {
+        guard let data = msg.data(using: .utf8),
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let type = json["type"] as? String else {
+            return "raw"
+        }
+        return type
     }
     
     private var settingsSheet: some View {
