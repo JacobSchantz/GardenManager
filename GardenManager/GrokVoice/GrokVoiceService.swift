@@ -51,6 +51,8 @@ enum ServicePermission {
 class GrokVoiceService: NSObject, ObservableObject {
     @Published var state: GrokVoiceState = .disconnected
     @Published var currentOutput: String = ""
+    @Published var responses: [String] = []
+    @Published var apiMessages: [String] = []  // All API messages for debugging
     @Published var debugLogs: [String] = []
     @Published var isPlaying = false
     @Published var errorMessage: String? = nil
@@ -59,7 +61,8 @@ class GrokVoiceService: NSObject, ObservableObject {
     private var webSocketTask: URLSessionWebSocketTask?
     private var urlSession: URLSession?
     private var receiveTask: Task<Void, Never>?
-    private var audioEngine: AVAudioEngine?
+    private var inputAudioEngine: AVAudioEngine?
+    private var playbackAudioEngine: AVAudioEngine?
     private var audioPlayer: AVAudioPlayerNode?
     private var apiKey: String = ""
     private var isInputTapInstalled = false
@@ -74,13 +77,23 @@ class GrokVoiceService: NSObject, ObservableObject {
         refreshPermissionStatus()
     }
     
+    private let apiKeyStorageKey = "xAI_API_Key"
+    
     private func loadAPIKey() {
+        // First try environment variable, then UserDefaults
         apiKey = (ProcessInfo.processInfo.environment["XAI_API_KEY"] ?? "")
             .trimmingCharacters(in: .whitespacesAndNewlines)
+        
         if apiKey.isEmpty {
-            debugLogs.insert("API key not found", at: 0)
+            // Try loading from UserDefaults
+            if let savedKey = UserDefaults.standard.string(forKey: apiKeyStorageKey) {
+                apiKey = savedKey
+                debugLogs.insert("API key loaded from cache", at: 0)
+            } else {
+                debugLogs.insert("API key not found", at: 0)
+            }
         } else {
-            debugLogs.insert("API key loaded", at: 0)
+            debugLogs.insert("API key loaded from environment", at: 0)
         }
     }
     
@@ -88,8 +101,11 @@ class GrokVoiceService: NSObject, ObservableObject {
         apiKey = key.trimmingCharacters(in: .whitespacesAndNewlines)
         if apiKey.isEmpty {
             debugLogs.insert("API key is empty after trimming.", at: 0)
+            UserDefaults.standard.removeObject(forKey: apiKeyStorageKey)
         } else {
-            debugLogs.insert("API key updated from Settings.", at: 0)
+            // Save to UserDefaults
+            UserDefaults.standard.set(apiKey, forKey: apiKeyStorageKey)
+            debugLogs.insert("API key saved to cache", at: 0)
         }
     }
 
@@ -181,7 +197,16 @@ class GrokVoiceService: NSObject, ObservableObject {
 
         let sessionConfig: [String: Any] = [
             "type": "session.update",
-            "session": ["voice": selectedVoice, "instructions": systemInstructions]
+            "session": [
+                "voice": selectedVoice,
+                "instructions": systemInstructions,
+                "turn_detection": ["type": "server_vad"],
+                "modalities": ["text", "audio"],
+                "audio": [
+                    "input": ["format": ["type": "audio/pcm", "rate": 24000]],
+                    "output": ["format": ["type": "audio/pcm", "rate": 24000]]
+                ]
+            ]
         ]
 
         guard let jsonData = try? JSONSerialization.data(withJSONObject: sessionConfig),
@@ -313,6 +338,9 @@ class GrokVoiceService: NSObject, ObservableObject {
         @unknown default: return
         }
         
+        // Store all API messages for debugging
+        apiMessages.insert(jsonString, at: 0)
+        
         debugLogs.insert("RX: \(jsonString.prefix(60))...", at: 0)
 
         guard let data = jsonString.data(using: .utf8) else {
@@ -335,13 +363,48 @@ class GrokVoiceService: NSObject, ObservableObject {
             if let delta = json["delta"] as? String { handleIncomingAudio(delta) }
         case "response.output_audio_transcript.delta":
             if let delta = json["delta"] as? String { currentOutput += delta }
-        case "input_audio_buffer.speech_started": state = .listening
-        case "response.done": state = .listening
+        case "input_audio_buffer.speech_started": 
+            commitAudioBuffer()
+            if !currentOutput.isEmpty {
+                responses.insert(currentOutput, at: 0)
+            }
+            currentOutput = ""
+            state = .listening
+        case "response.done": 
+            if !currentOutput.isEmpty {
+                responses.insert(currentOutput, at: 0)
+                currentOutput = ""
+            }
+            state = .listening
         case "error":
             if let msg = json["message"] as? String {
                 reportFailure(msg)
             }
-        default: break
+        case "ping":
+            // Pings are expected, just acknowledge in debug
+            debugLogs.insert("Pong", at: 0)
+        case "session.created":
+            debugLogs.insert("Session created", at: 0)
+        case "session_updated":
+            debugLogs.insert("Session updated", at: 0)
+        case "response.audio_transcript.done":
+            // Full transcript complete
+            if let transcript = json["transcript"] as? String {
+                if !currentOutput.isEmpty {
+                    responses.insert(currentOutput, at: 0)
+                }
+                currentOutput = transcript
+            }
+        case "response.created":
+            debugLogs.insert("Response created - processing", at: 0)
+            state = .processing
+        case "response.content.done":
+            // Response content complete
+            state = .listening
+        case "conversation.item.created":
+            debugLogs.insert("Input audio processed", at: 0)
+        default: 
+            debugLogs.insert("Unknown type: \(type)", at: 0)
         }
     }
     
@@ -403,9 +466,10 @@ class GrokVoiceService: NSObject, ObservableObject {
     
     private func playAudioBuffer(_ buf: AVAudioPCMBuffer) {
         do {
-            if audioEngine == nil { try setupAudioPlayer() }
-            guard let p = audioPlayer, let e = audioEngine else {
+            if playbackAudioEngine == nil { try setupAudioPlayer() }
+            guard let p = audioPlayer, let e = playbackAudioEngine else {
                 reportFailure("Audio player is not ready.")
+                debugLogs.insert("Audio player setup failed: player=\(audioPlayer == nil), engine=\(playbackAudioEngine == nil)", at: 0)
                 return
             }
             
@@ -415,16 +479,19 @@ class GrokVoiceService: NSObject, ObservableObject {
                     if self?.state == .speaking { self?.state = .listening }
                 }
             }
+            
             if !e.isRunning { try e.start() }
+            if !p.isPlaying { p.play() }
+            debugLogs.insert("Playing audio buffer", at: 0)
         } catch {
             reportFailure("PlayBuffer error: \(error.localizedDescription)")
         }
     }
     
     private func setupAudioPlayer() throws {
-        audioEngine = AVAudioEngine()
+        playbackAudioEngine = AVAudioEngine()
         audioPlayer = AVAudioPlayerNode()
-        guard let e = audioEngine, let p = audioPlayer else {
+        guard let e = playbackAudioEngine, let p = audioPlayer else {
             throw GrokVoiceError.audioSetupFailed("Engine or player nil")
         }
 
@@ -435,6 +502,7 @@ class GrokVoiceService: NSObject, ObservableObject {
         e.attach(p)
         e.connect(p, to: e.mainMixerNode, format: fmt)
         try e.start()
+        debugLogs.insert("Playback audio engine started", at: 0)
     }
     
     private func startAudioCapture() async throws {
@@ -446,8 +514,8 @@ class GrokVoiceService: NSObject, ObservableObject {
         try sess.setCategory(.playAndRecord, mode: .voiceChat, options: [.defaultToSpeaker, .allowBluetooth])
         try sess.setActive(true)
         
-        audioEngine = AVAudioEngine()
-        guard let eng = audioEngine else {
+        inputAudioEngine = AVAudioEngine()
+        guard let eng = inputAudioEngine else {
             throw GrokVoiceError.audioSetupFailed("Could not create audio engine")
         }
         
@@ -466,6 +534,8 @@ class GrokVoiceService: NSObject, ObservableObject {
         debugLogs.insert("Mic started", at: 0)
     }
     
+    private var inputBufferCommitNeeded = false
+    
     private func processInputAudioMessage(_ message: String) {
         guard state != .disconnected else {
             return
@@ -476,6 +546,37 @@ class GrokVoiceService: NSObject, ObservableObject {
         }
 
         sendMessage(message)
+        inputBufferCommitNeeded = true
+    }
+    
+    private func commitAudioBuffer() {
+        guard inputBufferCommitNeeded else { return }
+        inputBufferCommitNeeded = false
+        
+        // Commit the audio buffer
+        let commitMsg: [String: Any] = ["type": "input_audio_buffer.commit"]
+        guard let jsonData = try? JSONSerialization.data(withJSONObject: commitMsg),
+              let jsonString = String(data: jsonData, encoding: .utf8) else { return }
+        
+        sendMessage(jsonString)
+        debugLogs.insert("Audio buffer committed", at: 0)
+        
+        // Request a response
+        requestResponse()
+    }
+    
+    private func requestResponse() {
+        let responseMsg: [String: Any] = [
+            "type": "response.create",
+            "response": [
+                "modalities": ["text", "audio"]
+            ]
+        ]
+        guard let jsonData = try? JSONSerialization.data(withJSONObject: responseMsg),
+              let jsonString = String(data: jsonData, encoding: .utf8) else { return }
+        
+        sendMessage(jsonString)
+        debugLogs.insert("Response requested", at: 0)
     }
 
     nonisolated private func makeInputTapHandler() -> AVAudioNodeTapBlock {
@@ -516,12 +617,15 @@ class GrokVoiceService: NSObject, ObservableObject {
     }
     
     private func stopAudioCapture() {
-        if let engine = audioEngine, isInputTapInstalled {
+        if let engine = inputAudioEngine, isInputTapInstalled {
             engine.inputNode.removeTap(onBus: 0)
             isInputTapInstalled = false
         }
-        audioEngine?.stop()
-        audioEngine = nil
+        inputAudioEngine?.stop()
+        inputAudioEngine = nil
+        
+        playbackAudioEngine?.stop()
+        playbackAudioEngine = nil
     }
     
     func clearLogs() { debugLogs.removeAll() }
