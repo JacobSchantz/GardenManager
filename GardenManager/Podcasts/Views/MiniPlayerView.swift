@@ -37,7 +37,7 @@ struct MiniPlayerView: View {
                             HStack(spacing: 4) {
                                 Text(formatTime(audioPlayer.currentTime))
                                 Text("/")
-                                Text(formatTime(audioPlayer.duration))
+                                Text(formatTime(episode.duration > 0 ? episode.duration : audioPlayer.duration))
                             }
                             .font(.caption)
                             .foregroundColor(.secondary)
