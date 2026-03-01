@@ -123,6 +123,10 @@ struct GrokVoiceView: View {
             }
             .pickerStyle(.segmented)
             .disabled(service.state != .disconnected)
+            
+            Text("⚠️ Currently only works with AirPods or external headphones")
+                .font(.caption)
+                .foregroundColor(.orange)
         }
     }
     
