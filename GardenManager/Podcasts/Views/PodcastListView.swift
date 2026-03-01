@@ -2,10 +2,7 @@ import SwiftUI
 
 struct PodcastListView: View {
     @EnvironmentObject var viewModel: PodcastListViewModel
-    @State private var showingAddFeed = false
-    @State private var showingImageImport = false
     @State private var showingSearch = false
-    @State private var feedURLString = ""
     
     var body: some View {
         NavigationView {
@@ -36,31 +33,13 @@ struct PodcastListView: View {
             .navigationTitle("Podcasts")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Menu {
-                        Button(action: { showingSearch = true }) {
-                            Label("Search Podcasts", systemImage: "magnifyingglass")
-                        }
-                        
-                        Button(action: { showingAddFeed = true }) {
-                            Label("Add by URL", systemImage: "link")
-                        }
-                        
-                        Button(action: { showingImageImport = true }) {
-                            Label("Import from Image", systemImage: "photo")
-                        }
-                    } label: {
+                    Button(action: { showingSearch = true }) {
                         Image(systemName: "plus")
                     }
                 }
             }
             .sheet(isPresented: $showingSearch) {
                 PodcastSearchView(podcastViewModel: viewModel)
-            }
-            .sheet(isPresented: $showingAddFeed) {
-                AddFeedView(viewModel: viewModel, isPresented: $showingAddFeed)
-            }
-            .sheet(isPresented: $showingImageImport) {
-                ImagePodcastImportView(podcastListViewModel: viewModel)
             }
             .alert("Error", isPresented: $viewModel.showError) {
                 Button("OK", role: .cancel) { }
