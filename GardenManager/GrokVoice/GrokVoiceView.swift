@@ -273,63 +273,7 @@ struct GrokVoiceView: View {
     private var settingsSheet: some View {
         SettingsSheet(apiKey: $apiKey, service: service)
     }
-}
-
-struct SettingsSheet: View {
-    @Binding var apiKey: String
-    @ObservedObject var service: GrokVoiceService
-    @Environment(\.dismiss) private var dismiss
     
-    var body: some View {
-        NavigationStack {
-            Form {
-                Section("API Key") {
-                    SecureField("xAI API Key", text: $apiKey)
-                        .autocapitalization(.none)
-                        .autocorrectionDisabled()
-                    
-                    Button("Save API Key") {
-                        service.setAPIKey(apiKey)
-                        dismiss()
-                    }
-                    .disabled(apiKey.isEmpty)
-                    
-                    if UserDefaults.standard.string(forKey: "xAI_API_Key") != nil {
-                        Button("Clear Cached Key") {
-                            UserDefaults.standard.removeObject(forKey: "xAI_API_Key")
-                            service.setAPIKey("")
-                            apiKey = ""
-                            dismiss()
-                        }
-                        .foregroundColor(.red)
-                    }
-                }
-                
-                Section("System Instructions") {
-                    TextEditor(text: $service.systemInstructions)
-                        .frame(height: 100)
-                }
-            }
-            .navigationTitle("Settings")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
-                }
-            }
-        }
-        .presentationDetents([.medium, .large])
-        .onAppear {
-            // Load cached key if field is empty
-            if apiKey.isEmpty, let cached = UserDefaults.standard.string(forKey: "xAI_API_Key") {
-                apiKey = cached
-            }
-        }
-    }
-}
-
     private var stateColor: Color {
         switch service.state {
         case .disconnected: return .gray
@@ -440,6 +384,61 @@ struct SettingsSheet: View {
             copiedText = "error"
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                 copiedText = nil
+            }
+        }
+    }
+}
+
+struct SettingsSheet: View {
+    @Binding var apiKey: String
+    @ObservedObject var service: GrokVoiceService
+    @Environment(\.dismiss) private var dismiss
+    
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("API Key") {
+                    SecureField("xAI API Key", text: $apiKey)
+                        .autocapitalization(.none)
+                        .autocorrectionDisabled()
+                    
+                    Button("Save API Key") {
+                        service.setAPIKey(apiKey)
+                        dismiss()
+                    }
+                    .disabled(apiKey.isEmpty)
+                    
+                    if UserDefaults.standard.string(forKey: "xAI_API_Key") != nil {
+                        Button("Clear Cached Key") {
+                            UserDefaults.standard.removeObject(forKey: "xAI_API_Key")
+                            service.setAPIKey("")
+                            apiKey = ""
+                            dismiss()
+                        }
+                        .foregroundColor(.red)
+                    }
+                }
+                
+                Section("System Instructions") {
+                    TextEditor(text: $service.systemInstructions)
+                        .frame(height: 100)
+                }
+            }
+            .navigationTitle("Settings")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                }
+            }
+        }
+        .presentationDetents([.medium, .large])
+        .onAppear {
+            // Load cached key if field is empty
+            if apiKey.isEmpty, let cached = UserDefaults.standard.string(forKey: "xAI_API_Key") {
+                apiKey = cached
             }
         }
     }
