@@ -230,7 +230,7 @@ struct GrokVoiceView: View {
     }
     
     private var apiMessagesSection: some View {
-        DisclosureGroup("API Messages (\(service.apiMessages.count))") {
+        DisclosureGroup {
             if service.apiMessages.isEmpty {
                 Text("No messages yet")
                     .font(.caption)
@@ -248,6 +248,7 @@ struct GrokVoiceView: View {
                                     .font(.caption2)
                                     .foregroundColor(.secondary)
                                     .lineLimit(10)
+                                    .textSelection(.enabled)
                             }
                             .padding(8)
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -257,6 +258,18 @@ struct GrokVoiceView: View {
                     }
                 }
                 .frame(maxHeight: 300)
+            }
+        } label: {
+            HStack {
+                Text("API Messages (\(service.apiMessages.count))")
+                    .foregroundColor(.secondary)
+                Spacer()
+                if !service.apiMessages.isEmpty {
+                    Button(action: copyAPIMessages) {
+                        Image(systemName: copiedText == "api" ? "checkmark" : "doc.on.doc")
+                            .font(.caption)
+                    }
+                }
             }
         }
     }
@@ -385,6 +398,14 @@ struct GrokVoiceView: View {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                 copiedText = nil
             }
+        }
+    }
+    
+    private func copyAPIMessages() {
+        UIPasteboard.general.string = service.apiMessages.joined(separator: "\n\n")
+        copiedText = "api"
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            copiedText = nil
         }
     }
 }
