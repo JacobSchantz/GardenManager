@@ -6,7 +6,7 @@ struct PodcastSearchView: View {
     @Environment(\.dismiss) var dismiss
     @State private var searchText = ""
     @State private var showingAddPodcast = false
-    @State private var selectedPodcast: PodcastSearchResult? = nil
+    @State private var selectedPodcast: ITunesPodcastResult? = nil
     
     var body: some View {
         NavigationView {
@@ -127,7 +127,7 @@ struct PodcastSearchView: View {
 }
 
 struct AddSearchedPodcastView: View {
-    let podcast: PodcastSearchResult
+    let podcast: ITunesPodcastResult
     @ObservedObject var podcastViewModel: PodcastListViewModel
     @Environment(\.dismiss) var dismiss
     @State private var isLoading = false

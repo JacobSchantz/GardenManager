@@ -38,6 +38,7 @@
 		PHO333333333333333333333 /* PhotosUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = PHO444444444444444444444 /* PhotosUI.framework */; };
 		PIDX22222222222222222222 /* PodcastIndexModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = PIDX11111111111111111111 /* PodcastIndexModels.swift */; };
 		SRCH22222222222222222222 /* PodcastSearchResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = SRCH11111111111111111111 /* PodcastSearchResult.swift */; };
+		SRCH333333333333333333333 /* PodcastSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = SRCH444444444444444444444 /* PodcastSearchView.swift */; };
 		SRVC22222222222222222222 /* PodcastSearchService.swift in Sources */ = {isa = PBXBuildFile; fileRef = SRVC11111111111111111111 /* PodcastSearchService.swift */; };
 		TXT222222222222222222222 /* TextProcessingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = TXT111111111111111111111 /* TextProcessingService.swift */; };
 		VIS222222222222222222222 /* VisionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = VIS111111111111111111111 /* VisionService.swift */; };
@@ -78,6 +79,7 @@
 		PHO444444444444444444444 /* PhotosUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PhotosUI.framework; path = System/Library/Frameworks/PhotosUI.framework; sourceTree = SDKROOT; };
 		PIDX11111111111111111111 /* PodcastIndexModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PodcastIndexModels.swift; sourceTree = "<group>"; };
 		SRCH11111111111111111111 /* PodcastSearchResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PodcastSearchResult.swift; sourceTree = "<group>"; };
+		SRCH444444444444444444444 /* PodcastSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PodcastSearchView.swift; sourceTree = "<group>"; };
 		SRVC11111111111111111111 /* PodcastSearchService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PodcastSearchService.swift; sourceTree = "<group>"; };
 		TXT111111111111111111111 /* TextProcessingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextProcessingService.swift; sourceTree = "<group>"; };
 		VIS111111111111111111111 /* VisionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionService.swift; sourceTree = "<group>"; };
@@ -214,6 +216,7 @@
 				IMG111111111111111111111 /* ImagePodcastImportView.swift */,
 				CCE334E42F521672008F3749 /* EpisodeListItem.swift */,
 				IMV111111111111111111111 /* ImagePodcastImportViewModel.swift */,
+				SRCH444444444444444444444 /* PodcastSearchView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -367,6 +370,7 @@
 				IMG222222222222222222222 /* ImagePodcastImportView.swift in Sources */,
 				IMV222222222222222222222 /* ImagePodcastImportViewModel.swift in Sources */,
 				SRCH22222222222222222222 /* PodcastSearchResult.swift in Sources */,
+				SRCH333333333333333333333 /* PodcastSearchView.swift in Sources */,
 				PIDX22222222222222222222 /* PodcastIndexModels.swift in Sources */,
 				SRVC22222222222222222222 /* PodcastSearchService.swift in Sources */,
 			);

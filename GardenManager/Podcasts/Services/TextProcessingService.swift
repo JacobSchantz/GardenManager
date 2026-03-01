@@ -1,6 +1,7 @@
 import Foundation
 
-actor TextProcessingService {
+@MainActor
+class TextProcessingService: ObservableObject {
     private let podcastSearchService = PodcastSearchService()
     
     func extractPodcastNames(from textLines: [String]) async -> [String] {
@@ -35,13 +36,24 @@ actor TextProcessingService {
         for (index, name) in podcastNames.enumerated() {
             progressHandler(index, podcastNames.count)
             
-            do {
-                let searchResponse = try await podcastSearchService.searchPodcasts(query: name, limit: 5)
-                // Take the best match (first result if available)
-                let bestMatch = searchResponse.feeds.first
-                results.append((name, bestMatch?.toPodcast()))
-            } catch {
-                // If search fails, add with nil
+            // Search for podcasts
+            await podcastSearchService.search(query: name)
+            
+            // Take the best match (first result if available)
+            if let firstResult = podcastSearchService.results.first,
+               let feedUrlString = firstResult.feedUrl,
+               let feedUrl = URL(string: feedUrlString) {
+                let podcast = Podcast(
+                    id: UUID(),
+                    title: firstResult.trackName,
+                    author: firstResult.artistName,
+                    description: "",
+                    imageURL: firstResult.artworkUrl600.flatMap { URL(string: $0) },
+                    feedURL: feedUrl,
+                    episodes: []
+                )
+                results.append((name, podcast))
+            } else {
                 results.append((name, nil))
             }
         }

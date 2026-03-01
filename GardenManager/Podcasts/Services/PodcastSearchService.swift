@@ -1,6 +1,6 @@
 import Foundation
 
-struct PodcastSearchResult: Identifiable, Codable, Hashable {
+struct ITunesPodcastResult: Identifiable, Codable, Hashable {
     let trackId: Int
     let trackName: String
     let artistName: String
@@ -14,14 +14,14 @@ struct PodcastSearchResult: Identifiable, Codable, Hashable {
         hasher.combine(trackId)
     }
     
-    static func == (lhs: PodcastSearchResult, rhs: PodcastSearchResult) -> Bool {
+    static func == (lhs: ITunesPodcastResult, rhs: ITunesPodcastResult) -> Bool {
         lhs.trackId == rhs.trackId
     }
 }
 
 @MainActor
 class PodcastSearchService: ObservableObject {
-    @Published var results: [PodcastSearchResult] = []
+    @Published var results: [ITunesPodcastResult] = []
     @Published var isLoading = false
     @Published var errorMessage: String? = nil
     
@@ -76,5 +76,5 @@ class PodcastSearchService: ObservableObject {
 
 struct iTunesSearchResponse: Codable {
     let resultCount: Int
-    let results: [PodcastSearchResult]
+    let results: [ITunesPodcastResult]
 }
