@@ -1,6 +1,6 @@
 import Foundation
 
-struct PodcastSearchResult: Identifiable, Codable {
+struct PodcastSearchResult: Identifiable, Codable, Hashable {
     let trackId: Int
     let trackName: String
     let artistName: String
@@ -9,6 +9,14 @@ struct PodcastSearchResult: Identifiable, Codable {
     let trackCount: Int?
     
     var id: Int { trackId }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(trackId)
+    }
+    
+    static func == (lhs: PodcastSearchResult, rhs: PodcastSearchResult) -> Bool {
+        lhs.trackId == rhs.trackId
+    }
 }
 
 @MainActor
