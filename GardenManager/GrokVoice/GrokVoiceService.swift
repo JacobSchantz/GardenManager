@@ -61,7 +61,8 @@ class GrokVoiceService: NSObject, ObservableObject {
     private var webSocketTask: URLSessionWebSocketTask?
     private var urlSession: URLSession?
     private var receiveTask: Task<Void, Never>?
-    private var audioEngine: AVAudioEngine?
+    private var inputAudioEngine: AVAudioEngine?
+    private var playbackAudioEngine: AVAudioEngine?
     private var audioPlayer: AVAudioPlayerNode?
     private var apiKey: String = ""
     private var isInputTapInstalled = false
@@ -465,9 +466,10 @@ class GrokVoiceService: NSObject, ObservableObject {
     
     private func playAudioBuffer(_ buf: AVAudioPCMBuffer) {
         do {
-            if audioEngine == nil { try setupAudioPlayer() }
-            guard let p = audioPlayer, let e = audioEngine else {
+            if playbackAudioEngine == nil { try setupAudioPlayer() }
+            guard let p = audioPlayer, let e = playbackAudioEngine else {
                 reportFailure("Audio player is not ready.")
+                debugLogs.insert("Audio player setup failed: player=\(audioPlayer == nil), engine=\(playbackAudioEngine == nil)", at: 0)
                 return
             }
             
@@ -480,15 +482,16 @@ class GrokVoiceService: NSObject, ObservableObject {
             
             if !e.isRunning { try e.start() }
             if !p.isPlaying { p.play() }
+            debugLogs.insert("Playing audio buffer", at: 0)
         } catch {
             reportFailure("PlayBuffer error: \(error.localizedDescription)")
         }
     }
     
     private func setupAudioPlayer() throws {
-        audioEngine = AVAudioEngine()
+        playbackAudioEngine = AVAudioEngine()
         audioPlayer = AVAudioPlayerNode()
-        guard let e = audioEngine, let p = audioPlayer else {
+        guard let e = playbackAudioEngine, let p = audioPlayer else {
             throw GrokVoiceError.audioSetupFailed("Engine or player nil")
         }
 
@@ -499,6 +502,7 @@ class GrokVoiceService: NSObject, ObservableObject {
         e.attach(p)
         e.connect(p, to: e.mainMixerNode, format: fmt)
         try e.start()
+        debugLogs.insert("Playback audio engine started", at: 0)
     }
     
     private func startAudioCapture() async throws {
@@ -510,8 +514,8 @@ class GrokVoiceService: NSObject, ObservableObject {
         try sess.setCategory(.playAndRecord, mode: .voiceChat, options: [.defaultToSpeaker, .allowBluetooth])
         try sess.setActive(true)
         
-        audioEngine = AVAudioEngine()
-        guard let eng = audioEngine else {
+        inputAudioEngine = AVAudioEngine()
+        guard let eng = inputAudioEngine else {
             throw GrokVoiceError.audioSetupFailed("Could not create audio engine")
         }
         
@@ -613,12 +617,15 @@ class GrokVoiceService: NSObject, ObservableObject {
     }
     
     private func stopAudioCapture() {
-        if let engine = audioEngine, isInputTapInstalled {
+        if let engine = inputAudioEngine, isInputTapInstalled {
             engine.inputNode.removeTap(onBus: 0)
             isInputTapInstalled = false
         }
-        audioEngine?.stop()
-        audioEngine = nil
+        inputAudioEngine?.stop()
+        inputAudioEngine = nil
+        
+        playbackAudioEngine?.stop()
+        playbackAudioEngine = nil
     }
     
     func clearLogs() { debugLogs.removeAll() }
