@@ -27,9 +27,6 @@ struct GrokVoiceView: View {
                     errorSection(error)
                 }
                 
-                // Debug Logs (collapsible)
-                debugSection
-                
                 Spacer()
             }
             .padding()
@@ -129,42 +126,76 @@ struct GrokVoiceView: View {
     private var outputSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text("Output")
+                Text("Responses")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                 
                 Spacer()
                 
-                if !service.currentOutput.isEmpty {
-                    Button(action: copyOutput) {
+                if !service.responses.isEmpty {
+                    Button(action: copyAllResponses) {
                         HStack(spacing: 4) {
-                            Image(systemName: copiedText == "output" ? "checkmark" : "doc.on.doc")
-                            Text(copiedText == "output" ? "Copied!" : "Copy")
+                            Image(systemName: copiedText == "all" ? "checkmark" : "doc.on.doc")
+                            Text(copiedText == "all" ? "Copied!" : "Copy All")
                         }
                         .font(.caption)
                     }
                 }
             }
             
-            if service.currentOutput.isEmpty {
+            if service.responses.isEmpty && service.currentOutput.isEmpty {
                 Text("No output yet. Press the button above to start a conversation.")
                     .font(.body)
                     .foregroundColor(.secondary)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.vertical, 40)
             } else {
-                ScrollView {
-                    Text(service.currentOutput)
-                        .font(.body)
-                        .textSelection(.enabled)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                // Current (live) output
+                if !service.currentOutput.isEmpty {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Live")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        Text(service.currentOutput)
+                            .font(.body)
+                            .textSelection(.enabled)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .padding()
+                    .background(Color.blue.opacity(0.1))
+                    .cornerRadius(12)
                 }
-                .frame(minHeight: 100, maxHeight: 200)
-                .padding()
-                .background(Color(.systemGray6))
-                .cornerRadius(12)
+                
+                // Past responses
+                if !service.responses.isEmpty {
+                    ScrollView {
+                        LazyVStack(spacing: 8) {
+                            ForEach(Array(service.responses.enumerated()), id: \.offset) { index, response in
+                                responseItem(response, index: index)
+                            }
+                        }
+                    }
+                    .frame(minHeight: 100, maxHeight: 250)
+                }
             }
         }
+    }
+    
+    private func responseItem(_ response: String, index: Int) -> some View {
+        HStack(alignment: .top, spacing: 8) {
+            Text(response)
+                .font(.body)
+                .textSelection(.enabled)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            
+            Button(action: { copyResponse(index) }) {
+                Image(systemName: copiedText == "response-\(index)" ? "checkmark" : "doc.on.doc")
+                    .font(.caption)
+            }
+        }
+        .padding()
+        .background(Color(.systemGray6))
+        .cornerRadius(8)
     }
     
     private func errorSection(_ error: String) -> some View {
@@ -192,21 +223,6 @@ struct GrokVoiceView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(Color.red.opacity(0.1))
                 .cornerRadius(12)
-        }
-    }
-    
-    private var debugSection: some View {
-        DisclosureGroup("Debug Logs") {
-            ScrollView {
-                LazyVStack(alignment: .leading, spacing: 4) {
-                    ForEach(Array(service.debugLogs.enumerated()), id: \.offset) { index, log in
-                        Text(log)
-                            .font(.caption2)
-                            .foregroundColor(.secondary)
-                    }
-                }
-            }
-            .frame(maxHeight: 150)
         }
     }
     
@@ -327,6 +343,23 @@ struct GrokVoiceView: View {
     private func copyOutput() {
         UIPasteboard.general.string = service.currentOutput
         copiedText = "output"
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            copiedText = nil
+        }
+    }
+    
+    private func copyAllResponses() {
+        UIPasteboard.general.string = service.responses.joined(separator: "\n\n---\n\n")
+        copiedText = "all"
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            copiedText = nil
+        }
+    }
+    
+    private func copyResponse(_ index: Int) {
+        guard index < service.responses.count else { return }
+        UIPasteboard.general.string = service.responses[index]
+        copiedText = "response-\(index)"
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
             copiedText = nil
         }

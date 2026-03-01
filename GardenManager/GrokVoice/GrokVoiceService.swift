@@ -51,6 +51,7 @@ enum ServicePermission {
 class GrokVoiceService: NSObject, ObservableObject {
     @Published var state: GrokVoiceState = .disconnected
     @Published var currentOutput: String = ""
+    @Published var responses: [String] = []
     @Published var debugLogs: [String] = []
     @Published var isPlaying = false
     @Published var errorMessage: String? = nil
@@ -335,8 +336,18 @@ class GrokVoiceService: NSObject, ObservableObject {
             if let delta = json["delta"] as? String { handleIncomingAudio(delta) }
         case "response.output_audio_transcript.delta":
             if let delta = json["delta"] as? String { currentOutput += delta }
-        case "input_audio_buffer.speech_started": state = .listening
-        case "response.done": state = .listening
+        case "input_audio_buffer.speech_started": 
+            if !currentOutput.isEmpty {
+                responses.insert(currentOutput, at: 0)
+            }
+            currentOutput = ""
+            state = .listening
+        case "response.done": 
+            if !currentOutput.isEmpty {
+                responses.insert(currentOutput, at: 0)
+                currentOutput = ""
+            }
+            state = .listening
         case "error":
             if let msg = json["message"] as? String {
                 reportFailure(msg)
