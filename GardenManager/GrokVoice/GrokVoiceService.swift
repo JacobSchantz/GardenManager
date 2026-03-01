@@ -199,9 +199,12 @@ class GrokVoiceService: NSObject, ObservableObject {
             "session": [
                 "voice": selectedVoice,
                 "instructions": systemInstructions,
-                "modalities": ["audio", "text"],
-                "input_audio_format": "pcm_s16le",
-                "output_audio_format": "pcm_s16le"
+                "turn_detection": ["type": "server_vad"],
+                "modalities": ["text", "audio"],
+                "audio": [
+                    "input": ["format": ["type": "audio/pcm", "rate": 24000]],
+                    "output": ["format": ["type": "audio/pcm", "rate": 24000]]
+                ]
             ]
         ]
 
@@ -560,7 +563,7 @@ class GrokVoiceService: NSObject, ObservableObject {
         let responseMsg: [String: Any] = [
             "type": "response.create",
             "response": [
-                "modalities": ["audio", "text"]
+                "modalities": ["text", "audio"]
             ]
         ]
         guard let jsonData = try? JSONSerialization.data(withJSONObject: responseMsg),
