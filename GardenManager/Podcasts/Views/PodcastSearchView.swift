@@ -1,12 +1,16 @@
 import SwiftUI
+import Combine
 
 struct PodcastSearchView: View {
     @ObservedObject var searchService = PodcastSearchService()
     @ObservedObject var podcastViewModel: PodcastListViewModel
     @Environment(\.dismiss) var dismiss
     @State private var searchText = ""
-    @State private var showingAddPodcast = false
     @State private var selectedPodcast: ITunesPodcastResult? = nil
+    @FocusState private var isSearchFocused: Bool
+    
+    // Debounce timer
+    @State private var searchTask: Task<Void, Never>?
     
     var body: some View {
         NavigationView {
@@ -19,8 +23,17 @@ struct PodcastSearchView: View {
                         .textFieldStyle(.plain)
                         .autocorrectionDisabled()
                         .textInputAutocapitalization(.never)
-                        .onSubmit {
-                            Task { await searchService.search(query: searchText) }
+                        .focused($isSearchFocused)
+                        .onChange(of: searchText) { _, newValue in
+                            // Cancel previous search
+                            searchTask?.cancel()
+                            // Debounce new search
+                            searchTask = Task {
+                                try? await Task.sleep(nanoseconds: 500_000_000) // 0.5 second delay
+                                if !Task.isCancelled {
+                                    await searchService.search(query: newValue)
+                                }
+                            }
                         }
                     
                     if !searchText.isEmpty {
@@ -37,6 +50,9 @@ struct PodcastSearchView: View {
                 .background(Color(.systemGray6))
                 .cornerRadius(10)
                 .padding()
+                .onAppear {
+                    isSearchFocused = true
+                }
                 
                 if searchService.isLoading {
                     Spacer()
