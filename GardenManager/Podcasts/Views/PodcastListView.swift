@@ -4,6 +4,7 @@ struct PodcastListView: View {
     @EnvironmentObject var viewModel: PodcastListViewModel
     @State private var showingAddFeed = false
     @State private var showingImageImport = false
+    @State private var showingSearch = false
     @State private var feedURLString = ""
     
     var body: some View {
@@ -36,6 +37,10 @@ struct PodcastListView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Menu {
+                        Button(action: { showingSearch = true }) {
+                            Label("Search Podcasts", systemImage: "magnifyingglass")
+                        }
+                        
                         Button(action: { showingAddFeed = true }) {
                             Label("Add by URL", systemImage: "link")
                         }
@@ -47,6 +52,9 @@ struct PodcastListView: View {
                         Image(systemName: "plus")
                     }
                 }
+            }
+            .sheet(isPresented: $showingSearch) {
+                PodcastSearchView(podcastViewModel: viewModel)
             }
             .sheet(isPresented: $showingAddFeed) {
                 AddFeedView(viewModel: viewModel, isPresented: $showingAddFeed)

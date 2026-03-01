@@ -1,79 +1,113 @@
 import SwiftUI
 
 struct PodcastSearchView: View {
-    @StateObject private var viewModel = PodcastSearchViewModel()
-    @Environment(\.dismiss) private var dismiss
+    @ObservedObject var searchService = PodcastSearchService()
+    @ObservedObject var podcastViewModel: PodcastListViewModel
+    @Environment(\.dismiss) var dismiss
+    @State private var searchText = ""
+    @State private var showingAddPodcast = false
+    @State private var selectedPodcast: PodcastSearchResult? = nil
     
     var body: some View {
         NavigationView {
-            VStack {
-                // Search bar
+            VStack(spacing: 0) {
+                // Search Bar
                 HStack {
                     Image(systemName: "magnifyingglass")
-                        .foregroundColor(.gray)
-                    
-                    TextField("Search podcasts...", text: $viewModel.searchQuery)
+                        .foregroundColor(.secondary)
+                    TextField("Search podcasts...", text: $searchText)
                         .textFieldStyle(.plain)
                         .autocorrectionDisabled()
+                        .textInputAutocapitalization(.never)
                         .onSubmit {
-                            Task {
-                                await viewModel.searchPodcasts()
-                            }
+                            Task { await searchService.search(query: searchText) }
                         }
                     
-                    if !viewModel.searchQuery.isEmpty {
+                    if !searchText.isEmpty {
                         Button(action: {
-                            viewModel.searchQuery = ""
-                            viewModel.searchResults = []
+                            searchText = ""
+                            searchService.clear()
                         }) {
                             Image(systemName: "xmark.circle.fill")
-                                .foregroundColor(.gray)
+                                .foregroundColor(.secondary)
                         }
-                    }
-                    
-                    Button(action: {
-                        Task {
-                            await viewModel.searchPodcasts()
-                        }
-                    }) {
-                        Text("Search")
-                            .foregroundColor(.blue)
                     }
                 }
                 .padding()
                 .background(Color(.systemGray6))
                 .cornerRadius(10)
-                .padding(.horizontal)
+                .padding()
                 
-                if viewModel.isLoading {
-                    ProgressView()
-                        .progressViewStyle(.circular)
-                        .scaleEffect(1.5)
+                if searchService.isLoading {
+                    Spacer()
+                    ProgressView("Searching...")
+                    Spacer()
+                } else if let error = searchService.errorMessage {
+                    Spacer()
+                    Text(error)
+                        .foregroundColor(.red)
                         .padding()
                     Spacer()
-                } else if viewModel.searchResults.isEmpty && !viewModel.searchQuery.isEmpty {
-                    VStack(spacing: 20) {
+                } else if searchService.results.isEmpty && !searchText.isEmpty {
+                    Spacer()
+                    Text("No podcasts found")
+                        .foregroundColor(.secondary)
+                    Spacer()
+                } else if searchService.results.isEmpty {
+                    Spacer()
+                    VStack(spacing: 12) {
                         Image(systemName: "magnifyingglass")
-                            .font(.system(size: 60))
-                            .foregroundColor(.gray)
-                        Text("No podcasts found")
-                            .font(.title2)
-                            .foregroundColor(.gray)
-                        Text("Try a different search term")
-                            .font(.subheadline)
+                            .font(.system(size: 40))
+                            .foregroundColor(.secondary)
+                        Text("Search for podcasts")
                             .foregroundColor(.secondary)
                     }
-                    .padding(.top, 50)
                     Spacer()
                 } else {
-                    List(viewModel.searchResults) { podcast in
-                        PodcastSearchRow(podcast: podcast) {
-                            Task {
-                                await viewModel.importPodcast(podcast)
+                    List(searchService.results) { podcast in
+                        Button(action: { selectedPodcast = podcast }) {
+                            HStack(spacing: 12) {
+                                AsyncImage(url: URL(string: podcast.artworkUrl600 ?? "")) { image in
+                                    image
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fill)
+                                } placeholder: {
+                                    Rectangle()
+                                        .fill(Color.gray.opacity(0.3))
+                                        .overlay(
+                                            Image(systemName: "mic.fill")
+                                                .foregroundColor(.gray)
+                                        )
+                                }
+                                .frame(width: 60, height: 60)
+                                .cornerRadius(8)
+                                
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(podcast.trackName)
+                                        .font(.headline)
+                                        .lineLimit(2)
+                                        .foregroundColor(.primary)
+                                    Text(podcast.artistName)
+                                        .font(.subheadline)
+                                        .foregroundColor(.secondary)
+                                        .lineLimit(1)
+                                    if let count = podcast.trackCount {
+                                        Text("\(count) episodes")
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                    }
+                                }
+                                
+                                Spacer()
+                                
+                                Image(systemName: "plus.circle.fill")
+                                    .foregroundColor(.blue)
+                                    .font(.title2)
                             }
+                            .padding(.vertical, 4)
                         }
+                        .buttonStyle(.plain)
                     }
-                    .listStyle(.plain)
                 }
             }
             .navigationTitle("Search Podcasts")
@@ -85,137 +119,107 @@ struct PodcastSearchView: View {
                     }
                 }
             }
-            .alert("Import Successful", isPresented: $viewModel.showImportSuccess) {
-                Button("OK") {
-                    dismiss()
-                }
-            } message: {
-                Text("\"\(viewModel.lastImportedPodcast?.title ?? "")\" has been added to your library.")
-            }
-            .alert("Import Failed", isPresented: $viewModel.showImportError) {
-                Button("OK", role: .cancel) { }
-            } message: {
-                Text(viewModel.importErrorMessage)
+            .sheet(item: $selectedPodcast) { podcast in
+                AddSearchedPodcastView(podcast: podcast, podcastViewModel: podcastViewModel)
             }
         }
     }
 }
 
-struct PodcastSearchRow: View {
+struct AddSearchedPodcastView: View {
     let podcast: PodcastSearchResult
-    let onImport: () -> Void
+    @ObservedObject var podcastViewModel: PodcastListViewModel
+    @Environment(\.dismiss) var dismiss
+    @State private var isLoading = false
+    @State private var errorMessage: String? = nil
     
     var body: some View {
-        HStack(spacing: 12) {
-            CachedAsyncImage(url: URL(string: podcast.image ?? podcast.thumbnail ?? "")) {
-                Rectangle()
-                    .fill(Color.gray.opacity(0.3))
-                    .overlay(
-                        Image(systemName: "mic.fill")
-                            .foregroundColor(.gray)
-                    )
-            }
-            .frame(width: 60, height: 60)
-            .cornerRadius(8)
-            
-            VStack(alignment: .leading, spacing: 4) {
-                Text(podcast.title)
-                    .font(.headline)
-                    .lineLimit(2)
-                
-                Text(podcast.publisher)
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                    .lineLimit(1)
-                
-                HStack {
-                    Text("\(podcast.totalEpisodes) episodes")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+        NavigationView {
+            VStack(spacing: 20) {
+                // Podcast info
+                HStack(spacing: 16) {
+                    AsyncImage(url: URL(string: podcast.artworkUrl600 ?? "")) { image in
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                    } placeholder: {
+                        Rectangle()
+                            .fill(Color.gray.opacity(0.3))
+                    }
+                    .frame(width: 100, height: 100)
+                    .cornerRadius(12)
                     
-                    if podcast.explicitContent {
-                        Text("•")
-                            .font(.caption)
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(podcast.trackName)
+                            .font(.headline)
+                        Text(podcast.artistName)
+                            .font(.subheadline)
                             .foregroundColor(.secondary)
-                        Text("Explicit")
-                            .font(.caption)
-                            .foregroundColor(.orange)
+                        if let count = podcast.trackCount {
+                            Text("\(count) episodes")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                }
+                .padding()
+                
+                if let error = errorMessage {
+                    Text(error)
+                        .foregroundColor(.red)
+                        .padding()
+                }
+                
+                Button(action: addPodcast) {
+                    if isLoading {
+                        ProgressView()
+                            .tint(.white)
+                    } else {
+                        Text("Add Podcast")
+                    }
+                }
+                .font(.headline)
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(Color.blue)
+                .cornerRadius(12)
+                .disabled(isLoading)
+                .padding(.horizontal)
+                
+                Spacer()
+            }
+            .padding(.top)
+            .navigationTitle("Add Podcast")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") {
+                        dismiss()
                     }
                 }
             }
-            
-            Spacer()
-            
-            Button(action: onImport) {
-                Image(systemName: "plus.circle.fill")
-                    .foregroundColor(.blue)
-                    .font(.title2)
-            }
         }
-        .padding(.vertical, 8)
-    }
-}
-
-@MainActor
-class PodcastSearchViewModel: ObservableObject {
-    @Published var searchQuery = ""
-    @Published var searchResults: [PodcastSearchResult] = []
-    @Published var isLoading = false
-    @Published var showImportSuccess = false
-    @Published var showImportError = false
-    @Published var importErrorMessage = ""
-    @Published var lastImportedPodcast: PodcastSearchResult?
-    
-    private let searchService = PodcastSearchService()
-    private var podcastListViewModel: PodcastListViewModel?
-    
-    func setPodcastListViewModel(_ viewModel: PodcastListViewModel) {
-        self.podcastListViewModel = viewModel
     }
     
-    func searchPodcasts() async {
-        guard !searchQuery.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            searchResults = []
+    private func addPodcast() {
+        guard let feedURL = podcast.feedUrl, let url = URL(string: feedURL) else {
+            errorMessage = "No feed URL available"
             return
         }
         
         isLoading = true
-        defer { isLoading = false }
+        errorMessage = nil
         
-        do {
-            let response = try await searchService.searchPodcasts(query: searchQuery)
-            searchResults = response.results
-        } catch {
-            // For now, just clear results on error
-            // In a production app, you'd show an error message
-            searchResults = []
-        }
-    }
-    
-    func importPodcast(_ searchResult: PodcastSearchResult) async {
-        guard let podcastListViewModel = podcastListViewModel else { return }
-        
-        // Check if podcast already exists
-        if podcastListViewModel.podcasts.contains(where: { $0.feedURL.absoluteString == searchResult.rss }) {
-            importErrorMessage = "This podcast is already in your library."
-            showImportError = true
-            return
-        }
-        
-        do {
-            // Use the RSS URL to create the podcast via RSS parsing
-            let rssURL = URL(string: searchResult.rss)!
-            let parser = RSSFeedParser(feedURL: rssURL)
-            let podcast = try await parser.parse()
+        Task {
+            await podcastViewModel.addPodcast(feedURL: feedURL)
+            isLoading = false
             
-            podcastListViewModel.podcasts.append(podcast)
-            podcastListViewModel.savePodcasts()
-            
-            lastImportedPodcast = searchResult
-            showImportSuccess = true
-        } catch {
-            importErrorMessage = "Failed to import podcast: \(error.localizedDescription)"
-            showImportError = true
+            if !podcastViewModel.showError {
+                dismiss()
+            } else {
+                errorMessage = podcastViewModel.errorMessage
+            }
         }
     }
 }
