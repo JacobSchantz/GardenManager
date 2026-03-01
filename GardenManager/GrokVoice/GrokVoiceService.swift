@@ -477,7 +477,9 @@ class GrokVoiceService: NSObject, ObservableObject {
                     if self?.state == .speaking { self?.state = .listening }
                 }
             }
+            
             if !e.isRunning { try e.start() }
+            if !p.isPlaying { p.play() }
         } catch {
             reportFailure("PlayBuffer error: \(error.localizedDescription)")
         }

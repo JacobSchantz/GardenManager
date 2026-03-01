@@ -9,30 +9,30 @@ struct GrokVoiceView: View {
     
     var body: some View {
         NavigationStack {
-            VStack(spacing: 20) {
-                // Status and Connect Button
-                statusSection
+            ScrollView {
+                VStack(spacing: 20) {
+                    // Status and Connect Button
+                    statusSection
 
-                // Permission Status
-                permissionSection
-                
-                // Voice Selection
-                voiceSection
-                
-                // Output Section
-                outputSection
-                
-                // Error Section
-                if let error = service.errorMessage {
-                    errorSection(error)
+                    // Permission Status
+                    permissionSection
+                    
+                    // Voice Selection
+                    voiceSection
+                    
+                    // Output Section
+                    outputSection
+                    
+                    // Error Section
+                    if let error = service.errorMessage {
+                        errorSection(error)
+                    }
+                    
+                    // API Messages (debug)
+                    apiMessagesSection
                 }
-                
-                // API Messages (debug)
-                apiMessagesSection
-                
-                Spacer()
+                .padding()
             }
-            .padding()
             .navigationTitle("Grok Voice")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
