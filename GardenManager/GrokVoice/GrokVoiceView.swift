@@ -42,7 +42,7 @@ struct GrokVoiceView: View {
                 }
             }
             .sheet(isPresented: $showSettings) {
-                settingsSheet
+                SettingsSheet(apiKey: $apiKey, service: service)
             }
             .onAppear {
                 service.refreshPermissionStatus()
@@ -271,6 +271,16 @@ struct GrokVoiceView: View {
     }
     
     private var settingsSheet: some View {
+        SettingsSheet(apiKey: $apiKey, service: service)
+    }
+}
+
+struct SettingsSheet: View {
+    @Binding var apiKey: String
+    @ObservedObject var service: GrokVoiceService
+    @Environment(\.dismiss) private var dismiss
+    
+    var body: some View {
         NavigationStack {
             Form {
                 Section("API Key") {
@@ -280,9 +290,19 @@ struct GrokVoiceView: View {
                     
                     Button("Save API Key") {
                         service.setAPIKey(apiKey)
-                        showSettings = false
+                        dismiss()
                     }
                     .disabled(apiKey.isEmpty)
+                    
+                    if UserDefaults.standard.string(forKey: "xAI_API_Key") != nil {
+                        Button("Clear Cached Key") {
+                            UserDefaults.standard.removeObject(forKey: "xAI_API_Key")
+                            service.setAPIKey("")
+                            apiKey = ""
+                            dismiss()
+                        }
+                        .foregroundColor(.red)
+                    }
                 }
                 
                 Section("System Instructions") {
@@ -295,12 +315,18 @@ struct GrokVoiceView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
-                        showSettings = false
+                        dismiss()
                     }
                 }
             }
         }
         .presentationDetents([.medium, .large])
+        .onAppear {
+            // Load cached key if field is empty
+            if apiKey.isEmpty, let cached = UserDefaults.standard.string(forKey: "xAI_API_Key") {
+                apiKey = cached
+            }
+        }
     }
     
     // MARK: - Helpers

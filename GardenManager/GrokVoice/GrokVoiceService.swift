@@ -76,13 +76,23 @@ class GrokVoiceService: NSObject, ObservableObject {
         refreshPermissionStatus()
     }
     
+    private let apiKeyStorageKey = "xAI_API_Key"
+    
     private func loadAPIKey() {
+        // First try environment variable, then UserDefaults
         apiKey = (ProcessInfo.processInfo.environment["XAI_API_KEY"] ?? "")
             .trimmingCharacters(in: .whitespacesAndNewlines)
+        
         if apiKey.isEmpty {
-            debugLogs.insert("API key not found", at: 0)
+            // Try loading from UserDefaults
+            if let savedKey = UserDefaults.standard.string(forKey: apiKeyStorageKey) {
+                apiKey = savedKey
+                debugLogs.insert("API key loaded from cache", at: 0)
+            } else {
+                debugLogs.insert("API key not found", at: 0)
+            }
         } else {
-            debugLogs.insert("API key loaded", at: 0)
+            debugLogs.insert("API key loaded from environment", at: 0)
         }
     }
     
@@ -90,8 +100,11 @@ class GrokVoiceService: NSObject, ObservableObject {
         apiKey = key.trimmingCharacters(in: .whitespacesAndNewlines)
         if apiKey.isEmpty {
             debugLogs.insert("API key is empty after trimming.", at: 0)
+            UserDefaults.standard.removeObject(forKey: apiKeyStorageKey)
         } else {
-            debugLogs.insert("API key updated from Settings.", at: 0)
+            // Save to UserDefaults
+            UserDefaults.standard.set(apiKey, forKey: apiKeyStorageKey)
+            debugLogs.insert("API key saved to cache", at: 0)
         }
     }
 
