@@ -196,7 +196,13 @@ class GrokVoiceService: NSObject, ObservableObject {
 
         let sessionConfig: [String: Any] = [
             "type": "session.update",
-            "session": ["voice": selectedVoice, "instructions": systemInstructions]
+            "session": [
+                "voice": selectedVoice,
+                "instructions": systemInstructions,
+                "modalities": ["audio", "text"],
+                "input_audio_format": "pcm_s16le",
+                "output_audio_format": "pcm_s16le"
+            ]
         ]
 
         guard let jsonData = try? JSONSerialization.data(withJSONObject: sessionConfig),
