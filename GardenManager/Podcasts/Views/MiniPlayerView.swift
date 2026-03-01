@@ -84,82 +84,89 @@ struct FullPlayerView: View {
     
     var body: some View {
         NavigationView {
-            VStack(spacing: 24) {
-                Spacer()
-                
-                if let episode = audioPlayer.currentEpisode {
-                    CachedAsyncImage(
-                        url: episode.displayImageURL,
-                        localURL: episode.localImageURL
-                    ) {
-                        Rectangle()
-                            .fill(Color.gray.opacity(0.3))
-                            .overlay(
-                                Image(systemName: "mic.fill")
-                                    .font(.system(size: 60))
-                                    .foregroundColor(.gray)
-                            )
-                    }
-                    .frame(width: 300, height: 300)
-                    .cornerRadius(12)
-                    .shadow(radius: 10)
+            ScrollView {
+                VStack(spacing: 24) {
+                    Spacer()
                     
-                    VStack(spacing: 8) {
+                    if let episode = audioPlayer.currentEpisode {
+                        CachedAsyncImage(
+                            url: episode.displayImageURL,
+                            localURL: episode.localImageURL
+                        ) {
+                            Rectangle()
+                                .fill(Color.gray.opacity(0.3))
+                                .overlay(
+                                    Image(systemName: "mic.fill")
+                                        .font(.system(size: 60))
+                                        .foregroundColor(.gray)
+                                )
+                        }
+                        .frame(width: 300, height: 300)
+                        .cornerRadius(12)
+                        .shadow(radius: 10)
+                        
                         Text(episode.title)
                             .font(.title2)
                             .fontWeight(.bold)
                             .multilineTextAlignment(.center)
                             .lineLimit(2)
-                        
-                        Text(episode.description)
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
-                            .lineLimit(3)
                             .padding(.horizontal)
                     }
-                }
-                
-                Spacer()
-                
-                VStack(spacing: 8) {
-                    Slider(value: Binding(
-                        get: { audioPlayer.currentTime },
-                        set: { audioPlayer.debouncedSeek(to: $0) }
-                    ), in: 0...max(audioPlayer.duration, 1))
+                    
+                    // Controls
+                    VStack(spacing: 8) {
+                        Slider(value: Binding(
+                            get: { audioPlayer.currentTime },
+                            set: { audioPlayer.debouncedSeek(to: $0) }
+                        ), in: 0...max(audioPlayer.duration, 1))
+                            .padding(.horizontal)
+                        
+                        HStack {
+                            Text(formatTime(audioPlayer.currentTime))
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            Spacer()
+                            Text(formatTime(audioPlayer.duration))
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
                         .padding(.horizontal)
+                    }
                     
-                    HStack {
-                        Text(formatTime(audioPlayer.currentTime))
-                            .font(.caption)
+                    HStack(spacing: 60) {
+                        Button(action: { audioPlayer.skipBackward() }) {
+                            Image(systemName: "gobackward.15")
+                                .font(.system(size: 32))
+                        }
+                        
+                        Button(action: { audioPlayer.togglePlayPause() }) {
+                            Image(systemName: audioPlayer.isPlaying ? "pause.circle.fill" : "play.circle.fill")
+                                .font(.system(size: 70))
+                        }
+                        
+                        Button(action: { audioPlayer.skipForward() }) {
+                            Image(systemName: "goforward.15")
+                                .font(.system(size: 32))
+                        }
+                    }
+                    
+                    // Description - below controls, scrollable
+                    if let episode = audioPlayer.currentEpisode {
+                        let cleanDescription = episode.description
+                            .replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression)
+                        
+                        Text(cleanDescription)
+                            .font(.subheadline)
                             .foregroundColor(.secondary)
-                        Spacer()
-                        Text(formatTime(audioPlayer.duration))
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                    .padding(.horizontal)
-                }
-                
-                HStack(spacing: 60) {
-                    Button(action: { audioPlayer.skipBackward() }) {
-                        Image(systemName: "gobackward.15")
-                            .font(.system(size: 32))
+                            .multilineTextAlignment(.leading)
+                            .padding(.horizontal)
+                            .padding(.top, 16)
                     }
                     
-                    Button(action: { audioPlayer.togglePlayPause() }) {
-                        Image(systemName: audioPlayer.isPlaying ? "pause.circle.fill" : "play.circle.fill")
-                            .font(.system(size: 70))
-                    }
-                    
-                    Button(action: { audioPlayer.skipForward() }) {
-                        Image(systemName: "goforward.15")
-                            .font(.system(size: 32))
-                    }
+                    Spacer()
                 }
-                .padding(.bottom, 40)
+                .padding()
             }
-            .padding()
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
