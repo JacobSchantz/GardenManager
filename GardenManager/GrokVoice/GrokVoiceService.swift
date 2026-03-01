@@ -354,6 +354,7 @@ class GrokVoiceService: NSObject, ObservableObject {
         case "response.output_audio_transcript.delta":
             if let delta = json["delta"] as? String { currentOutput += delta }
         case "input_audio_buffer.speech_started": 
+            commitAudioBuffer()
             if !currentOutput.isEmpty {
                 responses.insert(currentOutput, at: 0)
             }
@@ -369,7 +370,31 @@ class GrokVoiceService: NSObject, ObservableObject {
             if let msg = json["message"] as? String {
                 reportFailure(msg)
             }
-        default: break
+        case "ping":
+            // Pings are expected, just acknowledge in debug
+            debugLogs.insert("Pong", at: 0)
+        case "session.created":
+            debugLogs.insert("Session created", at: 0)
+        case "session_updated":
+            debugLogs.insert("Session updated", at: 0)
+        case "response.audio_transcript.done":
+            // Full transcript complete
+            if let transcript = json["transcript"] as? String {
+                if !currentOutput.isEmpty {
+                    responses.insert(currentOutput, at: 0)
+                }
+                currentOutput = transcript
+            }
+        case "response.created":
+            debugLogs.insert("Response created - processing", at: 0)
+            state = .processing
+        case "response.content.done":
+            // Response content complete
+            state = .listening
+        case "conversation.item.created":
+            debugLogs.insert("Input audio processed", at: 0)
+        default: 
+            debugLogs.insert("Unknown type: \(type)", at: 0)
         }
     }
     
@@ -494,6 +519,8 @@ class GrokVoiceService: NSObject, ObservableObject {
         debugLogs.insert("Mic started", at: 0)
     }
     
+    private var inputBufferCommitNeeded = false
+    
     private func processInputAudioMessage(_ message: String) {
         guard state != .disconnected else {
             return
@@ -504,6 +531,19 @@ class GrokVoiceService: NSObject, ObservableObject {
         }
 
         sendMessage(message)
+        inputBufferCommitNeeded = true
+    }
+    
+    private func commitAudioBuffer() {
+        guard inputBufferCommitNeeded else { return }
+        inputBufferCommitNeeded = false
+        
+        let commitMsg: [String: Any] = ["type": "input_audio_buffer.commit"]
+        guard let jsonData = try? JSONSerialization.data(withJSONObject: commitMsg),
+              let jsonString = String(data: jsonData, encoding: .utf8) else { return }
+        
+        sendMessage(jsonString)
+        debugLogs.insert("Audio buffer committed", at: 0)
     }
 
     nonisolated private func makeInputTapHandler() -> AVAudioNodeTapBlock {
