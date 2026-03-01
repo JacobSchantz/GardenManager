@@ -219,8 +219,8 @@ class AudioPlayerService: NSObject, ObservableObject {
     }
     
     func pause(reason: String = "manual") {
-        // Don't pause from remote/UI commands while in background (except for real interruptions)
-        let allowedBackgroundPauses = ["interruption_began", "route_change_old_device_unavailable"]
+        // Allow remote commands to pause in background
+        let allowedBackgroundPauses = ["interruption_began", "route_change_old_device_unavailable", "remote_command", "togglePlayPause"]
         if isInBackground && reason != "manual" && !allowedBackgroundPauses.contains(reason) {
             print("[AudioPlayerService] Skipping pause in background - reason: \(reason)")
             return
