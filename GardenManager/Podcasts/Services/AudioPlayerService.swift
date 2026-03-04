@@ -339,9 +339,8 @@ class AudioPlayerService: NSObject, ObservableObject {
             Task {
                 if let data = try? Data(contentsOf: imageURL),
                    let image = UIImage(data: data) {
-                    var info = MPNowPlayingInfoCenter.default().nowPlayingInfo ?? [:]
-                    info[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: image.size) { _ in image }
-                    MPNowPlayingInfoCenter.default().nowPlayingInfo = info
+                    nowPlayingInfo[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: image.size) { _ in image }
+                    MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
                 }
             }
         }
