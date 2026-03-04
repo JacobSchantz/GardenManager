@@ -75,6 +75,7 @@ struct RootView: View {
             }
         }
         .onReceive(podcastViewModel.$podcasts) { podcasts in
+            audioPlayer.updatePlaybackPodcasts(podcasts)
             audioPlayer.restoreLastPlayedEpisode(
                 podcasts: podcasts,
                 resolveLocalURL: { episode in

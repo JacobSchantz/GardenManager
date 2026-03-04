@@ -1,8 +1,7 @@
 import SwiftUI
-import Combine
 
 struct PodcastSearchView: View {
-    @ObservedObject var searchService = PodcastSearchService()
+    @StateObject private var searchService = PodcastSearchService()
     @ObservedObject var podcastViewModel: PodcastListViewModel
     @Environment(\.dismiss) var dismiss
     @State private var searchText = ""
@@ -10,6 +9,7 @@ struct PodcastSearchView: View {
     
     // Debounce timer
     @State private var searchTask: Task<Void, Never>?
+    @State private var focusTask: Task<Void, Never>?
     @State private var isAdding = false
     
     var body: some View {
@@ -25,11 +25,18 @@ struct PodcastSearchView: View {
                         .textInputAutocapitalization(.never)
                         .focused($isSearchFocused)
                         .onChange(of: searchText) { _, newValue in
+                            let trimmed = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
                             searchTask?.cancel()
+
+                            guard trimmed.count >= 2 else {
+                                searchService.clear()
+                                return
+                            }
+
                             searchTask = Task {
                                 try? await Task.sleep(nanoseconds: 500_000_000)
                                 if !Task.isCancelled {
-                                    await searchService.search(query: newValue)
+                                    await searchService.search(query: trimmed)
                                 }
                             }
                         }
@@ -49,7 +56,25 @@ struct PodcastSearchView: View {
                 .cornerRadius(10)
                 .padding()
                 .onAppear {
-                    isSearchFocused = true
+                    // Reset state every time sheet opens so no stale query/results run automatically.
+                    searchTask?.cancel()
+                    searchService.clear()
+                    if !searchText.isEmpty {
+                        searchText = ""
+                    }
+
+                    focusTask?.cancel()
+                    focusTask = Task {
+                        try? await Task.sleep(nanoseconds: 200_000_000)
+                        if !Task.isCancelled {
+                            isSearchFocused = true
+                        }
+                    }
+                }
+                .onDisappear {
+                    searchTask?.cancel()
+                    focusTask?.cancel()
+                    isSearchFocused = false
                 }
                 
                 if searchService.isLoading || isAdding {
@@ -62,7 +87,7 @@ struct PodcastSearchView: View {
                         .foregroundColor(.red)
                         .padding()
                     Spacer()
-                } else if searchService.results.isEmpty && !searchText.isEmpty {
+                } else if searchService.results.isEmpty && searchText.trimmingCharacters(in: .whitespacesAndNewlines).count >= 3 {
                     Spacer()
                     Text("No podcasts found")
                         .foregroundColor(.secondary)
@@ -81,9 +106,7 @@ struct PodcastSearchView: View {
                     List(searchService.results) { podcast in
                         Button(action: { addPodcast(podcast) }) {
                             HStack(spacing: 12) {
-                                AsyncImage(url: URL(string: podcast.artworkUrl600 ?? "")) { image in
-                                    image.resizable().aspectRatio(contentMode: .fill)
-                                } placeholder: {
+                                CachedAsyncImage(url: URL(string: podcast.artworkUrl600 ?? "")) {
                                     Rectangle()
                                         .fill(Color.gray.opacity(0.3))
                                         .overlay(Image(systemName: "mic.fill").foregroundColor(.gray))

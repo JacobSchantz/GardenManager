@@ -111,6 +111,9 @@ struct EpisodeListItem: View {
                         Image(systemName: "checkmark.circle.fill")
                             .foregroundColor(.green)
                             .font(.caption)
+                        Text("Played")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
                     }
                     
                     if isDownloading {
@@ -120,7 +123,7 @@ struct EpisodeListItem: View {
                             .font(.caption)
                             .foregroundColor(.secondary)
                     } else if isDownloaded {
-                        Image(systemName: "checkmark.circle.fill")
+                        Image(systemName: "square.and.arrow.down.badge.checkmark")
                             .foregroundColor(.green)
                             .font(.caption)
                         Text("Downloaded")

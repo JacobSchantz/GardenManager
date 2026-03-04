@@ -211,14 +211,15 @@ class PodcastListViewModel: ObservableObject {
     
     @objc private func handleEpisodeMarkedAsPlayed(_ notification: Notification) {
         guard let episodeId = notification.userInfo?["episodeId"] as? UUID else { return }
+        let isPlayed = notification.userInfo?["isPlayed"] as? Bool ?? true
         
         // Find and update the episode
         for podcastIndex in podcasts.indices {
             if let episodeIndex = podcasts[podcastIndex].episodes.firstIndex(where: { $0.id == episodeId }) {
-                if !podcasts[podcastIndex].episodes[episodeIndex].isPlayed {
-                    podcasts[podcastIndex].episodes[episodeIndex].isPlayed = true
+                if podcasts[podcastIndex].episodes[episodeIndex].isPlayed != isPlayed {
+                    podcasts[podcastIndex].episodes[episodeIndex].isPlayed = isPlayed
                     savePodcasts()
-                    print("[PodcastListViewModel] Episode marked as played: \(episodeId)")
+                    print("[PodcastListViewModel] Episode played state updated: \(episodeId), isPlayed: \(isPlayed)")
                 }
                 break
             }

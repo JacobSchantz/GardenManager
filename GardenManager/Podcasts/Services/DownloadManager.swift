@@ -11,6 +11,8 @@ class DownloadManager: NSObject, ObservableObject {
     
     // Track episodes that need image downloads
     private var pendingImageDownloads: Set<UUID> = []
+    private let legacyDownloadedEpisodesKey = "downloadedEpisodes"
+    private let downloadedEpisodesFileName = "downloaded_episodes.json"
     
     override init() {
         super.init()
@@ -106,14 +108,38 @@ class DownloadManager: NSObject, ObservableObject {
     }
     
     private func saveDownloadedEpisodes() {
-        let ids = Array(downloadedEpisodes).map { $0.uuidString }
-        UserDefaults.standard.set(ids, forKey: "downloadedEpisodes")
+        let ids = Array(downloadedEpisodes).map { $0.uuidString }.sorted()
+        let fileURL = downloadedEpisodesFileURL()
+        guard let data = try? JSONEncoder().encode(ids) else {
+            return
+        }
+        try? data.write(to: fileURL, options: .atomic)
     }
     
     private func loadDownloadedEpisodes() {
-        if let ids = UserDefaults.standard.array(forKey: "downloadedEpisodes") as? [String] {
+        let fileURL = downloadedEpisodesFileURL()
+
+        if let data = try? Data(contentsOf: fileURL),
+           let ids = try? JSONDecoder().decode([String].self, from: data) {
             downloadedEpisodes = Set(ids.compactMap { UUID(uuidString: $0) })
+            UserDefaults.standard.removeObject(forKey: legacyDownloadedEpisodesKey)
+            return
         }
+
+        if let legacyIDs = UserDefaults.standard.array(forKey: legacyDownloadedEpisodesKey) as? [String] {
+            downloadedEpisodes = Set(legacyIDs.compactMap { UUID(uuidString: $0) })
+            saveDownloadedEpisodes()
+        }
+
+        UserDefaults.standard.removeObject(forKey: legacyDownloadedEpisodesKey)
+    }
+
+    private func downloadedEpisodesFileURL() -> URL {
+        let supportURL = FileManager.default
+            .urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("GardenManager", isDirectory: true)
+        try? FileManager.default.createDirectory(at: supportURL, withIntermediateDirectories: true)
+        return supportURL.appendingPathComponent(downloadedEpisodesFileName)
     }
 }
 
