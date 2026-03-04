@@ -335,18 +335,41 @@ class AudioPlayerService: NSObject, ObservableObject {
         nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = 0
         nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = 1.0
         
-        if let imageURL = episode.imageURL {
-            Task {
-                if let data = try? Data(contentsOf: imageURL),
-                   let image = UIImage(data: data) {
-                    nowPlayingInfo[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: image.size) { _ in image }
-                    MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
-                }
-            }
+        if let artworkURL = episode.localImageURL ?? episode.displayImageURL {
+            loadNowPlayingArtwork(from: artworkURL)
         }
         
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
         setupRemoteCommandCenter()
+    }
+
+    private func loadNowPlayingArtwork(from artworkURL: URL) {
+        Task.detached(priority: .utility) {
+            let data: Data?
+
+            if artworkURL.isFileURL {
+                data = try? Data(contentsOf: artworkURL)
+            } else {
+                guard let (remoteData, response) = try? await URLSession.shared.data(from: artworkURL),
+                      let httpResponse = response as? HTTPURLResponse,
+                      200..<300 ~= httpResponse.statusCode else {
+                    return
+                }
+                data = remoteData
+            }
+
+            guard let data,
+                  let image = UIImage(data: data) else {
+                return
+            }
+
+            let artwork = MPMediaItemArtwork(boundsSize: image.size) { _ in image }
+            await MainActor.run {
+                var info = MPNowPlayingInfoCenter.default().nowPlayingInfo ?? [:]
+                info[MPMediaItemPropertyArtwork] = artwork
+                MPNowPlayingInfoCenter.default().nowPlayingInfo = info
+            }
+        }
     }
     
     private func updateNowPlayingPlaybackState() {
