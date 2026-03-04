@@ -199,6 +199,30 @@ class PodcastListViewModel: ObservableObject {
     
     init() {
         loadPodcasts()
+        
+        // Listen for episodes marked as played
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleEpisodeMarkedAsPlayed(_:)),
+            name: .episodeMarkedAsPlayed,
+            object: nil
+        )
+    }
+    
+    @objc private func handleEpisodeMarkedAsPlayed(_ notification: Notification) {
+        guard let episodeId = notification.userInfo?["episodeId"] as? UUID else { return }
+        
+        // Find and update the episode
+        for podcastIndex in podcasts.indices {
+            if let episodeIndex = podcasts[podcastIndex].episodes.firstIndex(where: { $0.id == episodeId }) {
+                if !podcasts[podcastIndex].episodes[episodeIndex].isPlayed {
+                    podcasts[podcastIndex].episodes[episodeIndex].isPlayed = true
+                    savePodcasts()
+                    print("[PodcastListViewModel] Episode marked as played: \(episodeId)")
+                }
+                break
+            }
+        }
     }
     
     func addPodcast(feedURL: String) async {

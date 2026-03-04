@@ -30,6 +30,10 @@ struct EpisodeListItem: View {
         audioPlayer.currentEpisode?.id == episode.id && audioPlayer.isPlaying
     }
     
+    private var isPlayed: Bool {
+        episode.isPlayed
+    }
+    
     private var isDownloaded: Bool {
         downloadManager.isDownloaded(episode)
     }
@@ -103,6 +107,12 @@ struct EpisodeListItem: View {
                 }
                 
                 HStack(spacing: 8) {
+                    if isPlayed {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.green)
+                            .font(.caption)
+                    }
+                    
                     if isDownloading {
                         ProgressView(value: downloadProgress)
                             .frame(width: style == .compact ? 100 : 80)

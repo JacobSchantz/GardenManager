@@ -4,11 +4,19 @@ import AVFoundation
 import Combine
 import MediaPlayer
 
+// Notification for when an episode is marked as played
+extension Notification.Name {
+    static let episodeMarkedAsPlayed = Notification.Name("episodeMarkedAsPlayed")
+}
+
 class AudioPlayerService: NSObject, ObservableObject {
     @Published var isPlaying = false
     @Published var currentTime: TimeInterval = 0
     @Published var duration: TimeInterval = 0
     @Published var currentEpisode: Episode?
+    
+    // Threshold: if within 1 minute of end, mark as played
+    private let playedThreshold: TimeInterval = 60
     
     private var player: AVPlayer?
     private var timeObserver: Any?
@@ -161,6 +169,8 @@ class AudioPlayerService: NSObject, ObservableObject {
             // Save position of previous episode before switching
             if let prevEpisode = currentEpisode {
                 savePlaybackPosition(for: prevEpisode.id)
+                // Check if previous episode should be marked as played
+                markEpisodeAsPlayed(prevEpisode)
             }
             
             currentTime = 0
@@ -235,6 +245,8 @@ class AudioPlayerService: NSObject, ObservableObject {
         if let episode = currentEpisode {
             savePlaybackPosition(for: episode.id)
             saveLastPlayedEpisodeID(episode.id)
+            // Check if should be marked as played
+            markEpisodeAsPlayed(episode)
         }
     }
     
@@ -322,9 +334,23 @@ class AudioPlayerService: NSObject, ObservableObject {
         currentTime = 0
         player?.seek(to: .zero)
         
-        // Clear saved position when episode finishes
+        // Clear saved position and mark as played when episode finishes
         if let episode = currentEpisode {
+            markEpisodeAsPlayed(episode)
             clearPlaybackPosition(for: episode.id)
+        }
+    }
+    
+    /// Marks an episode as played if within threshold of the end
+    private func markEpisodeAsPlayed(_ episode: Episode) {
+        let remainingTime = duration - currentTime
+        // Mark as played if within 60 seconds of the end
+        if remainingTime <= playedThreshold && duration > 0 {
+            NotificationCenter.default.post(
+                name: .episodeMarkedAsPlayed,
+                object: nil,
+                userInfo: ["episodeId": episode.id]
+            )
         }
     }
     

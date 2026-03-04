@@ -32,8 +32,9 @@ struct Episode: Identifiable, Codable {
     var isDownloaded: Bool
     var localFileURL: URL?
     var downloadProgress: Double
+    var isPlayed: Bool  // Marked as played when within 1 minute of end
     
-    init(id: UUID = UUID(), title: String, description: String, audioURL: URL, duration: TimeInterval = 0, publishDate: Date, imageURL: URL? = nil, podcastImageURL: URL? = nil, isDownloaded: Bool = false, localFileURL: URL? = nil, downloadProgress: Double = 0) {
+    init(id: UUID = UUID(), title: String, description: String, audioURL: URL, duration: TimeInterval = 0, publishDate: Date, imageURL: URL? = nil, podcastImageURL: URL? = nil, isDownloaded: Bool = false, localFileURL: URL? = nil, downloadProgress: Double = 0, isPlayed: Bool = false) {
         self.id = id
         self.title = title
         self.description = description
@@ -45,6 +46,7 @@ struct Episode: Identifiable, Codable {
         self.isDownloaded = isDownloaded
         self.localFileURL = localFileURL
         self.downloadProgress = downloadProgress
+        self.isPlayed = isPlayed
     }
     
     // Computed property for display - episode image with podcast fallback
