@@ -14,7 +14,7 @@ struct EpisodeListItem: View {
     let episode: Episode
     var style: EpisodeRowStyle = .standard
     var showDownloadButton: Bool = true
-    var showCancelButton: Bool = false
+    var showDeleteButton: Bool = false  // Only show in library, not show/source view
     
     @State private var showEpisodeOptions = false
     

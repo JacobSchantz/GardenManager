@@ -22,7 +22,7 @@ struct PodcastListView: View {
                 } else {
                     List {
                         ForEach(viewModel.podcasts) { podcast in
-                            NavigationLink(destination: EpisodeListView(podcastID: podcast.id)) {
+                            NavigationLink(destination: EpisodeListView(podcastID: podcast.id, showDeleteButton: false)) {
                                 PodcastRow(podcast: podcast)
                             }
                         }
