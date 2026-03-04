@@ -65,7 +65,7 @@ struct PodcastSearchView: View {
 
                     focusTask?.cancel()
                     focusTask = Task {
-                        try? await Task.sleep(nanoseconds: 200_000_000)
+                        try? await Task.sleep(nanoseconds: 200_000)
                         if !Task.isCancelled {
                             isSearchFocused = true
                         }
