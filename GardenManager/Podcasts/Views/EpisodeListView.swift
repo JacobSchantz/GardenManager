@@ -2,6 +2,7 @@ import SwiftUI
 
 struct EpisodeListView: View {
     let podcastID: UUID
+    let showDeleteButton: Bool  // Only show delete in library, not in show/source
     @EnvironmentObject var audioPlayer: AudioPlayerService
     @EnvironmentObject var downloadManager: DownloadManager
     @EnvironmentObject var podcastViewModel: PodcastListViewModel
@@ -17,10 +18,11 @@ struct EpisodeListView: View {
                     EpisodeListItem(
                         podcast: podcast,
                         episode: episode,
-                        style: .compact
+                        style: .compact,
+                        showDeleteButton: showDeleteButton
                     )
                 }
-                .onDelete(perform: deleteEpisodes)
+                .onDelete(perform: showDeleteButton ? deleteEpisodes : nil)
             }
         }
         .id(podcastID)  // Force refresh when podcast changes

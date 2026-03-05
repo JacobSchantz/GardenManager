@@ -22,7 +22,7 @@ struct PodcastListView: View {
                 } else {
                     List {
                         ForEach(viewModel.podcasts) { podcast in
-                            NavigationLink(destination: EpisodeListView(podcastID: podcast.id)) {
+                            NavigationLink(destination: EpisodeListView(podcastID: podcast.id, showDeleteButton: false)) {
                                 PodcastRow(podcast: podcast)
                             }
                         }
@@ -199,6 +199,24 @@ class PodcastListViewModel: ObservableObject {
     
     init() {
         loadPodcasts()
+        
+        // Listen for episodes marked as played
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleEpisodeMarkedAsPlayed(_:)),
+            name: .episodeMarkedAsPlayed,
+            object: nil
+        )
+    }
+    
+    @objc private func handleEpisodeMarkedAsPlayed(_ notification: Notification) {
+        guard let episodeId = notification.userInfo?["episodeId"] as? UUID else { return }
+        let isPlayed = notification.userInfo?["isPlayed"] as? Bool ?? true
+        
+        if isPlayed {
+            // Use the new method that saves to separate storage
+            markEpisodeAsPlayed(episodeId)
+        }
     }
     
     func addPodcast(feedURL: String) async {
@@ -236,6 +254,57 @@ class PodcastListViewModel: ObservableObject {
         savePodcasts()
     }
     
+    // MARK: - Played Status Storage (persists independently of episodes)
+    
+    private let playedEpisodesKey = "playedEpisodeIDs"
+    
+    /// Get set of played episode IDs from storage
+    private func getPlayedEpisodeIDs() -> Set<UUID> {
+        guard let ids = UserDefaults.standard.array(forKey: playedEpisodesKey) as? [String] else {
+            return []
+        }
+        return Set(ids.compactMap { UUID(uuidString: $0) })
+    }
+    
+    /// Save played episode IDs to storage
+    private func savePlayedEpisodeIDs(_ ids: Set<UUID>) {
+        let idStrings = ids.map { $0.uuidString }
+        UserDefaults.standard.set(idStrings, forKey: playedEpisodesKey)
+    }
+    
+    /// Mark episode as played and persist independently
+    func markEpisodeAsPlayed(_ episodeId: UUID) {
+        var playedIDs = getPlayedEpisodeIDs()
+        playedIDs.insert(episodeId)
+        savePlayedEpisodeIDs(playedIDs)
+        
+        // Also update in the episodes if present
+        for podcastIndex in podcasts.indices {
+            if let episodeIndex = podcasts[podcastIndex].episodes.firstIndex(where: { $0.id == episodeId }) {
+                podcasts[podcastIndex].episodes[episodeIndex].isPlayed = true
+            }
+        }
+        savePodcasts()
+    }
+    
+    /// Check if episode is played
+    func isEpisodePlayed(_ episodeId: UUID) -> Bool {
+        getPlayedEpisodeIDs().contains(episodeId)
+    }
+    
+    /// Restore played status from storage after loading podcasts
+    private func restorePlayedStatus() {
+        let playedIDs = getPlayedEpisodeIDs()
+        for podcastIndex in podcasts.indices {
+            for episodeIndex in podcasts[podcastIndex].episodes.indices {
+                let episodeId = podcasts[podcastIndex].episodes[episodeIndex].id
+                if playedIDs.contains(episodeId) {
+                    podcasts[podcastIndex].episodes[episodeIndex].isPlayed = true
+                }
+            }
+        }
+    }
+    
     func savePodcasts() {
         let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         let podcastsFile = documentsPath.appendingPathComponent("podcasts.json")
@@ -252,6 +321,8 @@ class PodcastListViewModel: ObservableObject {
         if let data = try? Data(contentsOf: podcastsFile),
            let decoded = try? JSONDecoder().decode([Podcast].self, from: data) {
             podcasts = decoded
+            // Restore played status from separate storage
+            restorePlayedStatus()
         }
     }
 }

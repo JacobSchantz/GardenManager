@@ -14,7 +14,7 @@ struct EpisodeListItem: View {
     let episode: Episode
     var style: EpisodeRowStyle = .standard
     var showDownloadButton: Bool = true
-    var showCancelButton: Bool = false
+    var showDeleteButton: Bool = false  // Only show in library, not show/source view
     
     @State private var showEpisodeOptions = false
     
@@ -28,6 +28,10 @@ struct EpisodeListItem: View {
     
     private var isPlaying: Bool {
         audioPlayer.currentEpisode?.id == episode.id && audioPlayer.isPlaying
+    }
+    
+    private var isPlayed: Bool {
+        episode.isPlayed
     }
     
     private var isDownloaded: Bool {
@@ -103,6 +107,15 @@ struct EpisodeListItem: View {
                 }
                 
                 HStack(spacing: 8) {
+                    if isPlayed {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.green)
+                            .font(.caption)
+                        Text("Played")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    
                     if isDownloading {
                         ProgressView(value: downloadProgress)
                             .frame(width: style == .compact ? 100 : 80)
@@ -110,7 +123,7 @@ struct EpisodeListItem: View {
                             .font(.caption)
                             .foregroundColor(.secondary)
                     } else if isDownloaded {
-                        Image(systemName: "checkmark.circle.fill")
+                        Image(systemName: "square.and.arrow.down.badge.checkmark")
                             .foregroundColor(.green)
                             .font(.caption)
                         Text("Downloaded")

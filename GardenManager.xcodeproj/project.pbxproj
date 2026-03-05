@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -16,6 +16,7 @@
 		CC2D86EC2F0A4A3E00EA33F5 /* MotionGraphsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2D86EB2F0A4A3E00EA33F5 /* MotionGraphsView.swift */; };
 		CCC20D892F536018008E96B9 /* GrokVoiceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCC20D862F536018008E96B9 /* GrokVoiceService.swift */; };
 		CCC20D8A2F536018008E96B9 /* GrokVoiceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCC20D872F536018008E96B9 /* GrokVoiceView.swift */; };
+		CCC20D942F57B1FC008E96B9 /* RealityKitContent in Frameworks */ = {isa = PBXBuildFile; productRef = CCC20D932F57B1FC008E96B9 /* RealityKitContent */; };
 		CCE334E52F521672008F3749 /* EpisodeListItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCE334E42F521672008F3749 /* EpisodeListItem.swift */; };
 		DDD111111111111111111111 /* SpeechRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDD222222222222222222222 /* SpeechRecognizer.swift */; };
 		EEE111111111111111111111 /* CommandParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEE222222222222222222222 /* CommandParser.swift */; };
@@ -45,6 +46,16 @@
 		VIS333333333333333333333 /* Vision.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = VIS444444444444444444444 /* Vision.framework */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		CCC20DA12F57B1FD008E96B9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B99FFFFFFFFFFFFFFFFFFFFF /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = CCC20D8E2F57B1FC008E96B9;
+			remoteInfo = gardenManagerVision;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		A22222222222222222222222 /* GardenManagerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GardenManagerApp.swift; sourceTree = "<group>"; };
 		A44444444444444444444444 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -57,6 +68,9 @@
 		CCAAF83E2F082CA100D14C0E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		CCC20D862F536018008E96B9 /* GrokVoiceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrokVoiceService.swift; sourceTree = "<group>"; };
 		CCC20D872F536018008E96B9 /* GrokVoiceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrokVoiceView.swift; sourceTree = "<group>"; };
+		CCC20D8F2F57B1FC008E96B9 /* gardenManagerVision.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = gardenManagerVision.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CCC20D922F57B1FC008E96B9 /* RealityKitContent */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = RealityKitContent; sourceTree = "<group>"; };
+		CCC20DA02F57B1FD008E96B9 /* gardenManagerVisionTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = gardenManagerVisionTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CCE334E42F521672008F3749 /* EpisodeListItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EpisodeListItem.swift; sourceTree = "<group>"; };
 		DDD222222222222222222222 /* SpeechRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechRecognizer.swift; sourceTree = "<group>"; };
 		EEE222222222222222222222 /* CommandParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandParser.swift; sourceTree = "<group>"; };
@@ -86,6 +100,21 @@
 		VIS444444444444444444444 /* Vision.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Vision.framework; path = System/Library/Frameworks/Vision.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		CCC20DAA2F57B1FD008E96B9 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = CCC20D8E2F57B1FC008E96B9 /* gardenManagerVision */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		CCC20D902F57B1FC008E96B9 /* gardenManagerVision */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (CCC20DAA2F57B1FD008E96B9 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = gardenManagerVision; sourceTree = "<group>"; };
+		CCC20DA32F57B1FD008E96B9 /* gardenManagerVisionTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = gardenManagerVisionTests; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
+
 /* Begin PBXFrameworksBuildPhase section */
 		AEE444444444444444444444 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
@@ -96,6 +125,21 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		CCC20D8C2F57B1FC008E96B9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				CCC20D942F57B1FC008E96B9 /* RealityKitContent in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CCC20D9D2F57B1FD008E96B9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -103,6 +147,9 @@
 			isa = PBXGroup;
 			children = (
 				B00666666666666666666666 /* GardenManager */,
+				CCC20D902F57B1FC008E96B9 /* gardenManagerVision */,
+				CCC20D912F57B1FC008E96B9 /* Packages */,
+				CCC20DA32F57B1FD008E96B9 /* gardenManagerVisionTests */,
 				B11777777777777777777777 /* Products */,
 				CCE334E12F5209E6008F3749 /* Recovered References */,
 			);
@@ -127,6 +174,8 @@
 			isa = PBXGroup;
 			children = (
 				ADD333333333333333333333 /* GardenManager.app */,
+				CCC20D8F2F57B1FC008E96B9 /* gardenManagerVision.app */,
+				CCC20DA02F57B1FD008E96B9 /* gardenManagerVisionTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -138,6 +187,14 @@
 				CCC20D872F536018008E96B9 /* GrokVoiceView.swift */,
 			);
 			path = GrokVoice;
+			sourceTree = "<group>";
+		};
+		CCC20D912F57B1FC008E96B9 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				CCC20D922F57B1FC008E96B9 /* RealityKitContent */,
+			);
+			path = Packages;
 			sourceTree = "<group>";
 		};
 		CCE334E12F5209E6008F3749 /* Recovered References */ = {
@@ -291,6 +348,52 @@
 			productReference = ADD333333333333333333333 /* GardenManager.app */;
 			productType = "com.apple.product-type.application";
 		};
+		CCC20D8E2F57B1FC008E96B9 /* gardenManagerVision */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CCC20DAB2F57B1FD008E96B9 /* Build configuration list for PBXNativeTarget "gardenManagerVision" */;
+			buildPhases = (
+				CCC20D8B2F57B1FC008E96B9 /* Sources */,
+				CCC20D8C2F57B1FC008E96B9 /* Frameworks */,
+				CCC20D8D2F57B1FC008E96B9 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				CCC20D902F57B1FC008E96B9 /* gardenManagerVision */,
+			);
+			name = gardenManagerVision;
+			packageProductDependencies = (
+				CCC20D932F57B1FC008E96B9 /* RealityKitContent */,
+			);
+			productName = gardenManagerVision;
+			productReference = CCC20D8F2F57B1FC008E96B9 /* gardenManagerVision.app */;
+			productType = "com.apple.product-type.application";
+		};
+		CCC20D9F2F57B1FD008E96B9 /* gardenManagerVisionTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CCC20DAC2F57B1FD008E96B9 /* Build configuration list for PBXNativeTarget "gardenManagerVisionTests" */;
+			buildPhases = (
+				CCC20D9C2F57B1FD008E96B9 /* Sources */,
+				CCC20D9D2F57B1FD008E96B9 /* Frameworks */,
+				CCC20D9E2F57B1FD008E96B9 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				CCC20DA22F57B1FD008E96B9 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				CCC20DA32F57B1FD008E96B9 /* gardenManagerVisionTests */,
+			);
+			name = gardenManagerVisionTests;
+			packageProductDependencies = (
+			);
+			productName = gardenManagerVisionTests;
+			productReference = CCC20DA02F57B1FD008E96B9 /* gardenManagerVisionTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -298,11 +401,18 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1500;
+				LastSwiftUpdateCheck = 2630;
 				LastUpgradeCheck = 1500;
 				TargetAttributes = {
 					B55BBBBBBBBBBBBBBBBBBBBBB = {
 						CreatedOnToolsVersion = 15.0;
+					};
+					CCC20D8E2F57B1FC008E96B9 = {
+						CreatedOnToolsVersion = 26.3;
+					};
+					CCC20D9F2F57B1FD008E96B9 = {
+						CreatedOnToolsVersion = 26.3;
+						TestTargetID = CCC20D8E2F57B1FC008E96B9;
 					};
 				};
 			};
@@ -320,6 +430,8 @@
 			projectRoot = "";
 			targets = (
 				B55BBBBBBBBBBBBBBBBBBBBBB /* GardenManager */,
+				CCC20D8E2F57B1FC008E96B9 /* gardenManagerVision */,
+				CCC20D9F2F57B1FD008E96B9 /* gardenManagerVisionTests */,
 			);
 		};
 /* End PBXProject section */
@@ -330,6 +442,20 @@
 			buildActionMask = 2147483647;
 			files = (
 				A55555555555555555555555 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CCC20D8D2F57B1FC008E96B9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CCC20D9E2F57B1FD008E96B9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -376,7 +502,29 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		CCC20D8B2F57B1FC008E96B9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CCC20D9C2F57B1FD008E96B9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		CCC20DA22F57B1FD008E96B9 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = CCC20D8E2F57B1FC008E96B9 /* gardenManagerVision */;
+			targetProxy = CCC20DA12F57B1FD008E96B9 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		C11111111111111111111111 /* Debug */ = {
@@ -527,9 +675,11 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.gardenmanager.application;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator xros xrsimulator";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 6.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				XROS_DEPLOYMENT_TARGET = 26.0;
 			};
 			name = Debug;
 		};
@@ -562,9 +712,121 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.gardenmanager.application;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator xros xrsimulator";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 6.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				XROS_DEPLOYMENT_TARGET = 26.0;
+			};
+			name = Release;
+		};
+		CCC20DA62F57B1FD008E96B9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = C545RG9LW8;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "$(TARGET_NAME)/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.longTermSelf.gardenManagerVision;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = xros;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "xros xrsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 7;
+				XROS_DEPLOYMENT_TARGET = 26.2;
+			};
+			name = Debug;
+		};
+		CCC20DA72F57B1FD008E96B9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = C545RG9LW8;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "$(TARGET_NAME)/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.longTermSelf.gardenManagerVision;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = xros;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "xros xrsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 7;
+				XROS_DEPLOYMENT_TARGET = 26.2;
+			};
+			name = Release;
+		};
+		CCC20DA82F57B1FD008E96B9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = C545RG9LW8;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.longTermSelf.gardenManagerVisionTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = xros;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SUPPORTED_PLATFORMS = "xros xrsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 7;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/gardenManagerVision.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/gardenManagerVision";
+				XROS_DEPLOYMENT_TARGET = 26.2;
+			};
+			name = Debug;
+		};
+		CCC20DA92F57B1FD008E96B9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = C545RG9LW8;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.longTermSelf.gardenManagerVisionTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = xros;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SUPPORTED_PLATFORMS = "xros xrsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 7;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/gardenManagerVision.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/gardenManagerVision";
+				XROS_DEPLOYMENT_TARGET = 26.2;
 			};
 			name = Release;
 		};
@@ -589,7 +851,32 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		CCC20DAB2F57B1FD008E96B9 /* Build configuration list for PBXNativeTarget "gardenManagerVision" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CCC20DA62F57B1FD008E96B9 /* Debug */,
+				CCC20DA72F57B1FD008E96B9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CCC20DAC2F57B1FD008E96B9 /* Build configuration list for PBXNativeTarget "gardenManagerVisionTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CCC20DA82F57B1FD008E96B9 /* Debug */,
+				CCC20DA92F57B1FD008E96B9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		CCC20D932F57B1FC008E96B9 /* RealityKitContent */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = RealityKitContent;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = B99FFFFFFFFFFFFFFFFFFFFF /* Project object */;
 }

@@ -2,6 +2,7 @@ import SwiftUI
 
 @main
 @available(iOS 26.0, *)
+@MainActor
 struct GardenManagerApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     
@@ -12,6 +13,7 @@ struct GardenManagerApp: App {
     }
 }
 
+@MainActor
 struct RootView: View {
     @StateObject private var audioPlayer = AudioPlayerService()
     @StateObject private var downloadManager = DownloadManager()
@@ -73,6 +75,7 @@ struct RootView: View {
             }
         }
         .onReceive(podcastViewModel.$podcasts) { podcasts in
+            audioPlayer.updatePlaybackPodcasts(podcasts)
             audioPlayer.restoreLastPlayedEpisode(
                 podcasts: podcasts,
                 resolveLocalURL: { episode in

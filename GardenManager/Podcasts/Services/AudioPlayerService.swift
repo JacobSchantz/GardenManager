@@ -4,11 +4,19 @@ import AVFoundation
 import Combine
 import MediaPlayer
 
+// Notification for when an episode is marked as played
+extension Notification.Name {
+    static let episodeMarkedAsPlayed = Notification.Name("episodeMarkedAsPlayed")
+}
+
 class AudioPlayerService: NSObject, ObservableObject {
     @Published var isPlaying = false
     @Published var currentTime: TimeInterval = 0
     @Published var duration: TimeInterval = 0
     @Published var currentEpisode: Episode?
+    
+    // Threshold: if within 2 minutes of end, mark as played
+    private let playedThreshold: TimeInterval = 120
     
     private var player: AVPlayer?
     private var timeObserver: Any?
@@ -20,11 +28,17 @@ class AudioPlayerService: NSObject, ObservableObject {
     private var isInBackground = false
     private var cancellables = Set<AnyCancellable>()
     
-    private let playbackPositionsKey = "PlaybackPositions"
+    private let legacyPlaybackPositionsKey = "PlaybackPositions"
     private let lastPlayedEpisodeIDKey = "LastPlayedEpisodeID"
+    private let playbackPositionsFileName = "playback_positions.json"
+    private let maxStoredPlaybackPositions = 2000
+    private var playbackPodcasts: [Podcast] = []
+    private var playbackPositions: [String: TimeInterval] = [:]
+    private var playedStatusByEpisodeID: [UUID: Bool] = [:]
     
     override init() {
         super.init()
+        loadPlaybackPositionsFromDisk()
         setupRemoteCommandCenter()
         setupInterruptionHandling()
         
@@ -161,6 +175,7 @@ class AudioPlayerService: NSObject, ObservableObject {
             // Save position of previous episode before switching
             if let prevEpisode = currentEpisode {
                 savePlaybackPosition(for: prevEpisode.id)
+                syncPlayedStatus(for: prevEpisode, progress: currentTime, duration: duration)
             }
             
             currentTime = 0
@@ -196,11 +211,12 @@ class AudioPlayerService: NSObject, ObservableObject {
             
             // Restore saved position - either from parameter or from storage
             let savedPosition = restoredFromPosition ?? getPlaybackPosition(for: episode.id)
-            if savedPosition > 0 {
-                let cmTime = CMTime(seconds: savedPosition, preferredTimescale: 600)
+            let resumePosition = resumePositionIfUnplayed(savedPosition, for: episode)
+            if resumePosition > 0 {
+                let cmTime = CMTime(seconds: resumePosition, preferredTimescale: 600)
                 player?.seek(to: cmTime)
-                currentTime = savedPosition
-                print("[AudioPlayerService] Restored position: \(savedPosition)s")
+                currentTime = resumePosition
+                print("[AudioPlayerService] Restored position: \(resumePosition)s")
             }
         }
         
@@ -235,6 +251,7 @@ class AudioPlayerService: NSObject, ObservableObject {
         if let episode = currentEpisode {
             savePlaybackPosition(for: episode.id)
             saveLastPlayedEpisodeID(episode.id)
+            syncPlayedStatus(for: episode)
         }
     }
     
@@ -288,6 +305,19 @@ class AudioPlayerService: NSObject, ObservableObject {
         let newTime = player.currentTime().seconds - seconds
         seek(to: max(newTime, 0))
     }
+
+    func updatePlaybackPodcasts(_ podcasts: [Podcast]) {
+        playbackPodcasts = podcasts
+        prunePlaybackPositionsToKnownEpisodes()
+        syncPlayedStatusesForKnownEpisodes()
+    }
+
+    private func syncPlayedStatusesForKnownEpisodes() {
+        for episode in playbackPodcasts.flatMap(\.episodes) {
+            let isPlayed = playedStatus(for: episode)
+            postPlayedStatusIfChanged(episodeID: episode.id, isPlayed: isPlayed)
+        }
+    }
     
     private func setupTimeObserver() {
         if let timeObserver = timeObserver {
@@ -307,6 +337,10 @@ class AudioPlayerService: NSObject, ObservableObject {
             if !self.isSeeking {
                 self.updateNowPlayingElapsedTime()
             }
+
+            if let episode = self.currentEpisode {
+                self.syncPlayedStatus(for: episode)
+            }
             
             // Save position every 10 seconds during playback
             if let episode = self.currentEpisode,
@@ -318,14 +352,133 @@ class AudioPlayerService: NSObject, ObservableObject {
     }
     
     @objc private func playerDidFinishPlaying() {
+        guard let finishedEpisode = currentEpisode else {
+            isPlaying = false
+            updateNowPlayingPlaybackState()
+            return
+        }
+
+        // Persist near-end progress so played state is derived from progress.
+        let finishedDuration = player?.currentItem?.duration.seconds ?? duration
+        if finishedDuration.isFinite && finishedDuration > 0 {
+            duration = finishedDuration
+            currentTime = finishedDuration
+        }
+        savePlaybackPosition(for: finishedEpisode.id)
+        syncPlayedStatus(for: finishedEpisode)
+
+        if playNextUnplayedDownloadedEpisode(after: finishedEpisode) {
+            return
+        }
+
         isPlaying = false
         currentTime = 0
         player?.seek(to: .zero)
-        
-        // Clear saved position when episode finishes
-        if let episode = currentEpisode {
-            clearPlaybackPosition(for: episode.id)
+        updateNowPlayingPlaybackState()
+    }
+    
+    private func resumePositionIfUnplayed(_ progress: TimeInterval, for episode: Episode) -> TimeInterval {
+        guard progress > 0 else {
+            return 0
         }
+        return isProgressPlayed(progress, duration: episode.duration) ? 0 : progress
+    }
+
+    private func isProgressPlayed(_ progress: TimeInterval, duration: TimeInterval) -> Bool {
+        guard progress.isFinite, duration.isFinite, duration > 0 else {
+            return false
+        }
+        return (duration - progress) <= playedThreshold
+    }
+
+    private func playedStatus(for episode: Episode, progress: TimeInterval? = nil, duration overrideDuration: TimeInterval? = nil) -> Bool {
+        let episodeProgress: TimeInterval
+        if let progress {
+            episodeProgress = progress
+        } else if currentEpisode?.id == episode.id {
+            episodeProgress = currentTime
+        } else {
+            episodeProgress = getPlaybackPosition(for: episode.id)
+        }
+
+        let episodeDuration: TimeInterval
+        if let overrideDuration {
+            episodeDuration = overrideDuration
+        } else if currentEpisode?.id == episode.id && duration > 0 {
+            episodeDuration = duration
+        } else {
+            episodeDuration = episode.duration
+        }
+
+        return isProgressPlayed(episodeProgress, duration: episodeDuration)
+    }
+
+    private func syncPlayedStatus(for episode: Episode, progress: TimeInterval? = nil, duration overrideDuration: TimeInterval? = nil) {
+        let isPlayed = playedStatus(for: episode, progress: progress, duration: overrideDuration)
+        postPlayedStatusIfChanged(episodeID: episode.id, isPlayed: isPlayed)
+    }
+
+    private func postPlayedStatusIfChanged(episodeID: UUID, isPlayed: Bool) {
+        if playedStatusByEpisodeID[episodeID] == isPlayed {
+            return
+        }
+
+        playedStatusByEpisodeID[episodeID] = isPlayed
+        if currentEpisode?.id == episodeID {
+            currentEpisode?.isPlayed = isPlayed
+        }
+
+        NotificationCenter.default.post(
+            name: .episodeMarkedAsPlayed,
+            object: nil,
+            userInfo: [
+                "episodeId": episodeID,
+                "isPlayed": isPlayed
+            ]
+        )
+    }
+
+    private func playNextUnplayedDownloadedEpisode(after finishedEpisode: Episode) -> Bool {
+        let allDownloaded = playbackPodcasts
+            .flatMap(\.episodes)
+            .filter { localAudioURL(for: $0.id) != nil }
+            .sorted { $0.publishDate > $1.publishDate }
+
+        guard !allDownloaded.isEmpty else {
+            return false
+        }
+
+        let orderedCandidates: [Episode]
+        if let finishedIndex = allDownloaded.firstIndex(where: { $0.id == finishedEpisode.id }) {
+            let head = Array(allDownloaded[(finishedIndex + 1)...])
+            let tail = Array(allDownloaded[..<finishedIndex])
+            orderedCandidates = head + tail
+        } else {
+            orderedCandidates = allDownloaded
+        }
+
+        for candidate in orderedCandidates where !playedStatus(for: candidate) {
+            guard let localURL = localAudioURL(for: candidate.id) else {
+                continue
+            }
+
+            var nextEpisode = candidate
+            nextEpisode.localFileURL = localURL
+            print("[AudioPlayerService] Auto-playing next unplayed downloaded episode: \(nextEpisode.title)")
+            play(episode: nextEpisode)
+            return true
+        }
+
+        return false
+    }
+
+    private func localAudioURL(for episodeID: UUID) -> URL? {
+        let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        let fileURL = documentsPath
+            .appendingPathComponent("Downloads")
+            .appendingPathComponent("\(episodeID.uuidString).mp3")
+
+        return FileManager.default.fileExists(atPath: fileURL.path) ? fileURL : nil
     }
     
     private func setupNowPlaying(episode: Episode) {
@@ -335,19 +488,41 @@ class AudioPlayerService: NSObject, ObservableObject {
         nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = 0
         nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = 1.0
         
-        if let imageURL = episode.imageURL {
-            Task {
-                if let data = try? Data(contentsOf: imageURL),
-                   let image = UIImage(data: data) {
-                    var info = MPNowPlayingInfoCenter.default().nowPlayingInfo ?? [:]
-                    info[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: image.size) { _ in image }
-                    MPNowPlayingInfoCenter.default().nowPlayingInfo = info
-                }
-            }
+        if let artworkURL = episode.localImageURL ?? episode.displayImageURL {
+            loadNowPlayingArtwork(from: artworkURL)
         }
         
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
         setupRemoteCommandCenter()
+    }
+
+    private func loadNowPlayingArtwork(from artworkURL: URL) {
+        Task.detached(priority: .utility) {
+            let data: Data?
+
+            if artworkURL.isFileURL {
+                data = try? Data(contentsOf: artworkURL)
+            } else {
+                guard let (remoteData, response) = try? await URLSession.shared.data(from: artworkURL),
+                      let httpResponse = response as? HTTPURLResponse,
+                      200..<300 ~= httpResponse.statusCode else {
+                    return
+                }
+                data = remoteData
+            }
+
+            guard let data,
+                  let image = UIImage(data: data) else {
+                return
+            }
+
+            let artwork = MPMediaItemArtwork(boundsSize: image.size) { _ in image }
+            await MainActor.run {
+                var info = MPNowPlayingInfoCenter.default().nowPlayingInfo ?? [:]
+                info[MPMediaItemPropertyArtwork] = artwork
+                MPNowPlayingInfoCenter.default().nowPlayingInfo = info
+            }
+        }
     }
     
     private func updateNowPlayingPlaybackState() {
@@ -404,25 +579,87 @@ class AudioPlayerService: NSObject, ObservableObject {
     // MARK: - Playback Position Persistence
     
     private func savePlaybackPosition(for episodeID: UUID) {
-        var positions = getPlaybackPositions()
-        positions[episodeID.uuidString] = currentTime
-        UserDefaults.standard.set(positions, forKey: playbackPositionsKey)
+        guard currentTime.isFinite && currentTime >= 0 else {
+            return
+        }
+
+        playbackPositions[episodeID.uuidString] = currentTime
+        prunePlaybackPositionsToKnownEpisodes()
+        trimPlaybackPositionsIfNeeded()
+        persistPlaybackPositionsToDisk()
         print("[AudioPlayerService] Saved position: \(currentTime)s for episode \(episodeID)")
     }
     
     private func getPlaybackPosition(for episodeID: UUID) -> TimeInterval {
-        let positions = getPlaybackPositions()
-        return positions[episodeID.uuidString] ?? 0
-    }
-    
-    private func getPlaybackPositions() -> [String: TimeInterval] {
-        return UserDefaults.standard.dictionary(forKey: playbackPositionsKey) as? [String: TimeInterval] ?? [:]
+        playbackPositions[episodeID.uuidString] ?? 0
     }
     
     func clearPlaybackPosition(for episodeID: UUID) {
-        var positions = getPlaybackPositions()
-        positions.removeValue(forKey: episodeID.uuidString)
-        UserDefaults.standard.set(positions, forKey: playbackPositionsKey)
+        playbackPositions.removeValue(forKey: episodeID.uuidString)
+        persistPlaybackPositionsToDisk()
+        postPlayedStatusIfChanged(episodeID: episodeID, isPlayed: false)
+    }
+
+    private func playbackPositionsFileURL() -> URL {
+        let supportURL = FileManager.default
+            .urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("GardenManager", isDirectory: true)
+        try? FileManager.default.createDirectory(at: supportURL, withIntermediateDirectories: true)
+        return supportURL.appendingPathComponent(playbackPositionsFileName)
+    }
+
+    private func loadPlaybackPositionsFromDisk() {
+        let fileURL = playbackPositionsFileURL()
+
+        if let data = try? Data(contentsOf: fileURL),
+           let decoded = try? JSONDecoder().decode([String: TimeInterval].self, from: data) {
+            playbackPositions = decoded
+            UserDefaults.standard.removeObject(forKey: legacyPlaybackPositionsKey)
+            return
+        }
+
+        if let legacyPositions = UserDefaults.standard.dictionary(forKey: legacyPlaybackPositionsKey) {
+            var migrated: [String: TimeInterval] = [:]
+            for (key, value) in legacyPositions {
+                if let number = value as? NSNumber {
+                    migrated[key] = number.doubleValue
+                }
+            }
+            playbackPositions = migrated
+            trimPlaybackPositionsIfNeeded()
+            persistPlaybackPositionsToDisk()
+        }
+
+        UserDefaults.standard.removeObject(forKey: legacyPlaybackPositionsKey)
+    }
+
+    private func persistPlaybackPositionsToDisk() {
+        let fileURL = playbackPositionsFileURL()
+        guard let data = try? JSONEncoder().encode(playbackPositions) else {
+            return
+        }
+        try? data.write(to: fileURL, options: .atomic)
+    }
+
+    private func prunePlaybackPositionsToKnownEpisodes() {
+        let validIDs = Set(playbackPodcasts.flatMap(\.episodes).map { $0.id.uuidString })
+        guard !validIDs.isEmpty else {
+            return
+        }
+        playbackPositions = playbackPositions.filter { validIDs.contains($0.key) }
+        let validUUIDs = Set(playbackPodcasts.flatMap(\.episodes).map(\.id))
+        playedStatusByEpisodeID = playedStatusByEpisodeID.filter { validUUIDs.contains($0.key) }
+    }
+
+    private func trimPlaybackPositionsIfNeeded() {
+        guard playbackPositions.count > maxStoredPlaybackPositions else {
+            return
+        }
+
+        let overflowCount = playbackPositions.count - maxStoredPlaybackPositions
+        for key in playbackPositions.keys.sorted().prefix(overflowCount) {
+            playbackPositions.removeValue(forKey: key)
+        }
     }
     
     @objc private func savePositionOnBackground() {
@@ -538,11 +775,12 @@ class AudioPlayerService: NSObject, ObservableObject {
         
         // Restore saved position
         let savedPosition = restoredFromPosition ?? getPlaybackPosition(for: episode.id)
-        if savedPosition > 0 {
-            let cmTime = CMTime(seconds: savedPosition, preferredTimescale: 600)
+        let resumePosition = resumePositionIfUnplayed(savedPosition, for: episode)
+        if resumePosition > 0 {
+            let cmTime = CMTime(seconds: resumePosition, preferredTimescale: 600)
             player?.seek(to: cmTime)
-            currentTime = savedPosition
-            print("[AudioPlayerService] Restored position: \(savedPosition)s")
+            currentTime = resumePosition
+            print("[AudioPlayerService] Restored position: \(resumePosition)s")
         }
         
         // Don't auto-play - just ready to play

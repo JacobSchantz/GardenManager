@@ -20,57 +20,93 @@ struct ITunesPodcastResult: Identifiable, Codable, Hashable {
 }
 
 @MainActor
-class PodcastSearchService: ObservableObject {
+final class PodcastSearchService: ObservableObject {
     @Published var results: [ITunesPodcastResult] = []
     @Published var isLoading = false
     @Published var errorMessage: String? = nil
+    private var latestSearchID = UUID()
+
+    private enum SearchError: LocalizedError {
+        case invalidURL
+        case invalidResponse
+        case serverError(Int)
+
+        var errorDescription: String? {
+            switch self {
+            case .invalidURL:
+                return "Invalid URL"
+            case .invalidResponse:
+                return "Invalid response"
+            case .serverError(let code):
+                return "Server error: \(code)"
+            }
+        }
+    }
     
     func search(query: String) async {
-        guard !query.isEmpty else {
+        let trimmedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard trimmedQuery.count >= 2 else {
+            latestSearchID = UUID()
             results = []
-            return
-        }
-        
-        isLoading = true
-        errorMessage = nil
-        results = []
-        
-        let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? query
-        let urlString = "https://itunes.apple.com/search?term=\(encodedQuery)&media=podcast&entity=podcast&limit=25"
-        
-        guard let url = URL(string: urlString) else {
-            errorMessage = "Invalid URL"
+            errorMessage = nil
             isLoading = false
             return
         }
-        
+
+        let searchID = UUID()
+        latestSearchID = searchID
+        isLoading = true
+        errorMessage = nil
+
         do {
-            let (data, response) = try await URLSession.shared.data(from: url)
-            
-            guard let httpResponse = response as? HTTPURLResponse else {
-                errorMessage = "Invalid response"
-                isLoading = false
+            let fetchedResults = try await Self.fetchResults(for: trimmedQuery)
+
+            guard searchID == latestSearchID else {
                 return
             }
-            
-            if httpResponse.statusCode != 200 {
-                errorMessage = "Server error: \(httpResponse.statusCode)"
-                isLoading = false
+
+            results = fetchedResults
+        } catch is CancellationError {
+            guard searchID == latestSearchID else {
                 return
             }
-            
-            let searchResponse = try JSONDecoder().decode(iTunesSearchResponse.self, from: data)
-            results = searchResponse.results.filter { $0.feedUrl != nil }
         } catch {
             errorMessage = "Search failed: \(error.localizedDescription)"
         }
-        
-        isLoading = false
+
+        if searchID == latestSearchID {
+            isLoading = false
+        }
     }
     
     func clear() {
+        latestSearchID = UUID()
         results = []
         errorMessage = nil
+        isLoading = false
+    }
+
+    nonisolated private static func fetchResults(for query: String) async throws -> [ITunesPodcastResult] {
+        let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? query
+        let urlString = "https://itunes.apple.com/search?term=\(encodedQuery)&media=podcast&entity=podcast&limit=25"
+
+        guard let url = URL(string: urlString) else {
+            throw SearchError.invalidURL
+        }
+
+        let (data, response) = try await URLSession.shared.data(from: url)
+
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw SearchError.invalidResponse
+        }
+
+        guard httpResponse.statusCode == 200 else {
+            throw SearchError.serverError(httpResponse.statusCode)
+        }
+
+        let searchResponse = try JSONDecoder().decode(iTunesSearchResponse.self, from: data)
+        return searchResponse.results.filter { $0.feedUrl != nil }
     }
 }
 
