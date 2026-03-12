@@ -3,538 +3,154 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 70;
+	objectVersion = 77;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		A11111111111111111111111 /* GardenManagerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A22222222222222222222222 /* GardenManagerApp.swift */; };
-		A33333333333333333333333 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A44444444444444444444444 /* ContentView.swift */; };
-		A55555555555555555555555 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A66666666666666666666666 /* Assets.xcassets */; };
-		A77777777777777777777777 /* Tool.swift in Sources */ = {isa = PBXBuildFile; fileRef = A88888888888888888888888 /* Tool.swift */; };
-		A99999999999999999999999 /* ToolService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA000000000000000000000 /* ToolService.swift */; };
-		ABB111111111111111111111 /* ToolParameterSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACC222222222222222222222 /* ToolParameterSheet.swift */; };
-		CC2D86EC2F0A4A3E00EA33F5 /* MotionGraphsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC2D86EB2F0A4A3E00EA33F5 /* MotionGraphsView.swift */; };
-		CCC20D892F536018008E96B9 /* GrokVoiceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCC20D862F536018008E96B9 /* GrokVoiceService.swift */; };
-		CCC20D8A2F536018008E96B9 /* GrokVoiceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCC20D872F536018008E96B9 /* GrokVoiceView.swift */; };
-		CCC20D942F57B1FC008E96B9 /* RealityKitContent in Frameworks */ = {isa = PBXBuildFile; productRef = CCC20D932F57B1FC008E96B9 /* RealityKitContent */; };
-		CCE334E52F521672008F3749 /* EpisodeListItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCE334E42F521672008F3749 /* EpisodeListItem.swift */; };
-		DDD111111111111111111111 /* SpeechRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDD222222222222222222222 /* SpeechRecognizer.swift */; };
-		EEE111111111111111111111 /* CommandParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEE222222222222222222222 /* CommandParser.swift */; };
-		FFF111111111111111111111 /* Podcast.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFF222222222222222222222 /* Podcast.swift */; };
-		GGG111111111111111111111 /* RSSFeedParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = GGG222222222222222222222 /* RSSFeedParser.swift */; };
-		HHH111111111111111111111 /* AudioPlayerService.swift in Sources */ = {isa = PBXBuildFile; fileRef = HHH222222222222222222222 /* AudioPlayerService.swift */; };
-		III111111111111111111111 /* PodcastListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = III222222222222222222222 /* PodcastListView.swift */; };
-		IMG222222222222222222222 /* ImagePodcastImportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = IMG111111111111111111111 /* ImagePodcastImportView.swift */; };
-		IMV222222222222222222222 /* ImagePodcastImportViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = IMV111111111111111111111 /* ImagePodcastImportViewModel.swift */; };
-		JJJ111111111111111111111 /* EpisodeListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = JJJ222222222222222222222 /* EpisodeListView.swift */; };
-		KKK111111111111111111111 /* MiniPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = KKK222222222222222222222 /* MiniPlayerView.swift */; };
-		MMM111111111111111111111 /* DownloadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = MMM222222222222222222222 /* DownloadManager.swift */; };
-		MOT111111111111111111111 /* MotionTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = MOT222222222222222222222 /* MotionTracker.swift */; };
-		MOT333333333333333333333 /* MotionStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = MOT444444444444444444444 /* MotionStatusView.swift */; };
-		MOT555555555555555555555 /* MotionAudioCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = MOT666666666666666666666 /* MotionAudioCoordinator.swift */; };
-		MOTAAA111111111111111111 /* MotionEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = MOT888888888888888888888 /* MotionEvent.swift */; };
-		MOTBBB111111111111111111 /* MotionTabContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = MOT999999999999999999999 /* MotionTabContainerView.swift */; };
-		NNN111111111111111111111 /* DownloadsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = NNN222222222222222222222 /* DownloadsView.swift */; };
-		OOO111111111111111111111 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = OOO222222222222222222222 /* AppDelegate.swift */; };
-		PHO333333333333333333333 /* PhotosUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = PHO444444444444444444444 /* PhotosUI.framework */; };
-		PIDX22222222222222222222 /* PodcastIndexModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = PIDX11111111111111111111 /* PodcastIndexModels.swift */; };
-		SRCH22222222222222222222 /* PodcastSearchResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = SRCH11111111111111111111 /* PodcastSearchResult.swift */; };
-		SRCH333333333333333333333 /* PodcastSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = SRCH444444444444444444444 /* PodcastSearchView.swift */; };
-		SRVC22222222222222222222 /* PodcastSearchService.swift in Sources */ = {isa = PBXBuildFile; fileRef = SRVC11111111111111111111 /* PodcastSearchService.swift */; };
-		TXT222222222222222222222 /* TextProcessingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = TXT111111111111111111111 /* TextProcessingService.swift */; };
-		VIS222222222222222222222 /* VisionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = VIS111111111111111111111 /* VisionService.swift */; };
-		VIS333333333333333333333 /* Vision.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = VIS444444444444444444444 /* Vision.framework */; };
+		2190DBF72C1AC02F2AB01302 /* GardenManagerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8919C9873ED7317E8A8E62AC /* GardenManagerApp.swift */; };
+		58DE49DAEDCCB7C78C2A0477 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57E25AB53CF1C8F7AA8580F3 /* AppDelegate.swift */; };
+		CEB5386EA518934CD63F9F4B /* GrokVoiceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39305927F4656B443DBA3B5A /* GrokVoiceService.swift */; };
+		D3D5864AB12A7B038FEB2DEC /* GrokVoiceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02E4DE8CF024785D92B1EBC4 /* GrokVoiceView.swift */; };
+		F40B7A27987F32C13BDC2DBE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F238D1F176156184E7E8AFAA /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXContainerItemProxy section */
-		CCC20DA12F57B1FD008E96B9 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = B99FFFFFFFFFFFFFFFFFFFFF /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = CCC20D8E2F57B1FC008E96B9;
-			remoteInfo = gardenManagerVision;
-		};
-/* End PBXContainerItemProxy section */
-
 /* Begin PBXFileReference section */
-		A22222222222222222222222 /* GardenManagerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GardenManagerApp.swift; sourceTree = "<group>"; };
-		A44444444444444444444444 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		A66666666666666666666666 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		A88888888888888888888888 /* Tool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tool.swift; sourceTree = "<group>"; };
-		AAA000000000000000000000 /* ToolService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolService.swift; sourceTree = "<group>"; };
-		ACC222222222222222222222 /* ToolParameterSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolParameterSheet.swift; sourceTree = "<group>"; };
-		ADD333333333333333333333 /* GardenManager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GardenManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		CC2D86EB2F0A4A3E00EA33F5 /* MotionGraphsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionGraphsView.swift; sourceTree = "<group>"; };
-		CCAAF83E2F082CA100D14C0E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		CCC20D862F536018008E96B9 /* GrokVoiceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrokVoiceService.swift; sourceTree = "<group>"; };
-		CCC20D872F536018008E96B9 /* GrokVoiceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrokVoiceView.swift; sourceTree = "<group>"; };
-		CCC20D8F2F57B1FC008E96B9 /* gardenManagerVision.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = gardenManagerVision.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		CCC20D922F57B1FC008E96B9 /* RealityKitContent */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = RealityKitContent; sourceTree = "<group>"; };
-		CCC20DA02F57B1FD008E96B9 /* gardenManagerVisionTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = gardenManagerVisionTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		CCE334E42F521672008F3749 /* EpisodeListItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EpisodeListItem.swift; sourceTree = "<group>"; };
-		DDD222222222222222222222 /* SpeechRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechRecognizer.swift; sourceTree = "<group>"; };
-		EEE222222222222222222222 /* CommandParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandParser.swift; sourceTree = "<group>"; };
-		FFF222222222222222222222 /* Podcast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Podcast.swift; sourceTree = "<group>"; };
-		GGG222222222222222222222 /* RSSFeedParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RSSFeedParser.swift; sourceTree = "<group>"; };
-		HHH222222222222222222222 /* AudioPlayerService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPlayerService.swift; sourceTree = "<group>"; };
-		III222222222222222222222 /* PodcastListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PodcastListView.swift; sourceTree = "<group>"; };
-		IMG111111111111111111111 /* ImagePodcastImportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePodcastImportView.swift; sourceTree = "<group>"; };
-		IMV111111111111111111111 /* ImagePodcastImportViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePodcastImportViewModel.swift; sourceTree = "<group>"; };
-		JJJ222222222222222222222 /* EpisodeListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EpisodeListView.swift; sourceTree = "<group>"; };
-		KKK222222222222222222222 /* MiniPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiniPlayerView.swift; sourceTree = "<group>"; };
-		MMM222222222222222222222 /* DownloadManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadManager.swift; sourceTree = "<group>"; };
-		MOT222222222222222222222 /* MotionTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionTracker.swift; sourceTree = "<group>"; };
-		MOT444444444444444444444 /* MotionStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionStatusView.swift; sourceTree = "<group>"; };
-		MOT666666666666666666666 /* MotionAudioCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionAudioCoordinator.swift; sourceTree = "<group>"; };
-		MOT888888888888888888888 /* MotionEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionEvent.swift; sourceTree = "<group>"; };
-		MOT999999999999999999999 /* MotionTabContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionTabContainerView.swift; sourceTree = "<group>"; };
-		NNN222222222222222222222 /* DownloadsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadsView.swift; sourceTree = "<group>"; };
-		OOO222222222222222222222 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		PHO444444444444444444444 /* PhotosUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PhotosUI.framework; path = System/Library/Frameworks/PhotosUI.framework; sourceTree = SDKROOT; };
-		PIDX11111111111111111111 /* PodcastIndexModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PodcastIndexModels.swift; sourceTree = "<group>"; };
-		SRCH11111111111111111111 /* PodcastSearchResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PodcastSearchResult.swift; sourceTree = "<group>"; };
-		SRCH444444444444444444444 /* PodcastSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PodcastSearchView.swift; sourceTree = "<group>"; };
-		SRVC11111111111111111111 /* PodcastSearchService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PodcastSearchService.swift; sourceTree = "<group>"; };
-		TXT111111111111111111111 /* TextProcessingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextProcessingService.swift; sourceTree = "<group>"; };
-		VIS111111111111111111111 /* VisionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisionService.swift; sourceTree = "<group>"; };
-		VIS444444444444444444444 /* Vision.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Vision.framework; path = System/Library/Frameworks/Vision.framework; sourceTree = SDKROOT; };
+		02E4DE8CF024785D92B1EBC4 /* GrokVoiceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrokVoiceView.swift; sourceTree = "<group>"; };
+		1C388DA753AFE5093063A2A4 /* GardenManager.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = GardenManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		39305927F4656B443DBA3B5A /* GrokVoiceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrokVoiceService.swift; sourceTree = "<group>"; };
+		57E25AB53CF1C8F7AA8580F3 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		613D126342A6B10D41E68D1C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		8919C9873ED7317E8A8E62AC /* GardenManagerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GardenManagerApp.swift; sourceTree = "<group>"; };
+		F238D1F176156184E7E8AFAA /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		CCC20DAA2F57B1FD008E96B9 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Info.plist,
-			);
-			target = CCC20D8E2F57B1FC008E96B9 /* gardenManagerVision */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
-/* Begin PBXFileSystemSynchronizedRootGroup section */
-		CCC20D902F57B1FC008E96B9 /* gardenManagerVision */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (CCC20DAA2F57B1FD008E96B9 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = gardenManagerVision; sourceTree = "<group>"; };
-		CCC20DA32F57B1FD008E96B9 /* gardenManagerVisionTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = gardenManagerVisionTests; sourceTree = "<group>"; };
-/* End PBXFileSystemSynchronizedRootGroup section */
-
-/* Begin PBXFrameworksBuildPhase section */
-		AEE444444444444444444444 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				VIS333333333333333333333 /* Vision.framework in Frameworks */,
-				PHO333333333333333333333 /* PhotosUI.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		CCC20D8C2F57B1FC008E96B9 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				CCC20D942F57B1FC008E96B9 /* RealityKitContent in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		CCC20D9D2F57B1FD008E96B9 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXFrameworksBuildPhase section */
-
 /* Begin PBXGroup section */
-		AFF555555555555555555555 = {
+		28C0822AC49FF25127182914 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				B00666666666666666666666 /* GardenManager */,
-				CCC20D902F57B1FC008E96B9 /* gardenManagerVision */,
-				CCC20D912F57B1FC008E96B9 /* Packages */,
-				CCC20DA32F57B1FD008E96B9 /* gardenManagerVisionTests */,
-				B11777777777777777777777 /* Products */,
-				CCE334E12F5209E6008F3749 /* Recovered References */,
-			);
-			sourceTree = "<group>";
-		};
-		B00666666666666666666666 /* GardenManager */ = {
-			isa = PBXGroup;
-			children = (
-				CCC20D882F536018008E96B9 /* GrokVoice */,
-				CCAAF83E2F082CA100D14C0E /* Info.plist */,
-				A22222222222222222222222 /* GardenManagerApp.swift */,
-				OOO222222222222222222222 /* AppDelegate.swift */,
-				MOTDDD111111111111111111 /* Motion */,
-				PPP111111111111111111111 /* Podcasts */,
-				PPP222222222222222222222 /* Tools */,
-				A66666666666666666666666 /* Assets.xcassets */,
-			);
-			path = GardenManager;
-			sourceTree = "<group>";
-		};
-		B11777777777777777777777 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				ADD333333333333333333333 /* GardenManager.app */,
-				CCC20D8F2F57B1FC008E96B9 /* gardenManagerVision.app */,
-				CCC20DA02F57B1FD008E96B9 /* gardenManagerVisionTests.xctest */,
+				1C388DA753AFE5093063A2A4 /* GardenManager.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		CCC20D882F536018008E96B9 /* GrokVoice */ = {
+		39F42B6B4D9CE7C82C363244 /* GardenManager */ = {
 			isa = PBXGroup;
 			children = (
-				CCC20D862F536018008E96B9 /* GrokVoiceService.swift */,
-				CCC20D872F536018008E96B9 /* GrokVoiceView.swift */,
+				57E25AB53CF1C8F7AA8580F3 /* AppDelegate.swift */,
+				F238D1F176156184E7E8AFAA /* Assets.xcassets */,
+				8919C9873ED7317E8A8E62AC /* GardenManagerApp.swift */,
+				613D126342A6B10D41E68D1C /* Info.plist */,
+				6E97B3C3FB5CB8DC34912ADF /* GrokVoice */,
+			);
+			path = GardenManager;
+			sourceTree = "<group>";
+		};
+		6E97B3C3FB5CB8DC34912ADF /* GrokVoice */ = {
+			isa = PBXGroup;
+			children = (
+				39305927F4656B443DBA3B5A /* GrokVoiceService.swift */,
+				02E4DE8CF024785D92B1EBC4 /* GrokVoiceView.swift */,
 			);
 			path = GrokVoice;
 			sourceTree = "<group>";
 		};
-		CCC20D912F57B1FC008E96B9 /* Packages */ = {
+		C5CBE673CA134839955C87E2 = {
 			isa = PBXGroup;
 			children = (
-				CCC20D922F57B1FC008E96B9 /* RealityKitContent */,
+				39F42B6B4D9CE7C82C363244 /* GardenManager */,
+				28C0822AC49FF25127182914 /* Products */,
 			);
-			path = Packages;
-			sourceTree = "<group>";
-		};
-		CCE334E12F5209E6008F3749 /* Recovered References */ = {
-			isa = PBXGroup;
-			children = (
-				VIS444444444444444444444 /* Vision.framework */,
-				PHO444444444444444444444 /* PhotosUI.framework */,
-			);
-			name = "Recovered References";
-			sourceTree = "<group>";
-		};
-		MOTAAA222222222222222222 /* Models */ = {
-			isa = PBXGroup;
-			children = (
-				MOT888888888888888888888 /* MotionEvent.swift */,
-			);
-			path = Models;
-			sourceTree = "<group>";
-		};
-		MOTBBB222222222222222222 /* Views */ = {
-			isa = PBXGroup;
-			children = (
-				CC2D86EB2F0A4A3E00EA33F5 /* MotionGraphsView.swift */,
-				MOT444444444444444444444 /* MotionStatusView.swift */,
-				MOT999999999999999999999 /* MotionTabContainerView.swift */,
-			);
-			path = Views;
-			sourceTree = "<group>";
-		};
-		MOTCCC222222222222222222 /* Services */ = {
-			isa = PBXGroup;
-			children = (
-				MOT222222222222222222222 /* MotionTracker.swift */,
-				MOT666666666666666666666 /* MotionAudioCoordinator.swift */,
-			);
-			path = Services;
-			sourceTree = "<group>";
-		};
-		MOTDDD111111111111111111 /* Motion */ = {
-			isa = PBXGroup;
-			children = (
-				MOTAAA222222222222222222 /* Models */,
-				MOTCCC222222222222222222 /* Services */,
-				MOTBBB222222222222222222 /* Views */,
-			);
-			path = Motion;
-			sourceTree = "<group>";
-		};
-		PPP111111111111111111111 /* Podcasts */ = {
-			isa = PBXGroup;
-			children = (
-				PPP333333333333333333333 /* Views */,
-				PPP444444444444444444444 /* Models */,
-				PPP555555555555555555555 /* Services */,
-			);
-			path = Podcasts;
-			sourceTree = "<group>";
-		};
-		PPP222222222222222222222 /* Tools */ = {
-			isa = PBXGroup;
-			children = (
-				PPP666666666666666666666 /* Views */,
-				PPP777777777777777777777 /* Models */,
-				PPP888888888888888888888 /* Services */,
-			);
-			path = Tools;
-			sourceTree = "<group>";
-		};
-		PPP333333333333333333333 /* Views */ = {
-			isa = PBXGroup;
-			children = (
-				III222222222222222222222 /* PodcastListView.swift */,
-				JJJ222222222222222222222 /* EpisodeListView.swift */,
-				KKK222222222222222222222 /* MiniPlayerView.swift */,
-				NNN222222222222222222222 /* DownloadsView.swift */,
-				IMG111111111111111111111 /* ImagePodcastImportView.swift */,
-				CCE334E42F521672008F3749 /* EpisodeListItem.swift */,
-				IMV111111111111111111111 /* ImagePodcastImportViewModel.swift */,
-				SRCH444444444444444444444 /* PodcastSearchView.swift */,
-			);
-			path = Views;
-			sourceTree = "<group>";
-		};
-		PPP444444444444444444444 /* Models */ = {
-			isa = PBXGroup;
-			children = (
-				FFF222222222222222222222 /* Podcast.swift */,
-				SRCH11111111111111111111 /* PodcastSearchResult.swift */,
-				PIDX11111111111111111111 /* PodcastIndexModels.swift */,
-			);
-			path = Models;
-			sourceTree = "<group>";
-		};
-		PPP555555555555555555555 /* Services */ = {
-			isa = PBXGroup;
-			children = (
-				HHH222222222222222222222 /* AudioPlayerService.swift */,
-				GGG222222222222222222222 /* RSSFeedParser.swift */,
-				MMM222222222222222222222 /* DownloadManager.swift */,
-				SRVC11111111111111111111 /* PodcastSearchService.swift */,
-				VIS111111111111111111111 /* VisionService.swift */,
-				TXT111111111111111111111 /* TextProcessingService.swift */,
-			);
-			path = Services;
-			sourceTree = "<group>";
-		};
-		PPP666666666666666666666 /* Views */ = {
-			isa = PBXGroup;
-			children = (
-				A44444444444444444444444 /* ContentView.swift */,
-				ACC222222222222222222222 /* ToolParameterSheet.swift */,
-			);
-			path = Views;
-			sourceTree = "<group>";
-		};
-		PPP777777777777777777777 /* Models */ = {
-			isa = PBXGroup;
-			children = (
-				A88888888888888888888888 /* Tool.swift */,
-			);
-			path = Models;
-			sourceTree = "<group>";
-		};
-		PPP888888888888888888888 /* Services */ = {
-			isa = PBXGroup;
-			children = (
-				AAA000000000000000000000 /* ToolService.swift */,
-				DDD222222222222222222222 /* SpeechRecognizer.swift */,
-				EEE222222222222222222222 /* CommandParser.swift */,
-			);
-			path = Services;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		B55BBBBBBBBBBBBBBBBBBBBBB /* GardenManager */ = {
+		8090CD793CA5DB251BF5BFF4 /* GardenManager */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = B66CCCCCCCCCCCCCCCCCCCCCC /* Build configuration list for PBXNativeTarget "GardenManager" */;
+			buildConfigurationList = 913C2E941B3A4FB2A025CDA3 /* Build configuration list for PBXNativeTarget "GardenManager" */;
 			buildPhases = (
-				B77DDDDDDDDDDDDDDDDDDDDDD /* Sources */,
-				AEE444444444444444444444 /* Frameworks */,
-				B88EEEEEEEEEEEEEEEEEEEEEE /* Resources */,
+				AC9BF7B32BDCEF4B501E030A /* Sources */,
+				152C8DAE6E109E5002B9F8A1 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			name = GardenManager;
+			packageProductDependencies = (
+			);
 			productName = GardenManager;
-			productReference = ADD333333333333333333333 /* GardenManager.app */;
+			productReference = 1C388DA753AFE5093063A2A4 /* GardenManager.app */;
 			productType = "com.apple.product-type.application";
-		};
-		CCC20D8E2F57B1FC008E96B9 /* gardenManagerVision */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = CCC20DAB2F57B1FD008E96B9 /* Build configuration list for PBXNativeTarget "gardenManagerVision" */;
-			buildPhases = (
-				CCC20D8B2F57B1FC008E96B9 /* Sources */,
-				CCC20D8C2F57B1FC008E96B9 /* Frameworks */,
-				CCC20D8D2F57B1FC008E96B9 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			fileSystemSynchronizedGroups = (
-				CCC20D902F57B1FC008E96B9 /* gardenManagerVision */,
-			);
-			name = gardenManagerVision;
-			packageProductDependencies = (
-				CCC20D932F57B1FC008E96B9 /* RealityKitContent */,
-			);
-			productName = gardenManagerVision;
-			productReference = CCC20D8F2F57B1FC008E96B9 /* gardenManagerVision.app */;
-			productType = "com.apple.product-type.application";
-		};
-		CCC20D9F2F57B1FD008E96B9 /* gardenManagerVisionTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = CCC20DAC2F57B1FD008E96B9 /* Build configuration list for PBXNativeTarget "gardenManagerVisionTests" */;
-			buildPhases = (
-				CCC20D9C2F57B1FD008E96B9 /* Sources */,
-				CCC20D9D2F57B1FD008E96B9 /* Frameworks */,
-				CCC20D9E2F57B1FD008E96B9 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				CCC20DA22F57B1FD008E96B9 /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				CCC20DA32F57B1FD008E96B9 /* gardenManagerVisionTests */,
-			);
-			name = gardenManagerVisionTests;
-			packageProductDependencies = (
-			);
-			productName = gardenManagerVisionTests;
-			productReference = CCC20DA02F57B1FD008E96B9 /* gardenManagerVisionTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		B99FFFFFFFFFFFFFFFFFFFFF /* Project object */ = {
+		629BB110FCA66C5F544AC160 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 2630;
-				LastUpgradeCheck = 1500;
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1600;
 				TargetAttributes = {
-					B55BBBBBBBBBBBBBBBBBBBBBB = {
-						CreatedOnToolsVersion = 15.0;
-					};
-					CCC20D8E2F57B1FC008E96B9 = {
-						CreatedOnToolsVersion = 26.3;
-					};
-					CCC20D9F2F57B1FD008E96B9 = {
-						CreatedOnToolsVersion = 26.3;
-						TestTargetID = CCC20D8E2F57B1FC008E96B9;
+					8090CD793CA5DB251BF5BFF4 = {
+						DevelopmentTeam = 563V2QK49N;
+						ProvisioningStyle = Automatic;
 					};
 				};
 			};
-			buildConfigurationList = C00000000000000000000000 /* Build configuration list for PBXProject "GardenManager" */;
-			compatibilityVersion = "Xcode 14.0";
+			buildConfigurationList = DE90EDFFA36AAC3CAD62F477 /* Build configuration list for PBXProject "GardenManager" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
-				en,
 				Base,
+				en,
 			);
-			mainGroup = AFF555555555555555555555;
-			productRefGroup = B11777777777777777777777 /* Products */;
+			mainGroup = C5CBE673CA134839955C87E2;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 28C0822AC49FF25127182914 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				B55BBBBBBBBBBBBBBBBBBBBBB /* GardenManager */,
-				CCC20D8E2F57B1FC008E96B9 /* gardenManagerVision */,
-				CCC20D9F2F57B1FD008E96B9 /* gardenManagerVisionTests */,
+				8090CD793CA5DB251BF5BFF4 /* GardenManager */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		B88EEEEEEEEEEEEEEEEEEEEEE /* Resources */ = {
+		152C8DAE6E109E5002B9F8A1 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A55555555555555555555555 /* Assets.xcassets in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		CCC20D8D2F57B1FC008E96B9 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		CCC20D9E2F57B1FD008E96B9 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
+				F40B7A27987F32C13BDC2DBE /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		B77DDDDDDDDDDDDDDDDDDDDDD /* Sources */ = {
+		AC9BF7B32BDCEF4B501E030A /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CCC20D892F536018008E96B9 /* GrokVoiceService.swift in Sources */,
-				CCC20D8A2F536018008E96B9 /* GrokVoiceView.swift in Sources */,
-				A33333333333333333333333 /* ContentView.swift in Sources */,
-				A11111111111111111111111 /* GardenManagerApp.swift in Sources */,
-				A77777777777777777777777 /* Tool.swift in Sources */,
-				A99999999999999999999999 /* ToolService.swift in Sources */,
-				ABB111111111111111111111 /* ToolParameterSheet.swift in Sources */,
-				DDD111111111111111111111 /* SpeechRecognizer.swift in Sources */,
-				EEE111111111111111111111 /* CommandParser.swift in Sources */,
-				FFF111111111111111111111 /* Podcast.swift in Sources */,
-				GGG111111111111111111111 /* RSSFeedParser.swift in Sources */,
-				HHH111111111111111111111 /* AudioPlayerService.swift in Sources */,
-				III111111111111111111111 /* PodcastListView.swift in Sources */,
-				JJJ111111111111111111111 /* EpisodeListView.swift in Sources */,
-				KKK111111111111111111111 /* MiniPlayerView.swift in Sources */,
-				MMM111111111111111111111 /* DownloadManager.swift in Sources */,
-				CCE334E52F521672008F3749 /* EpisodeListItem.swift in Sources */,
-				NNN111111111111111111111 /* DownloadsView.swift in Sources */,
-				CC2D86EC2F0A4A3E00EA33F5 /* MotionGraphsView.swift in Sources */,
-				OOO111111111111111111111 /* AppDelegate.swift in Sources */,
-				MOT111111111111111111111 /* MotionTracker.swift in Sources */,
-				MOT333333333333333333333 /* MotionStatusView.swift in Sources */,
-				MOT555555555555555555555 /* MotionAudioCoordinator.swift in Sources */,
-				MOTAAA111111111111111111 /* MotionEvent.swift in Sources */,
-				MOTBBB111111111111111111 /* MotionTabContainerView.swift in Sources */,
-				VIS222222222222222222222 /* VisionService.swift in Sources */,
-				TXT222222222222222222222 /* TextProcessingService.swift in Sources */,
-				IMG222222222222222222222 /* ImagePodcastImportView.swift in Sources */,
-				IMV222222222222222222222 /* ImagePodcastImportViewModel.swift in Sources */,
-				SRCH22222222222222222222 /* PodcastSearchResult.swift in Sources */,
-				SRCH333333333333333333333 /* PodcastSearchView.swift in Sources */,
-				PIDX22222222222222222222 /* PodcastIndexModels.swift in Sources */,
-				SRVC22222222222222222222 /* PodcastSearchService.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		CCC20D8B2F57B1FC008E96B9 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		CCC20D9C2F57B1FD008E96B9 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
+				58DE49DAEDCCB7C78C2A0477 /* AppDelegate.swift in Sources */,
+				2190DBF72C1AC02F2AB01302 /* GardenManagerApp.swift in Sources */,
+				CEB5386EA518934CD63F9F4B /* GrokVoiceService.swift in Sources */,
+				D3D5864AB12A7B038FEB2DEC /* GrokVoiceView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
-/* Begin PBXTargetDependency section */
-		CCC20DA22F57B1FD008E96B9 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = CCC20D8E2F57B1FC008E96B9 /* gardenManagerVision */;
-			targetProxy = CCC20DA12F57B1FD008E96B9 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
-
 /* Begin XCBuildConfiguration section */
-		C11111111111111111111111 /* Debug */ = {
+		7CC7B70EC09735548F0F3AF1 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
@@ -560,18 +176,95 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 563V2QK49N;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_FILE = GardenManager/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		8067D8C84F36F7FA320A2867 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = GardenManager/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.gardenmanager.application;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		86021CCC0C9FD3C3552C2074 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 563V2QK49N;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
 					"$(inherited)",
+					"DEBUG=1",
 				);
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
@@ -579,304 +272,58 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_FILE = GardenManager/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
-				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
-		C22222222222222222222222 /* Release */ = {
+		EC995564DBAFD4A5969501E0 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
-				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
-				CLANG_ENABLE_MODULES = YES;
-				CLANG_ENABLE_OBJC_ARC = YES;
-				CLANG_ENABLE_OBJC_WEAK = YES;
-				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
-				CLANG_WARN_BOOL_CONVERSION = YES;
-				CLANG_WARN_COMMA = YES;
-				CLANG_WARN_CONSTANT_CONVERSION = YES;
-				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
-				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
-				CLANG_WARN_EMPTY_BODY = YES;
-				CLANG_WARN_ENUM_CONVERSION = YES;
-				CLANG_WARN_INFINITE_RECURSION = YES;
-				CLANG_WARN_INT_CONVERSION = YES;
-				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
-				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
-				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
-				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
-				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
-				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
-				CLANG_WARN_STRICT_PROTOTYPES = YES;
-				CLANG_WARN_SUSPICIOUS_MOVE = YES;
-				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CLANG_WARN_UNREACHABLE_CODE = YES;
-				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				COPY_PHASE_STRIP = NO;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				ENABLE_NS_ASSERTIONS = NO;
-				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu17;
-				GCC_NO_COMMON_BLOCKS = YES;
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
-				GCC_WARN_UNDECLARED_SELECTOR = YES;
-				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
-				GCC_WARN_UNUSED_FUNCTION = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
-				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MTL_ENABLE_DEBUG_INFO = NO;
-				MTL_FAST_MATH = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = GardenManager/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.gardenmanager.application;
 				SDKROOT = iphoneos;
-				SWIFT_COMPILATION_MODE = wholemodule;
-				VALIDATE_PRODUCT = YES;
-			};
-			name = Release;
-		};
-		C33333333333333333333333 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "";
-				DEVELOPMENT_TEAM = C545RG9LW8;
-				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = GardenManager/Info.plist;
-				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "This app needs network access to download podcast episodes.";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Garden Manager needs microphone access to listen to your voice commands.";
-				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Garden Manager uses speech recognition to understand your voice commands and execute garden tools.";
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UIBackgroundModes = "audio fetch";
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.gardenmanager.application;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator xros xrsimulator";
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 6.0;
-				TARGETED_DEVICE_FAMILY = "1,2,7";
-				XROS_DEPLOYMENT_TARGET = 26.0;
-			};
-			name = Debug;
-		};
-		C44444444444444444444444 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_ASSET_PATHS = "";
-				DEVELOPMENT_TEAM = C545RG9LW8;
-				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = GardenManager/Info.plist;
-				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "This app needs network access to download podcast episodes.";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Garden Manager needs microphone access to listen to your voice commands.";
-				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Garden Manager uses speech recognition to understand your voice commands and execute garden tools.";
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UIBackgroundModes = "audio fetch";
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.gardenmanager.application;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator xros xrsimulator";
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 6.0;
-				TARGETED_DEVICE_FAMILY = "1,2,7";
-				XROS_DEPLOYMENT_TARGET = 26.0;
-			};
-			name = Release;
-		};
-		CCC20DA62F57B1FD008E96B9 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = C545RG9LW8;
-				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "$(TARGET_NAME)/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.longTermSelf.gardenManagerVision;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = xros;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SUPPORTED_PLATFORMS = "xros xrsimulator";
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 7;
-				XROS_DEPLOYMENT_TARGET = 26.2;
-			};
-			name = Debug;
-		};
-		CCC20DA72F57B1FD008E96B9 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = C545RG9LW8;
-				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "$(TARGET_NAME)/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.longTermSelf.gardenManagerVision;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = xros;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
-				SUPPORTED_PLATFORMS = "xros xrsimulator";
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 7;
-				XROS_DEPLOYMENT_TARGET = 26.2;
-			};
-			name = Release;
-		};
-		CCC20DA82F57B1FD008E96B9 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = C545RG9LW8;
-				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.longTermSelf.gardenManagerVisionTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = xros;
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SUPPORTED_PLATFORMS = "xros xrsimulator";
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 7;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/gardenManagerVision.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/gardenManagerVision";
-				XROS_DEPLOYMENT_TARGET = 26.2;
-			};
-			name = Debug;
-		};
-		CCC20DA92F57B1FD008E96B9 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = C545RG9LW8;
-				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.longTermSelf.gardenManagerVisionTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = xros;
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SUPPORTED_PLATFORMS = "xros xrsimulator";
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 7;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/gardenManagerVision.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/gardenManagerVision";
-				XROS_DEPLOYMENT_TARGET = 26.2;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		B66CCCCCCCCCCCCCCCCCCCCCC /* Build configuration list for PBXNativeTarget "GardenManager" */ = {
+		913C2E941B3A4FB2A025CDA3 /* Build configuration list for PBXNativeTarget "GardenManager" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				C33333333333333333333333 /* Debug */,
-				C44444444444444444444444 /* Release */,
+				8067D8C84F36F7FA320A2867 /* Debug */,
+				EC995564DBAFD4A5969501E0 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
-		C00000000000000000000000 /* Build configuration list for PBXProject "GardenManager" */ = {
+		DE90EDFFA36AAC3CAD62F477 /* Build configuration list for PBXProject "GardenManager" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				C11111111111111111111111 /* Debug */,
-				C22222222222222222222222 /* Release */,
+				86021CCC0C9FD3C3552C2074 /* Debug */,
+				7CC7B70EC09735548F0F3AF1 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		CCC20DAB2F57B1FD008E96B9 /* Build configuration list for PBXNativeTarget "gardenManagerVision" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				CCC20DA62F57B1FD008E96B9 /* Debug */,
-				CCC20DA72F57B1FD008E96B9 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		CCC20DAC2F57B1FD008E96B9 /* Build configuration list for PBXNativeTarget "gardenManagerVisionTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				CCC20DA82F57B1FD008E96B9 /* Debug */,
-				CCC20DA92F57B1FD008E96B9 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		CCC20D932F57B1FC008E96B9 /* RealityKitContent */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = RealityKitContent;
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
-	rootObject = B99FFFFFFFFFFFFFFFFFFFFF /* Project object */;
+	rootObject = 629BB110FCA66C5F544AC160 /* Project object */;
 }

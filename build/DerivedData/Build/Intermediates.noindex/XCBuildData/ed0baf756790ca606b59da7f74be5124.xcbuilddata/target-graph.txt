@@ -1,2 +1,0 @@
-Target dependency graph (1 target)
-Target 'GardenManager' in project 'GardenManager' (no dependencies)
