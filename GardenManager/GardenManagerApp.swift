@@ -18,11 +18,13 @@ struct RootView: View {
     var body: some View {
         TabView {
             GrokVoiceView()
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .tabItem {
                 Label("Grok", systemImage: "waveform")
             }
             
             AIAssistantTabView()
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .tabItem {
                 Label("AI", systemImage: "sparkles")
             }
