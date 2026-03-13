@@ -21,6 +21,11 @@ struct RootView: View {
             .tabItem {
                 Label("Grok", systemImage: "waveform")
             }
+            
+            AIAssistantTabView()
+            .tabItem {
+                Label("AI", systemImage: "sparkles")
+            }
         }
         .tint(.blue)
     }
