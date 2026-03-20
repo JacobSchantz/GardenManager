@@ -8,6 +8,11 @@ Goal: Preserve existing implementation as much as possible while making the buil
 - Only runs AFTER build failure is detected (existing Telegram notification triggers)
 - Integrates with existing github-listener server.js build logic
 
+## Notification Flow
+1. **First**: Send build failure notification immediately (existing behavior)
+2. **Then**: Attempt auto-fix
+3. **Finally**: Send follow-up with fix results (what was changed, or "auto-fix failed")
+
 ## ☐ Phase 1: Research & Exploration
 
 - [ ] 1.1 Understand Garden Manager architecture
@@ -71,6 +76,7 @@ Goal: Preserve existing implementation as much as possible while making the buil
 
 ## Notes
 
+- **Always notify first**: Send build failure message BEFORE attempting any fixes
 - **Preserve implementation**: Only change what's absolutely necessary to fix the build
 - **Minimal edits**: Prefer smallest possible changes to fix each error
 - **Don't rewrite logic**: If code logic is wrong, prefer to comment it out or add TODO rather than rewrite
@@ -78,4 +84,4 @@ Goal: Preserve existing implementation as much as possible while making the buil
 - Use existing codebase patterns for any new code
 - Don't try to fix complex logic errors - just simple syntactic issues
 - Always verify build succeeds after auto-fix
-- Send Telegram message with fix summary (what was changed)
+- Send follow-up Telegram message with fix summary (what was changed, or "auto-fix failed")
