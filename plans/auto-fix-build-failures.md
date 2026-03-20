@@ -1,5 +1,13 @@
 # Auto-Fix Build Failures - Implementation Plan
 
+## Overview
+When a build fails, automatically attempt to fix the issues and retry the build.
+Goal: Preserve existing implementation as much as possible while making the build work.
+
+## Trigger
+- Only runs AFTER build failure is detected (existing Telegram notification triggers)
+- Integrates with existing github-listener server.js build logic
+
 ## ☐ Phase 1: Research & Exploration
 
 - [ ] 1.1 Understand Garden Manager architecture
@@ -15,8 +23,9 @@
 ## ☐ Phase 2: Build Failure Detection
 
 - [ ] 2.1 Detect when a build fails
-  - [ ] 2.1.1 Parse build output for error patterns
-  - [ ] 2.1.2 Identify error types (compile errors, linker errors, etc.)
+  - [ ] 2.1.1 Use existing github-listener detection (line 117-118 in server.js)
+  - [ ] 2.1.2 Parse build output for error patterns
+  - [ ] 2.1.3 Identify error types (compile errors, linker errors, etc.)
 - [ ] 2.2 Extract error details
   - [ ] 2.2.1 Parse file paths from error messages
   - [ ] 2.2.2 Extract line numbers
@@ -62,7 +71,11 @@
 
 ## Notes
 
+- **Preserve implementation**: Only change what's absolutely necessary to fix the build
+- **Minimal edits**: Prefer smallest possible changes to fix each error
+- **Don't rewrite logic**: If code logic is wrong, prefer to comment it out or add TODO rather than rewrite
 - Start simple: fix common errors like missing imports, typo fixes
-- Use existing codebase patterns ("moon style") for any new code
+- Use existing codebase patterns for any new code
 - Don't try to fix complex logic errors - just simple syntactic issues
 - Always verify build succeeds after auto-fix
+- Send Telegram message with fix summary (what was changed)
