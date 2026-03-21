@@ -23,7 +23,7 @@ struct RootView: View {
                 Label("Grok", systemImage: "waveform")
             }
 
-            AIAssistantTabView()
+            Text("AI Coming Soon")
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .tabItem {
                 Label("AI", systemImage: "sparkles")
