@@ -218,22 +218,22 @@ Only include fixes for actual compilation errors. Do not fix warnings. If no sim
 function callOpenAI(prompt) {
   return new Promise((resolve, reject) => {
     const https = require('https');
-    const apiKey = process.env.OPENAI_API_KEY || 'sk-...'; // Set via env var
+    const apiKey = process.env.OPENROUTER_API_KEY || 'sk-...'; // Set via env var
     
     if (apiKey === 'sk-...') {
-      reject(new Error('OPENAI_API_KEY not set'));
+      reject(new Error('OPENROUTER_API_KEY not set'));
       return;
     }
     
     const postData = JSON.stringify({
-      model: 'gpt-4o-mini',
+      model: 'openrouter/auto',
       messages: [{ role: 'user', content: prompt }],
       max_tokens: 2000
     });
     
     const options = {
-      hostname: 'api.openai.com',
-      path: '/v1/chat/completions',
+      hostname: 'openrouter.ai',
+      path: '/api/v1/chat/completions',
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
