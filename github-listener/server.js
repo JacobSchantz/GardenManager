@@ -115,7 +115,7 @@ function triggerBuild(scriptPath, appName, commitMessage) {
   exec(`bash "${scriptPath}" 2>&1`, { timeout: 600000 }, (error, stdout, stderr) => {
     const fullOutput = stdout + '\n' + stderr;
     const buildFailed = error || fullOutput.includes('BUILD FAILED') || fullOutput.includes('error:');
-    const buildSucceeded = fullOutput.includes('BUILD SUCCEEDED') || fullOutput.includes('App launched successfully');
+    const buildSucceeded = fullOutput.includes('BUILD SUCCEEDED') || fullOutput.includes('App launched successfully') || fullOutput.includes('Build completed successfully!') || fullOutput.includes('Build and install completed successfully!');
     
     // Truncate commit message if too long
     const shortCommitMsg = commitMessage.length > 100 ? commitMessage.substring(0, 100) + '...' : commitMessage;
