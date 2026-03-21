@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A1B2C3D4E5F60123456789AB /* AITabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1C2D3E4F5061234567890AB /* AITabView.swift */; };
 		2190DBF72C1AC02F2AB01302 /* GardenManagerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8919C9873ED7317E8A8E62AC /* GardenManagerApp.swift */; };
 		58DE49DAEDCCB7C78C2A0477 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57E25AB53CF1C8F7AA8580F3 /* AppDelegate.swift */; };
 		CEB5386EA518934CD63F9F4B /* GrokVoiceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39305927F4656B443DBA3B5A /* GrokVoiceService.swift */; };
@@ -21,6 +22,7 @@
 		57E25AB53CF1C8F7AA8580F3 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		613D126342A6B10D41E68D1C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8919C9873ED7317E8A8E62AC /* GardenManagerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GardenManagerApp.swift; sourceTree = "<group>"; };
+		B1C2D3E4F5061234567890AB /* AITabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AITabView.swift; sourceTree = "<group>"; };
 		F238D1F176156184E7E8AFAA /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -36,6 +38,7 @@
 		39F42B6B4D9CE7C82C363244 /* GardenManager */ = {
 			isa = PBXGroup;
 			children = (
+				C1D2E3F4051627384950A1B2 /* AI */,
 				57E25AB53CF1C8F7AA8580F3 /* AppDelegate.swift */,
 				F238D1F176156184E7E8AFAA /* Assets.xcassets */,
 				8919C9873ED7317E8A8E62AC /* GardenManagerApp.swift */,
@@ -43,6 +46,14 @@
 				6E97B3C3FB5CB8DC34912ADF /* GrokVoice */,
 			);
 			path = GardenManager;
+			sourceTree = "<group>";
+		};
+		C1D2E3F4051627384950A1B2 /* AI */ = {
+			isa = PBXGroup;
+			children = (
+				B1C2D3E4F5061234567890AB /* AITabView.swift */,
+			);
+			path = AI;
 			sourceTree = "<group>";
 		};
 		6E97B3C3FB5CB8DC34912ADF /* GrokVoice */ = {
@@ -133,6 +144,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A1B2C3D4E5F60123456789AB /* AITabView.swift in Sources */,
 				58DE49DAEDCCB7C78C2A0477 /* AppDelegate.swift in Sources */,
 				2190DBF72C1AC02F2AB01302 /* GardenManagerApp.swift in Sources */,
 				CEB5386EA518934CD63F9F4B /* GrokVoiceService.swift in Sources */,
