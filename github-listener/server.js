@@ -29,6 +29,18 @@ app.get('/', (req, res) => {
   res.json({ status: 'GitHub Listener running', events: ['push', 'pull_request', 'release'] });
 });
 
+// Kill any previous builds to avoid queued builds
+function killPreviousBuilds() {
+  console.log('🛑 Killing previous builds...');
+  exec('pkill -9 -f flutter; pkill -9 -f xcodebuild; pkill -9 -f "flutter run"; pkill -9 -f "flutter build"', (err) => {
+    if (err) {
+      console.log('No previous builds to kill (or none found)');
+    } else {
+      console.log('✅ Previous builds killed');
+    }
+  });
+}
+
 // Webhook endpoint - handles GitHub webhooks (form-urlencoded)
 app.use(express.urlencoded({ extended: true }));
 app.post('/webhook', (req, res) => {
@@ -93,6 +105,9 @@ function handlePush(payload) {
     return;
   }
   
+  // Kill any previous builds before starting new one
+  killPreviousBuilds();
+  
   // Route based on repository
   if (repoName === 'atg_monorepo' && branch === 'Peaches') {
     console.log('🔥 Triggering ATG iOS build...');
@@ -112,13 +127,14 @@ function handlePush(payload) {
 }
 
 function triggerBuild(scriptPath, appName, commitMessage) {
+  // Send message that build is starting
+  const shortCommitMsg = commitMessage.length > 100 ? commitMessage.substring(0, 100) + '...' : commitMessage;
+  sendTelegramMessage(`🏗️ ${appName} build started...\n\nCommit: ${shortCommitMsg}`);
+  
   exec(`bash "${scriptPath}" 2>&1`, { timeout: 600000 }, (error, stdout, stderr) => {
     const fullOutput = stdout + '\n' + stderr;
     const buildFailed = error || fullOutput.includes('BUILD FAILED') || (fullOutput.includes('error:') && !fullOutput.includes('Error running application'));
     const buildSucceeded = fullOutput.includes('BUILD SUCCEEDED') || fullOutput.includes('App launched successfully') || fullOutput.includes('Build completed successfully!') || fullOutput.includes('Build and install completed successfully!');
-    
-    // Truncate commit message if too long
-    const shortCommitMsg = commitMessage.length > 100 ? commitMessage.substring(0, 100) + '...' : commitMessage;
     
     if (buildFailed) {
       console.error(`${appName} build FAILED:`, error?.message || 'Build error');
