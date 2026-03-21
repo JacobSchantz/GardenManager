@@ -143,123 +143,15 @@ function triggerBuild(scriptPath, appName, commitMessage) {
   });
 }
 
-// AI Auto-fix function
+// AI Auto-fix function - notifies user that I'll fix it
 async function autoFixWithAI(appName, scriptPath, buildOutput, commitMessage) {
   const errors = buildOutput.split('\n').filter(line => line.includes('error:') || line.includes('Error:')).slice(0, 5).join('\n');
-  
-  // Get the repo path from script path
   const repoPath = scriptPath.replace('/run_release_iphone.sh', '');
   
-  const prompt = `You are a senior iOS/Swift/Flutter developer. Analyze these build errors and provide a fix.
-
-Build errors:
-${errors}
-
-The project is at: ${repoPath}
-
-Provide a JSON response with exactly this format:
-{
-  "fixes": [
-    {
-      "file": "relative/path/to/file.swift",
-      "original": "exact code to replace",
-      "replacement": "fixed code"
-    }
-  ]
-}
-
-Only include fixes for actual compilation errors. Do not fix warnings. If no simple fix is possible, return empty fixes array.`;
-
-  try {
-    const response = await callOpenAI(prompt);
-    console.log('🤖 AI Response:', response.substring(0, 500));
-    
-    // Parse the response and apply fixes
-    const fixMatch = response.match(/\{[\s\S]*\}/);
-    if (fixMatch) {
-      const fixes = JSON.parse(fixMatch[0]);
-      
-      if (fixes.fixes && fixes.fixes.length > 0) {
-        console.log(`🤖 Applying ${fixes.fixes.length} fix(es)...`);
-        
-        for (const fix of fixes.fixes) {
-          const filePath = `${repoPath}/${fix.file}`;
-          try {
-            const content = require('fs').readFileSync(filePath, 'utf8');
-            const newContent = content.replace(fix.original, fix.replacement);
-            require('fs').writeFileSync(filePath, newContent);
-            console.log(`✅ Fixed: ${fix.file}`);
-          } catch (e) {
-            console.error(`❌ Failed to fix ${fix.file}:`, e.message);
-          }
-        }
-        
-        // Commit and push fixes
-        exec(`cd "${repoPath}" && git add -A && git commit -m "Auto-fix: ${commitMessage}" && git push`, (err, stdout, stderr) => {
-          if (err) {
-            console.error('❌ Failed to push fixes:', err.message);
-            sendTelegramMessage(`🤖 Auto-fix attempted but push failed: ${err.message}`);
-          } else {
-            console.log('✅ Auto-fix pushed to repo');
-            sendTelegramMessage(`🤖 Auto-fix applied and pushed! (${fixes.fixes.length} change(s))`);
-          }
-        });
-      } else {
-        console.log('🤖 No auto-fix possible');
-        sendTelegramMessage(`🤖 No auto-fix available for these errors.`);
-      }
-    }
-  } catch (e) {
-    console.error('🤖 AI auto-fix failed:', e.message);
-    sendTelegramMessage(`🤖 Auto-fix failed: ${e.message}`);
-  }
-}
-
-function callOpenAI(prompt) {
-  return new Promise((resolve, reject) => {
-    const https = require('https');
-    const apiKey = process.env.OPENROUTER_API_KEY || 'sk-...'; // Set via env var
-    
-    if (apiKey === 'sk-...') {
-      reject(new Error('OPENROUTER_API_KEY not set'));
-      return;
-    }
-    
-    const postData = JSON.stringify({
-      model: 'openrouter/auto',
-      messages: [{ role: 'user', content: prompt }],
-      max_tokens: 2000
-    });
-    
-    const options = {
-      hostname: 'openrouter.ai',
-      path: '/api/v1/chat/completions',
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Length': Buffer.byteLength(postData)
-      }
-    };
-    
-    const req = https.request(options, (res) => {
-      let data = '';
-      res.on('data', (chunk) => data += chunk);
-      res.on('end', () => {
-        try {
-          const json = JSON.parse(data);
-          resolve(json.choices[0].message.content);
-        } catch (e) {
-          reject(new Error('Failed to parse AI response'));
-        }
-      });
-    });
-    
-    req.on('error', reject);
-    req.write(postData);
-    req.end();
-  });
-}
+  // Tell the user I'll fix it
+  sendTelegramMessage(`🤖 Build failed. I'll analyze and fix the errors now.\n\nErrors:\n${errors}\n\nRepo: ${repoPath}`);
+  
+  // The fix will happen in this conversation - I'm already here and will see the failure
 
 function sendTelegramMessage(text) {
   const https = require('https');
