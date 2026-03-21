@@ -10,7 +10,6 @@ struct GardenManagerApp: App {
         WindowGroup {
             RootView()
         }
-
     }
 }
 
@@ -24,19 +23,11 @@ struct RootView: View {
                 Label("Grok", systemImage: "waveform")
             }
 
-            
-            // AIAssistantTabView()
-            // .frame(maxWidth: .infinity, maxHeight: .infinity)
-            // .tabItem {
-            //     Label("AI", systemImage: "sparkles")
-            // }
-            
-            Text("AI Coming Soon")
+            AIAssistantTabView()
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .tabItem {
                 Label("AI", systemImage: "sparkles")
             }
-
         }
 
         .tint(.blue)
