@@ -138,9 +138,14 @@ function triggerBuild(scriptPath, appName, commitMessage) {
     
     if (buildFailed) {
       console.error(`${appName} build FAILED:`, error?.message || 'Build error');
-      // Extract error summary
-      const errors = fullOutput.split('\n').filter(line => line.includes('error:')).slice(0, 5).join('\n');
-      sendTelegramMessage(`🚨 ${appName} build FAILED!\n\nCommit: ${shortCommitMsg}\n\n${errors || error?.message || 'Check logs'}`);
+      // Extract error summary - more comprehensive
+      const errors = fullOutput.split('\n').filter(line => 
+        line.includes('error:') || 
+        line.includes('Error:') || 
+        line.includes('BUILD FAILED') ||
+        line.includes('fatal:')
+      ).slice(0, 8).join('\n');
+      sendTelegramMessage(`🚨 ${appName} build FAILED!\n\nCommit: ${shortCommitMsg}\n\nError:\n${errors || error?.message || 'Unknown error - check logs'}`);
       
       // Attempt AI auto-fix
       console.log('🤖 Attempting AI auto-fix...');
