@@ -114,7 +114,7 @@ function handlePush(payload) {
 function triggerBuild(scriptPath, appName, commitMessage) {
   exec(`bash "${scriptPath}" 2>&1`, { timeout: 600000 }, (error, stdout, stderr) => {
     const fullOutput = stdout + '\n' + stderr;
-    const buildFailed = error || fullOutput.includes('BUILD FAILED') || fullOutput.includes('error:');
+    const buildFailed = error || fullOutput.includes('BUILD FAILED') || (fullOutput.includes('error:') && !fullOutput.includes('Error running application'));
     const buildSucceeded = fullOutput.includes('BUILD SUCCEEDED') || fullOutput.includes('App launched successfully') || fullOutput.includes('Build completed successfully!') || fullOutput.includes('Build and install completed successfully!');
     
     // Truncate commit message if too long
@@ -152,6 +152,7 @@ async function autoFixWithAI(appName, scriptPath, buildOutput, commitMessage) {
   sendTelegramMessage(`🤖 Build failed. I'll analyze and fix the errors now.\n\nErrors:\n${errors}\n\nRepo: ${repoPath}`);
   
   // The fix will happen in this conversation - I'm already here and will see the failure
+}
 
 function sendTelegramMessage(text) {
   const https = require('https');
