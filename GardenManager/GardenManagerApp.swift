@@ -25,7 +25,13 @@ struct RootView: View {
             }
 
             
-            AIAssistantTabView()
+            // AIAssistantTabView()
+            // .frame(maxWidth: .infinity, maxHeight: .infinity)
+            // .tabItem {
+            //     Label("AI", systemImage: "sparkles")
+            // }
+            
+            Text("AI Coming Soon")
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .tabItem {
                 Label("AI", systemImage: "sparkles")

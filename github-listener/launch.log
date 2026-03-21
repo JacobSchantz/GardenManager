@@ -1,0 +1,301 @@
+GitHub Listener running on port 8765
+Webhook URL: /webhook
+Received push event
+Repo: atg_monorepo Branch: Peaches
+Push to Peaches by undefined (repo: atg_monorepo)
+Commits: 1, before: undefined, after: undefined
+Latest commit: test
+🔥 Triggering ATG iOS build...
+Received push event
+Repo: GardenManager Branch: main
+Push to main by butterber347 (repo: GardenManager)
+Commits: 1, before: 93a14ec57215e6cc9f3fb96a40955b0d0c922e52, after: f018812a58ddadd095cf3a2c06f5e2c2cbf066d4
+Latest commit: Fix webhook payload parsing for form-urlencoded
+🌱 Triggering GardenManager iOS build...
+GardenManager build FAILED: Command failed: bash "/Users/peanut/.openclaw/workspace/GardenManager/run_release_iphone.sh" 2>&1
+
+Telegram notification sent
+Received push event
+Repo: atg_monorepo Branch: Peaches
+Push to Peaches by butterber347 (repo: atg_monorepo)
+Commits: 1, before: 1a84869dd89a30cd87bbf3b7e7b8245a9bf37508, after: 05ff5f3f97764c51bcf22a46a52421d222b71872
+Latest commit: trigger build test
+🔥 Triggering ATG iOS build...
+ATG build FAILED: Command failed: bash "/Users/peanut/.openclaw/workspace/atg_monorepo/run_release_iphone.sh" 2>&1
+
+Telegram notification sent
+ATG build FAILED: Command failed: bash "/Users/peanut/.openclaw/workspace/atg_monorepo/run_release_iphone.sh" 2>&1
+
+Telegram notification sent
+Received push event
+Repo: atg_monorepo Branch: Peaches
+Push to Peaches by butterber347 (repo: atg_monorepo)
+Commits: 1, before: 05ff5f3f97764c51bcf22a46a52421d222b71872, after: 7461cd5e9425cbda088d97909e2e6d3458021a41
+Latest commit: Use flutter build ipa instead of run for automated builds
+🔥 Triggering ATG iOS build...
+Received push event
+Repo: atg_monorepo Branch: Peaches
+Push to Peaches by butterber347 (repo: atg_monorepo)
+Commits: 1, before: 7461cd5e9425cbda088d97909e2e6d3458021a41, after: 16917c6b46a41dead9d446271e00f6ef2bc2fd83
+Latest commit: trigger ipa build
+🔥 Triggering ATG iOS build...
+ATG build FAILED: Command failed: bash "/Users/peanut/.openclaw/workspace/atg_monorepo/run_release_iphone.sh" 2>&1
+
+Telegram notification sent
+ATG build FAILED: Command failed: bash "/Users/peanut/.openclaw/workspace/atg_monorepo/run_release_iphone.sh" 2>&1
+
+Telegram notification sent
+Received push event
+Repo: atg_monorepo Branch: Peaches
+Push to Peaches by butterber347 (repo: atg_monorepo)
+Commits: 1, before: 16917c6b46a41dead9d446271e00f6ef2bc2fd83, after: bf59469039607fd1b3b62811b8ce133dd7567cac
+Latest commit: Build for simulator instead of device
+🔥 Triggering ATG iOS build...
+ATG build FAILED: Command failed: bash "/Users/peanut/.openclaw/workspace/atg_monorepo/run_release_iphone.sh" 2>&1
+
+Telegram notification sent
+Received push event
+Repo: atg_monorepo Branch: Peaches
+Push to Peaches by butterber347 (repo: atg_monorepo)
+Commits: 1, before: bf59469039607fd1b3b62811b8ce133dd7567cac, after: f0a0349b918a522e7b84e5db75eee3c40c40df08
+Latest commit: simulator build test
+🔥 Triggering ATG iOS build...
+ATG build FAILED: Command failed: bash "/Users/peanut/.openclaw/workspace/atg_monorepo/run_release_iphone.sh" 2>&1
+
+Telegram notification sent
+Received push event
+Repo: atg_monorepo Branch: Peaches
+Push to Peaches by butterber347 (repo: atg_monorepo)
+Commits: 1, before: f0a0349b918a522e7b84e5db75eee3c40c40df08, after: 763896fa8e61fac27236acc35021bed7cca8264e
+Latest commit: Use debug mode for simulator build
+🔥 Triggering ATG iOS build...
+Received push event
+Repo: atg_monorepo Branch: Peaches
+Push to Peaches by butterber347 (repo: atg_monorepo)
+Commits: 1, before: 763896fa8e61fac27236acc35021bed7cca8264e, after: 69bae535425ec99a369b0929808907069728c330
+Latest commit: debug build test
+🔥 Triggering ATG iOS build...
+ATG build FAILED: Command failed: bash "/Users/peanut/.openclaw/workspace/atg_monorepo/run_release_iphone.sh" 2>&1
+
+Telegram notification sent
+ATG build FAILED: Command failed: bash "/Users/peanut/.openclaw/workspace/atg_monorepo/run_release_iphone.sh" 2>&1
+
+Telegram notification sent
+Received push event
+Repo: atg_monorepo Branch: Peaches
+Push to Peaches by butterber347 (repo: atg_monorepo)
+Commits: 1, before: 69bae535425ec99a369b0929808907069728c330, after: 14c4e4f385faccf2e2f26939dd638cbec2a61036
+Latest commit: Fix build errors: MoonStyle, remainingSeconds, TimedExercise.title
+🔥 Triggering ATG iOS build...
+ATG build output: Building and running Moon Coaching app in release mode on iPhone...
+Pulling latest changes...
+From https://github.com/caleb654/atg_monorepo
+ * branch                Peaches    -> FETCH_HEAD
+Already up to date.
+Building for simulator (debug)...
+Resolving dependencies in `/Users/peanut/.openclaw/workspace/atg_monorepo`...
+Downloading packages...
+  _fe_analyzer_shared 85.0.0 (98.0.0 available)
+  _flutterfire_internals 1.3.65 (1.3.67 available)
+  accessibility_tools 2.6.0 (2.8.0 available)
+  analyzer 7.7.1 (12.0.0 available)
+  animations 2.0.11 (2.1.1 available)
+  archive 4.0.7 (4.0.9 available)
+  audio_session 0.2.2 (0.2.3 available)
+  audioplayers 6.5.1 (6.6.0 available)
+  audioplayers_darwin 6.3.0 (6.4.0 available)
+  audioplayers_web 5.1.1 (5.2.0 available)
+  audioplayers_windows 4.2.1 (4.3.0 available)
+  background_downloader 9.4.1 (9.5.4 available)
+  boxy 2.2.1 (2.2.2 available)
+  build 2.5.4 (4.0.4 available)
+  build_config 1.1.2 (1.3.0 available)
+  build_daemon 4.0.4 (4.1.1 available)
+  build_resolvers 2.5.4 (3.0.4 available)
+! build_runner 2.5.4 (overridden) (2.13.0 available)
+  build_runner_core 9.1.2 (9.3.2 available)
+  built_value 8.11.0 (8.12.4 available)
+  calendar_date_picker2 1.1.9 (2.0.1 available)
+  camera 0.11.2 (0.12.0+1 available)
+  camera_android_camerax 0.6.19 (0.7.1 available)
+  camera_avfoundation 0.9.20+6 (0.10.1 available)
+  camera_platform_interface 2.10.0 (2.12.0 available)
+  camera_web 0.3.5 (0.3.5+3 available)
+  chalkdart 3.0.5 (3.1.0 available)
+  cloud_firestore 6.1.1 (6.1.3 available)
+  cloud_firestore_platform_interface 7.0.5 (7.0.7 available)
+  cloud_firestore_web 5.1.1 (5.1.3 available)
+  cloud_functions 6.0.5 (6.0.7 available)
+  cloud_functions_platform_interface 5.8.8 (5.8.10 available)
+  cloud_functions_web 5.1.1 (5.1.3 available)
+  code_builder 4.10.1 (4.11.1 available)
+  connectivity_plus 6.1.5 (7.0.0 available)
+  cross_file 0.3.5+1 (0.3.5+2 available)
+  csv 6.0.0 (8.0.0 available)
+  dart_style 3.1.1 (3.1.8 available)
+  dbus 0.7.11 (0.7.12 available)
+! dependency_validator 5.0.2 (overridden) (5.0.4 available)
+  dio 5.9.0 (5.9.2 available)
+  dio_web_adapter 2.1.1 (2.1.2 available)
+  dotted_border 2.1.0 (3.1.0 available)
+  equatable 2.0.7 (2.0.8 available)
+  ffi 2.1.4 (2.2.0 available)
+  file_picker 10.3.7 (10.3.10 available)
+  file_selector_linux 0.9.3+2 (0.9.4 available)
+  file_selector_macos 0.9.4+3 (0.9.5 available)
+  file_selector_platform_interface 2.6.2 (2.7.0 available)
+  file_selector_windows 0.9.3+4 (0.9.3+5 available)
+  firebase_auth 6.1.3 (6.2.0 available)
+  firebase_auth_platform_interface 8.1.5 (8.1.7 available)
+  firebase_auth_web 6.1.1 (6.1.3 available)
+  firebase_core 4.3.0 (4.5.0 available)
+  firebase_core_web 3.3.1 (3.5.0 available)
+  firebase_crashlytics 5.0.6 (5.0.8 available)
+  firebase_crashlytics_platform_interface 3.8.16 (3.8.18 available)
+  firebase_messaging 16.1.0 (16.1.2 available)
+  firebase_messaging_platform_interface 4.7.5 (4.7.7 available)
+  firebase_messaging_web 4.1.1 (4.1.3 available)
+  firebase_storage 13.0.5 (13.1.0 available)
+  firebase_storage_platform_interface 5.2.16 (5.2.18 available)
+  firebase_storage_web 3.11.1 (3.11.3 available)
+  fl_chart 0.66.2 (1.2.0 available)
+  flat_buffers 23.5.26 (25.9.23 available)
+! flutter_flavorizr 2.4.1 (overridden) (2.4.2 available)
+  flutter_hooks 0.20.5 (0.21.3+1 available)
+! flutter_launcher_icons 0.14.4 (overridden)
+! flutter_lints 6.0.0 (overridden)
+  flutter_local_notifications 19.5.0 (21.0.0 available)
+  flutter_local_notifications_linux 6.0.0 (8.0.0 available)
+  flutter_local_notifications_platform_interface 9.1.0 (11.0.0 available)
+  flutter_local_notifications_windows 1.0.3 (3.0.0 available)
+! flutter_native_splash 2.4.6 (overridden) (2.4.7 available)
+  flutter_pdfview 1.4.2-beta.1 (1.4.4 available)
+  flutter_plugin_android_lifecycle 2.0.28 (2.0.33 available)
+  flutter_riverpod 2.6.1 (3.3.1 available)
+  flutter_state_notifier 0.7.3 (1.0.0 available)
+  flutter_svg 2.2.0 (2.2.4 available)
+  flutter_widget_from_html_core 0.15.2 (0.17.0 available)
+! freezed 3.1.0 (overridden) (3.2.5 available)
+! freezed_annotation 3.1.0 (overridden)
+  go_router 14.8.1 (17.1.0 available)
+  google_fonts 6.3.2 (8.0.2 available)
+  google_sign_in_android 7.2.7 (7.2.9 available)
+  google_sign_in_ios 6.2.4 (6.3.0 available)
+  google_sign_in_web 1.1.0 (1.1.3 available)
+  googleapis 11.4.0 (16.0.0 available)
+  googleapis_auth 1.6.0 (2.2.0 available)
+  gql 1.0.1-alpha+1730759315362 (1.0.1 available)
+  gql_dedupe_link 2.0.4-alpha+1715521079596 (4.0.0 available)
+  gql_error_link 1.0.0+1 (1.0.1 available)
+  gql_http_link 1.1.0 (1.2.0 available)
+  gql_link 1.0.1-alpha+1730759315378 (1.1.0 available)
+  gql_transform_link 1.0.0 (1.0.1 available)
+  graphql 5.2.1 (5.2.4 available)
+  graphql_flutter 5.2.0 (5.3.0 available)
+  grouped_list 5.1.2 (6.0.0 available)
+  home_widget 0.8.1 (0.9.0 available)
+  hooks_riverpod 2.6.1 (3.3.1 available)
+  http 1.4.0 (1.6.0 available)
+  image 4.5.4 (4.8.0 available)
+  image_picker_android 0.8.13+1 (0.8.13+14 available)
+  image_picker_ios 0.8.13 (0.8.13+6 available)
+  image_picker_macos 0.2.2 (0.2.2+1 available)
+! import_sorter 4.6.0 (overridden)
+  in_app_purchase 3.2.2 (3.2.3 available)
+  in_app_purchase_android 0.4.0+2 (0.4.0+8 available)
+  in_app_purchase_storekit 0.3.22+1 (0.4.8+1 available)
+  intercom_flutter 9.4.6 (9.5.5 available)
+  intercom_flutter_platform_interface 2.0.5 (2.0.6 available)
+  intercom_flutter_web 1.1.8 (1.1.11 available)
+  jiffy 6.4.3 (6.4.4 available)
+  jose 0.3.4 (0.3.5 available)
+  json_annotation 4.9.0 (4.11.0 available)
+! json_serializable 6.9.5 (overridden) (6.13.0 available)
+! lints 6.0.0 (overridden) (6.1.0 available)
+  live_activities 2.4.3 (2.4.7 available)
+  logger 2.6.1 (2.7.0 available)
+  lucide_icons_flutter 3.0.7 (3.1.10 available)
+  marionette_flutter 0.3.0 (0.4.0 available)
+  markdown 7.3.0 (7.3.1 available)
+  mason_logger 0.3.3 (0.3.5 available)
+  material_symbols_icons 4.2874.0 (4.2906.0 available)
+  meta 1.17.0 (1.18.2 available)
+  normalize 0.9.1 (0.10.0 available)
+  objectbox 4.3.0 (5.2.0 available)
+  objectbox_flutter_libs 4.3.0 (5.2.0 available)
+! objectbox_generator 4.3.0 (overridden) (5.2.0 available)
+  path_provider_android 2.2.17 (2.2.22 available)
+  path_provider_foundation 2.4.1 (2.6.0 available)
+  patrol 4.1.1 (4.3.0 available)
+  patrol_log 0.7.0 (0.7.1 available)
+  perfect_freehand 1.0.4 (2.5.2+1 available)
+  petitparser 6.1.0 (7.0.2 available)
+  photo_manager 3.8.3 (3.9.0 available)
+  pool 1.5.1 (1.5.2 available)
+  posix 6.0.3 (6.5.0 available)
+  posthog_flutter 5.11.1 (5.21.0 available)
+  provider 6.1.5 (6.1.5+1 available)
+  riverpod 2.6.1 (3.2.1 available)
+  riverpod_annotation 2.6.1 (4.0.2 available)
+  scribble 0.9.1 (0.10.0+1 available)
+  shadcn_ui 0.28.5 (0.52.1 available)
+  share_plus 12.0.0 (12.0.1 available)
+  shared_preferences_android 2.4.10 (2.4.21 available)
+  shared_preferences_foundation 2.5.4 (2.5.6 available)
+  shopify_flutter 2.6.0 (2.6.3 available)
+  shopify_sheet 0.0.4 (0.0.7 available)
+  source_gen 2.0.0 (4.2.1 available)
+  source_helper 1.3.5 (1.3.10 available)
+  source_span 1.10.1 (1.10.2 available)
+  sqflite_android 2.4.1 (2.4.2+3 available)
+  state_notifier 0.7.2+1 (1.0.0 available)
+  stream_chat 9.22.0 (9.23.0 available)
+  test_api 0.7.10 (0.7.11 available)
+  timezone 0.10.1 (0.11.0 available)
+  two_dimensional_scrollables 0.3.7 (0.3.8 available)
+  typesense 0.4.0 (0.5.2 available)
+  universal_image 1.0.10 (1.0.11 available)
+  universal_io 2.2.2 (2.3.1 available)
+  url_launcher_android 6.3.16 (6.3.28 available)
+  url_launcher_ios 6.3.3 (6.4.1 available)
+  url_launcher_linux 3.2.1 (3.2.2 available)
+  url_launcher_macos 3.2.2 (3.2.5 available)
+  url_launcher_web 2.4.1 (2.4.2 available)
+  url_launcher_windows 3.1.4 (3.1.5 available)
+  url_strategy 0.2.0 (0.3.0 available)
+  uuid 4.5.1 (4.5.3 available)
+  vector_graphics 1.1.19 (1.1.20 available)
+  vector_graphics_compiler 1.1.17 (1.2.0 available)
+  vector_math 2.2.0 (2.3.0 available)
+  video_player 2.10.1 (2.11.1 available)
+  video_player_android 2.8.10 (2.9.4 available)
+  video_player_avfoundation 2.8.0 (2.9.4 available)
+  video_player_platform_interface 6.4.0 (6.6.0 available)
+  vm_service 15.0.0 (15.0.2 available)
+  wakelock_plus 1.4.0 (1.5.1 available)
+  wakelock_plus_platform_interface 1.3.0 (1.4.0 available)
+  watcher 1.1.2 (1.2.1 available)
+  webview_flutter 4.13.0 (4.13.1 available)
+  webview_flutter_android 4.10.0 (4.10.13 available)
+  webview_flutter_wkwebview 3.23.0 (3.24.1 available)
+  win32 5.14.0 (6.0.0 available)
+  win32_registry 2.1.0 (3.0.2 available)
+  xml 6.5.0 (6.6.1 available)
+Got dependencies in `/Users/peanut/.openclaw/workspace/atg_monorepo`!
+182 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Building com.atgonlinecoaching.clientapp for simulator (ios)...
+Running Xcode build...                                          
+Xcode build done.                                           20.7s
+✓ Built build/ios/iphonesimulator/ATG.app
+Build completed successfully!
+
+Received push event
+Repo: buyahabit Branch: peaches
+Push to peaches by butterber347 (repo: buyahabit)
+Commits: 1, before: 9ca7b933e8546ca299c6b1a0da16fee625e9fbfc, after: 82231e691a2386ab84d1ad7e7995830322ce8196
+Latest commit: Fix BuyAHabitApp.swift location
+💰 Triggering BuyAHabit iOS build...
+BuyAHabit build FAILED: Command failed: bash "/Users/peanut/.openclaw/workspace/buyahabit/run_release_iphone.sh" 2>&1
+
+Telegram notification sent
