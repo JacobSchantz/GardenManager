@@ -164,15 +164,13 @@ function triggerBuild(scriptPath, appName, commitMessage) {
   });
 }
 
-// AI Auto-fix function - notifies user that I'll fix it
+// AI Auto-fix function - just logs, the fix happens in this conversation
 async function autoFixWithAI(appName, scriptPath, buildOutput, commitMessage) {
   const errors = buildOutput.split('\n').filter(line => line.includes('error:') || line.includes('Error:')).slice(0, 5).join('\n');
   const repoPath = scriptPath.replace('/run_release_iphone.sh', '');
   
-  // Tell the user I'll fix it
-  sendTelegramMessage(`🤖 Build failed. I'll analyze and fix the errors now.\n\nErrors:\n${errors}\n\nRepo: ${repoPath}`);
-  
   // The fix will happen in this conversation - I'm already here and will see the failure
+  console.log(`🤖 Will analyze and fix: ${errors.substring(0, 200)}`);
 }
 
 function sendTelegramMessage(text) {
