@@ -8,6 +8,11 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DEVICE_ID="00008130-0012492814C0001C"
 DERIVED_DATA="$SCRIPT_DIR/build/DerivedData"
 
+# Clean previous builds to avoid stale builds
+echo "Cleaning previous builds..."
+rm -rf "$SCRIPT_DIR/build"
+rm -rf "$SCRIPT_DIR/DerivedData"
+
 echo "Effective build setting (Release):"
 xcodebuild -project "$SCRIPT_DIR/GardenManager.xcodeproj" \
     -scheme GardenManager \
