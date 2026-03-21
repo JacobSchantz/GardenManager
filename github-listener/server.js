@@ -29,14 +29,19 @@ app.get('/', (req, res) => {
   res.json({ status: 'GitHub Listener running', events: ['push', 'pull_request', 'release'] });
 });
 
-// Webhook endpoint - handles both JSON and form-urlencoded
-app.post('/webhook', urlencodedParser, (req, res) => {
+// Webhook endpoint - handles GitHub webhooks (form-urlencoded)
+app.use(express.urlencoded({ extended: true }));
+app.post('/webhook', (req, res) => {
   const event = req.headers['x-github-event'];
   
-  // Handle form-urlencoded (payload in "payload" field) vs JSON
+  // Handle form-urlencoded (payload in "payload" field)
   let payload = req.body;
   if (typeof payload.payload === 'string') {
-    payload = JSON.parse(payload.payload);
+    try {
+      payload = JSON.parse(payload.payload);
+    } catch (e) {
+      console.log('Failed to parse payload:', e.message);
+    }
   }
   
   console.log(`Received ${event} event`);
