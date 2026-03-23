@@ -41,6 +41,29 @@ function killPreviousBuilds() {
   });
 }
 
+// Pull latest from the triggered repo
+function pullRepo(repoName) {
+  const repoPaths = {
+    'atg_monorepo': '/Users/peanut/.openclaw/workspace/atg_monorepo',
+    'keepMovin': '/Users/peanut/.openclaw/workspace/keepMovin',
+    'BuyAHabit': '/Users/peanut/.openclaw/workspace/buyahabit',
+    'buyahabit': '/Users/peanut/.openclaw/workspace/buyahabit',
+    'GardenManager': '/Users/peanut/.openclaw/workspace/GardenManager'
+  };
+  
+  const repoPath = repoPaths[repoName];
+  if (repoPath) {
+    console.log(`📥 Pulling latest from ${repoName}...`);
+    exec(`cd "${repoPath}" && git pull`, (err, stdout, stderr) => {
+      if (err) {
+        console.log(`⚠️ Failed to pull ${repoName}:`, err.message);
+      } else {
+        console.log(`✅ Pulled ${repoName}:`, stdout.trim());
+      }
+    });
+  }
+}
+
 // Webhook endpoint - handles GitHub webhooks (form-urlencoded)
 app.use(express.urlencoded({ extended: true }));
 app.post('/webhook', (req, res) => {
@@ -108,6 +131,9 @@ function handlePush(payload) {
   // Kill any previous builds before starting new one
   killPreviousBuilds();
   
+  // Pull latest from the triggered repo
+  pullRepo(repoName);
+  
   // Route based on repository
   if (repoName === 'atg_monorepo' && branch === 'Peaches') {
     console.log('🔥 Triggering ATG iOS build...');
@@ -126,10 +152,38 @@ function handlePush(payload) {
   }
 }
 
-function triggerBuild(scriptPath, appName, commitMessage) {
+const MAX_RETRIES = 2;
+const RETRY_DELAY_MS = 10000;
+const AUTO_FIX_AT_ATTEMPT = 2;
+
+// Track auto-fix state to avoid infinite loops
+let autoFixAttempted = {}; // { appName: { timestamp } }
+
+function shouldAutoFix(appName) {
+  const state = autoFixAttempted[appName];
+  if (!state) return true;
+  
+  // If we attempted a fix in the last 5 minutes, don't auto-fix again
+  if (Date.now() - state.timestamp < 5 * 60 * 1000) {
+    console.log(`⏭️ Skipping auto-fix for ${appName} - already attempted fix recently`);
+    return false;
+  }
+  return true;
+}
+
+function markAutoFixDone(appName) {
+  autoFixAttempted[appName] = { timestamp: Date.now() };
+} // Try to fix after this attempt fails
+
+function triggerBuild(scriptPath, appName, commitMessage, attempt = 1, previousOutput = '') {
   // Send message that build is starting
   const shortCommitMsg = commitMessage.length > 100 ? commitMessage.substring(0, 100) + '...' : commitMessage;
-  sendTelegramMessage(`🏗️ ${appName} build started...\n\nCommit: ${shortCommitMsg}`);
+  
+  if (attempt === 1) {
+    sendTelegramMessage(`🏗️ ${appName} build started...\n\nCommit: ${shortCommitMsg}`);
+  } else {
+    sendTelegramMessage(`🔄 ${appName} build attempt ${attempt} of ${MAX_RETRIES + 1}...`);
+  }
   
   exec(`bash "${scriptPath}" 2>&1`, { timeout: 600000 }, (error, stdout, stderr) => {
     const fullOutput = stdout + '\n' + stderr;
@@ -137,26 +191,58 @@ function triggerBuild(scriptPath, appName, commitMessage) {
     const buildSucceeded = fullOutput.includes('BUILD SUCCEEDED') || fullOutput.includes('App launched successfully') || fullOutput.includes('Build completed successfully!') || fullOutput.includes('Build and install completed successfully!');
     
     if (buildFailed) {
-      console.error(`${appName} build FAILED:`, error?.message || 'Build error');
-      // Extract error summary - more comprehensive
+      console.error(`${appName} build FAILED (attempt ${attempt}):`, error?.message || 'Build error');
+      
+      // After 2nd attempt fails, trigger auto-fix then retry
+      if (attempt === AUTO_FIX_AT_ATTEMPT && shouldAutoFix(appName)) {
+        console.log(`🤖 Attempt ${attempt} failed. Running AI auto-fix...`);
+        const errors = fullOutput.split('\n').filter(line => 
+          line.includes('error:') || 
+          line.includes('Error:') || 
+          line.includes('BUILD FAILED') ||
+          line.includes('fatal:')
+        ).slice(0, 8).join('\n');
+        
+        sendTelegramMessage(`🤖 Attempt 2 failed for ${appName}. Analyzing and attempting fix...`);
+        
+        markAutoFixing(appName);
+        
+        // Run auto-fix - I will fix code then push to GitHub which triggers new build
+        autoFixWithAI(appName, scriptPath, fullOutput, shortCommitMsg);
+        // Don't auto-retry - wait for GitHub push to trigger new build
+        return;
+      }
+      
+      if (attempt <= MAX_RETRIES) {
+        console.log(`⏳ Retrying in ${RETRY_DELAY_MS / 1000}s...`);
+        setTimeout(() => {
+          triggerBuild(scriptPath, appName, commitMessage, attempt + 1, fullOutput);
+        }, RETRY_DELAY_MS);
+        return;
+      }
+      
+      // All retries exhausted
       const errors = fullOutput.split('\n').filter(line => 
         line.includes('error:') || 
         line.includes('Error:') || 
         line.includes('BUILD FAILED') ||
         line.includes('fatal:')
       ).slice(0, 8).join('\n');
-      sendTelegramMessage(`🚨 ${appName} build FAILED!\n\nCommit: ${shortCommitMsg}\n\nError:\n${errors || error?.message || 'Unknown error - check logs'}`);
+      sendTelegramMessage(`❌ ${appName} build FAILED after ${MAX_RETRIES + 1} attempts!\n\nCommit: ${shortCommitMsg}\n\nError:\n${errors || error?.message || 'Unknown error - check logs'}`);
       
-      // Attempt AI auto-fix
-      console.log('🤖 Attempting AI auto-fix...');
-      autoFixWithAI(appName, scriptPath, fullOutput, shortCommitMsg);
+      // Attempt AI auto-fix (for future reference)
+      console.log('🤖 All retries exhausted. Notifying about failure.');
       return;
     }
     
     if (buildSucceeded) {
       console.log(`${appName} build output:`, stdout);
-      console.log(`✅ ${appName} build triggered successfully`);
-      sendTelegramMessage(`✅ ${appName} build succeeded!\n\nCommit: ${shortCommitMsg}`);
+      console.log(`✅ ${appName} build triggered successfully (attempt ${attempt})`);
+      if (attempt > 1) {
+        sendTelegramMessage(`✅ ${appName} build succeeded on retry ${attempt}!\n\nCommit: ${shortCommitMsg}`);
+      } else {
+        sendTelegramMessage(`✅ ${appName} build succeeded!\n\nCommit: ${shortCommitMsg}`);
+      }
     } else {
       console.log(`${appName} build output:`, stdout);
       if (stderr) console.error(`${appName} build stderr:`, stderr);
@@ -164,13 +250,38 @@ function triggerBuild(scriptPath, appName, commitMessage) {
   });
 }
 
-// AI Auto-fix function - just logs, the fix happens in this conversation
+// AI Auto-fix function - notifies me via Telegram, I fix then push to GitHub
 async function autoFixWithAI(appName, scriptPath, buildOutput, commitMessage) {
-  const errors = buildOutput.split('\n').filter(line => line.includes('error:') || line.includes('Error:')).slice(0, 5).join('\n');
+  const errors = buildOutput.split('\n').filter(line => 
+    line.includes('error:') || 
+    line.includes('Error:') || 
+    line.includes('BUILD FAILED') ||
+    line.includes('fatal:')
+  ).slice(0, 15).join('\n');
   const repoPath = scriptPath.replace('/run_release_iphone.sh', '');
   
-  // The fix will happen in this conversation - I'm already here and will see the failure
-  console.log(`🤖 Will analyze and fix: ${errors.substring(0, 200)}`);
+  console.log(`🤖 Auto-fix for ${appName}...`);
+  
+  // Write error to a file for me to analyze
+  const fixScriptPath = `/tmp/${appName.toLowerCase()}_build_error.json`;
+  const fs = require('fs');
+  const errorData = {
+    appName,
+    repoPath,
+    scriptPath,
+    errors,
+    commitMessage,
+    fullOutput: buildOutput.substring(0, 50000),
+    timestamp: new Date().toISOString()
+  };
+  fs.writeFileSync(fixScriptPath, JSON.stringify(errorData, null, 2));
+  
+  // Send me detailed notification
+  sendTelegramMessage(`🤖 AUTO-FIX NEEDED for ${appName}\n\nErrors:\n${errors.substring(0, 1000)}\n\nRepo: ${repoPath}\n\nPlease fix and push to GitHub to trigger retry.`);
+  
+  // Mark that we've attempted fix - when I push and a new build triggers, 
+  // shouldAutoFix will return false for 5 min to avoid another auto-fix loop
+  markAutoFixDone(appName);
 }
 
 function sendTelegramMessage(text) {
