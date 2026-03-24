@@ -171,9 +171,13 @@ function shouldAutoFix(appName) {
   return true;
 }
 
+function markAutoFixing(appName) {
+  autoFixAttempted[appName] = { timestamp: Date.now(), fixing: true };
+}
+
 function markAutoFixDone(appName) {
   autoFixAttempted[appName] = { timestamp: Date.now() };
-} // Try to fix after this attempt fails
+}
 
 function triggerBuild(scriptPath, appName, commitMessage, attempt = 1, previousOutput = '') {
   // Send message that build is starting

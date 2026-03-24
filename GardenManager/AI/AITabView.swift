@@ -181,12 +181,12 @@ struct PersonActionTabView: View {
             
             // Multiple Vision requests for comprehensive analysis
             let classificationRequest = VNClassifyImageRequest()
-            let personRequest = VNDetectPersonRectanglesRequest()
+            // let personRequest = VNDetectPersonRectanglesRequest() // Not available in iOS 26
             let poseRequest = VNDetectHumanBodyPoseRequest()
             let faceRequest = VNDetectFaceRectanglesRequest()
             
             do {
-                try handler.perform([classificationRequest, personRequest, poseRequest, faceRequest])
+                try handler.perform([classificationRequest, poseRequest, faceRequest])
             } catch {
                 continuation.resume(throwing: error)
                 return
@@ -194,11 +194,11 @@ struct PersonActionTabView: View {
             
             var results: [String] = []
             
-            // 1. Person detection
-            let personCount = personRequest.results?.count ?? 0
-            if personCount > 0 {
-                results.append("\(personCount) person(s) detected")
-            }
+            // 1. Person detection - disabled (VNDetectPersonRectanglesRequest not available)
+            // let personCount = personRequest.results?.count ?? 0
+            // if personCount > 0 {
+            //     results.append("\(personCount) person(s) detected")
+            // }
             
             // 2. Classification - get all results above threshold
             if let classifications = classificationRequest.results, !classifications.isEmpty {
@@ -221,22 +221,13 @@ struct PersonActionTabView: View {
             
             // Generate summary
             let summary: String
-            if personCount > 0 {
-                if let pose = poseRequest.results?.first {
-                    let activity = describeActivityFromPose(pose)
-                    summary = "Person - \(activity)"
-                } else {
-                    summary = "Person detected"
-                }
-                
-                if let classifications = classificationRequest.results, !classifications.isEmpty {
-                    let top3 = classifications.prefix(3).map { $0.identifier }.joined(separator: ", ")
-                    summary += "\nLikely: \(top3)"
-                }
-                
-                if faceCount > 0 {
-                    summary += "\nFace visible"
-                }
+            // Use pose detection
+            if let pose = poseRequest.results?.first {
+                let activity = describeActivityFromPose(pose)
+                summary = "Person - \(activity)"
+            } else if let classifications = classificationRequest.results, !classifications.isEmpty {
+                let top3 = classifications.prefix(3).map { $0.identifier }.joined(separator: ", ")
+                summary = "Likely: \(top3)"
             } else {
                 summary = results.isEmpty ? "Unable to analyze" : results.joined(separator: "\n")
             }
@@ -270,7 +261,6 @@ struct PersonActionTabView: View {
         
         return "standing naturally"
     }
-}
 }
 
 struct LocalAITabView: View {
