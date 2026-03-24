@@ -32,10 +32,7 @@ struct GrokVoiceView: View {
                     apiMessagesSection
                 }
                 .padding()
-                .frame(maxWidth: .infinity, alignment: .topLeading)
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-            .defaultScrollAnchor(.top)
             .navigationTitle("Grok Voice")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -471,3 +468,6 @@ struct SettingsSheet: View {
         }
     }
 }
+
+// MARK: - Xcode Previews
+

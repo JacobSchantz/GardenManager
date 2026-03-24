@@ -31,3 +31,17 @@ struct RootView: View {
         .tint(.blue)
     }
 } 
+
+
+
+
+#Preview("GrokVoiceView") {
+    RootView()
+}
+
+//#Preview("SettingsSheet") {
+//    SettingsSheet(
+//        apiKey: .constant("test-api-key"),
+//        service: GrokVoiceService()
+//    )
+//}
