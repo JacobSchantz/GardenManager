@@ -16,6 +16,8 @@
 		<string>processing</string>
 		<string>fetch</string>
 	</array>
+	<key>UILaunchScreen</key>
+<dict/>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
