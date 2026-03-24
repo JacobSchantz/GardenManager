@@ -408,10 +408,7 @@ private actor LocalAIService {
         configuration = newConfiguration.normalized()
         configuration.save()
         session = nil
-
-        if case .appleFoundation = selectedChatModel().kind {
-            try await ensureSession()
-        }
+        try await ensureSession()
     }
 
     func resetConversation() {
@@ -420,24 +417,6 @@ private actor LocalAIService {
 
     func status() async -> LocalAIModelStatus {
         let selectedModel = selectedChatModel()
-
-        if case .openRouter(let modelID) = selectedModel.kind {
-            let apiKey = OpenRouterAPIKeyCache.load().trimmingCharacters(in: .whitespacesAndNewlines)
-            if apiKey.isEmpty {
-                return .init(
-                    title: "API Key Needed",
-                    detail: "Selected: \(selectedModel.label) via OpenRouter. Add API key in OpenRouter Chat.",
-                    isReady: false
-                )
-            }
-
-            return .init(
-                title: "Ready",
-                detail: "Selected: \(selectedModel.label) via OpenRouter (\(modelID))",
-                isReady: true
-            )
-        }
-
         let model: SystemLanguageModel = .default
         let detail = "Selected: \(selectedModel.label)"
 
@@ -454,23 +433,6 @@ private actor LocalAIService {
         prompt: String,
         imageJPEGData: Data?
     ) async throws -> String {
-        let selectedModel = selectedChatModel()
-
-        if case .openRouter(let modelID) = selectedModel.kind {
-            let apiKey = OpenRouterAPIKeyCache.load().trimmingCharacters(in: .whitespacesAndNewlines)
-            guard !apiKey.isEmpty else {
-                throw OpenRouterClientError.apiError("Missing OpenRouter API key. Open OpenRouter Chat to set your key.")
-            }
-
-            return try await OpenRouterClient.shared.sendMessage(
-                apiKey: apiKey,
-                model: modelID,
-                history: history,
-                userText: prompt,
-                imageJPEGData: imageJPEGData
-            )
-        }
-
         try await ensureSession()
 
         var composedPrompt = prompt.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -702,7 +664,6 @@ private struct LocalAIModelStatus: Sendable {
 private struct LocalChatModelOption: Identifiable, Sendable {
     enum Kind: Sendable {
         case appleFoundation
-        case openRouter(modelID: String)
     }
 
     let id: String
@@ -710,11 +671,7 @@ private struct LocalChatModelOption: Identifiable, Sendable {
     let kind: Kind
 
     static let options: [LocalChatModelOption] = [
-        .init(id: "apple-foundation", label: "Apple Foundation (On-Device)", kind: .appleFoundation),
-        .init(id: "openrouter-qwen25-vl-3b", label: "Qwen2.5-VL 3B (OpenRouter)", kind: .openRouter(modelID: "qwen/qwen2.5-vl-3b-instruct")),
-        .init(id: "openrouter-qwen3-vl-8b", label: "Qwen3-VL 8B (OpenRouter)", kind: .openRouter(modelID: "qwen/qwen3-vl-8b-instruct")),
-        .init(id: "openrouter-llama32-vision", label: "Llama 3.2 11B Vision (OpenRouter)", kind: .openRouter(modelID: "meta-llama/llama-3.2-11b-vision-instruct")),
-        .init(id: "openrouter-gpt4o-mini", label: "GPT-4o Mini (OpenRouter)", kind: .openRouter(modelID: "openai/gpt-4o-mini"))
+        .init(id: "apple-foundation", label: "Apple Foundation (On-Device)", kind: .appleFoundation)
     ]
 
     static let defaultID = "apple-foundation"
