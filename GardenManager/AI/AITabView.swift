@@ -45,8 +45,6 @@ struct AIAssistantTabView: View {
 }
 
 struct PersonActionTabView: View {
-    @State private var apiKey = OpenRouterAPIKeyCache.load()
-    @State private var selectedModelID = OpenRouterVisionModel.defaults.id
     @State private var selectedImage: UIImage?
     @State private var resultText = ""
     @State private var isAnalyzing = false
@@ -58,17 +56,15 @@ struct PersonActionTabView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    Picker("Model", selection: $selectedModelID) {
-                        ForEach(OpenRouterVisionModel.options) { model in
-                            Text(model.label).tag(model.id)
-                        }
+                    // Offline indicator
+                    HStack(spacing: 6) {
+                        Image(systemName: "cpu")
+                            .foregroundStyle(.green)
+                        Text("Using offline CoreML vision models")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                     }
-
-                    SecureField("OpenRouter API Key", text: $apiKey)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                        .textFieldStyle(.roundedBorder)
-
+                    
                     if let selectedImage {
                         Image(uiImage: selectedImage)
                             .resizable()
@@ -97,16 +93,16 @@ struct PersonActionTabView: View {
                         .buttonStyle(.bordered)
 
                         Button("Analyze") {
-                            analyzeImage()
+                            analyzeImageOffline()
                         }
                         .buttonStyle(.borderedProminent)
-                        .disabled(isAnalyzing || selectedImage == nil || apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                        .disabled(isAnalyzing || selectedImage == nil)
                     }
 
                     if isAnalyzing {
                         HStack(spacing: 8) {
                             ProgressView()
-                            Text("Analyzing image...")
+                            Text("Analyzing with Vision framework...")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
@@ -120,7 +116,7 @@ struct PersonActionTabView: View {
 
                     if !resultText.isEmpty {
                         VStack(alignment: .leading, spacing: 8) {
-                            Text("Result")
+                            Text("Detected Action")
                                 .font(.headline)
                             Text(resultText)
                                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -149,22 +145,11 @@ struct PersonActionTabView: View {
                     }
                 }
             }
-            .onChange(of: apiKey) { _, newValue in
-                OpenRouterAPIKeyCache.save(newValue.trimmingCharacters(in: .whitespacesAndNewlines))
-            }
         }
     }
 
-    private func analyzeImage() {
-        guard !isAnalyzing else { return }
-
-        let trimmedKey = apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmedKey.isEmpty else {
-            errorText = "Please enter your OpenRouter API key."
-            return
-        }
-
-        guard let jpegData = selectedImage?.jpegData(compressionQuality: 0.82) else {
+    private func analyzeImageOffline() {
+        guard !isAnalyzing, let uiImage = selectedImage, let cgImage = uiImage.cgImage else {
             errorText = "Please choose an image first."
             return
         }
@@ -175,25 +160,156 @@ struct PersonActionTabView: View {
 
         Task {
             do {
-                let reply = try await OpenRouterClient.shared.sendSingleImagePrompt(
-                    apiKey: trimmedKey,
-                    model: selectedModelID,
-                    prompt: "Describe what the person in this image is doing. Be concise and specific.",
-                    imageJPEGData: jpegData
-                )
-
+                let analysis = try await performOfflineVisionAnalysis(cgImage: cgImage)
+                
                 await MainActor.run {
-                    resultText = reply
+                    resultText = analysis
                     isAnalyzing = false
                 }
             } catch {
                 await MainActor.run {
-                    errorText = error.localizedDescription
+                    errorText = "Analysis failed: \(error.localizedDescription)"
                     isAnalyzing = false
                 }
             }
         }
     }
+
+    private func performOfflineVisionAnalysis(cgImage: CGImage) async throws -> String {
+        try await withCheckedThrowingContinuation { continuation in
+            let requestHandler = VNImageRequestHandler(cgImage: cgImage, options: [:])
+            
+            // Create requests for different analyses
+            let classificationRequest = VNClassifyImageRequest()
+            let bodyPoseRequest = VNDetectHumanBodyPoseRequest()
+            let faceRequest = VNDetectFaceRectanglesRequest()
+            
+            let requests = [classificationRequest, bodyPoseRequest, faceRequest]
+            
+            do {
+                try requestHandler.perform(requests)
+            } catch {
+                continuation.resume(throwing: error)
+                return
+            }
+            
+            var results: [String] = []
+            
+            // 1. Get classification results (what objects/activities are in the image)
+            if let classifications = classificationRequest.results?.prefix(10) {
+                let labels = classifications.map { "\($0.identifier) (\(Int($0.confidence * 100))%)" }
+                results.append("Detected: \(labels.joined(separator: ", "))")
+            }
+            
+            // 2. Get body pose (if person detected)
+            if let poseObservation = bodyPoseRequest.results?.first {
+                let bodyParts = analyzeBodyPose(poseObservation)
+                if !bodyParts.isEmpty {
+                    results.append("Body position: \(bodyParts)")
+                }
+            }
+            
+            // 3. Check for faces
+            let faceCount = faceRequest.results?.count ?? 0
+            if faceCount > 0 {
+                results.append("Faces detected: \(faceCount)")
+            }
+            
+            // Generate a human-readable activity description
+            let activityDescription = generateActivityDescription(
+                classifications: classificationRequest.results ?? [],
+                pose: bodyPoseRequest.results?.first,
+                faceCount: faceCount
+            )
+            
+            let finalResult = results.isEmpty ? 
+                "Unable to analyze the image." : 
+                activityDescription + "\n\nDetails: " + results.joined(separator: "\n")
+            
+            continuation.resume(returning: finalResult)
+        }
+    }
+
+    private func analyzeBodyPose(_ observation: VNHumanBodyPoseObservation) -> String {
+        // Extract key body points to determine activity
+        var parts: [String] = []
+        
+        // Check arm positions
+        if let leftWrist = try? observation.recognizedPoint(.leftWrist),
+           let rightWrist = try? observation.recognizedPoint(.rightWrist),
+           let nose = try? observation.recognizedPoint(.nose) {
+            
+            let avgWristY = (leftWrist.location.y + rightWrist.location.y) / 2
+            let isArmsRaised = avgWristY > nose.location.y + 0.1
+            
+            if isArmsRaised {
+                parts.append("arms raised")
+            }
+        }
+        
+        // Check if standing or sitting
+        if let leftHip = try? observation.recognizedPoint(.leftHip),
+           let rightHip = try? observation.recognizedPoint(.rightHip),
+           let leftKnee = try? observation.recognizedPoint(.leftKnee) {
+            
+            let hipY = (leftHip.location.y + rightHip.location.y) / 2
+            let kneeY = leftKnee.location.y
+            
+            // In Vision coordinates, lower Y = higher on screen = standing
+            if kneeY < hipY + 0.05 {
+                parts.append("standing")
+            } else {
+                parts.append("seated")
+            }
+        }
+        
+        return parts.isEmpty ? "position detected" : parts.joined(separator: ", ")
+    }
+
+    private func generateActivityDescription(classifications: [VNClassificationObservation], pose: VNHumanBodyPoseObservation?, faceCount: Int) -> String {
+        let topClassifications = classifications.prefix(5).map { $0.identifier.lowercased() }
+        let classString = topClassifications.joined(separator: ", ")
+        
+        // Activity keywords to look for
+        let activityKeywords = [
+            "running", "walking", "sitting", "standing", "lying", "sleeping",
+            "exercise", "workout", "gym", "yoga", "cycling", "swimming",
+            "cooking", "eating", "drinking", "reading", "writing", "working",
+            "playing", "sport", "dancing", "gardening", "cleaning"
+        ]
+        
+        var detectedActivity = "unknown activity"
+        
+        for keyword in activityKeywords {
+            if classString.contains(keyword) {
+                detectedActivity = "\(keyword)ing"
+                break
+            }
+        }
+        
+        // Additional context from pose
+        var context = ""
+        if let pose = pose {
+            if let leftWrist = try? pose.recognizedPoint(.leftWrist),
+               let rightWrist = try? pose.recognizedPoint(.rightWrist),
+               let nose = try? pose.recognizedPoint(.nose) {
+                
+                let avgWristY = (leftWrist.location.y + rightWrist.location.y) / 2
+                if avgWristY < nose.location.y - 0.1 {
+                    context = " (arms extended forward)"
+                } else if avgWristY > nose.location.y + 0.15 {
+                    context = " (arms raised above head)"
+                }
+            }
+        }
+        
+        if faceCount > 0 {
+            return "Person \(detectedActivity)\(context). Face visible."
+        } else {
+            return "Person \(detectedActivity)\(context). No face visible."
+        }
+    }
+}
 }
 
 struct LocalAITabView: View {
