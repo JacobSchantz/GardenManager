@@ -44,6 +44,158 @@ struct AIAssistantTabView: View {
     }
 }
 
+struct PersonActionTabView: View {
+    @State private var apiKey = OpenRouterAPIKeyCache.load()
+    @State private var selectedModelID = OpenRouterVisionModel.defaults.id
+    @State private var selectedImage: UIImage?
+    @State private var resultText = ""
+    @State private var isAnalyzing = false
+    @State private var showCamera = false
+    @State private var showPhotoLibrary = false
+    @State private var errorText: String?
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    Picker("Model", selection: $selectedModelID) {
+                        ForEach(OpenRouterVisionModel.options) { model in
+                            Text(model.label).tag(model.id)
+                        }
+                    }
+
+                    SecureField("OpenRouter API Key", text: $apiKey)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                        .textFieldStyle(.roundedBorder)
+
+                    if let selectedImage {
+                        Image(uiImage: selectedImage)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(maxWidth: .infinity)
+                            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    } else {
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .fill(Color(.secondarySystemBackground))
+                            .frame(height: 220)
+                            .overlay {
+                                Text("Choose an image")
+                                    .foregroundStyle(.secondary)
+                            }
+                    }
+
+                    HStack(spacing: 12) {
+                        Button("Photos") {
+                            showPhotoLibrary = true
+                        }
+                        .buttonStyle(.bordered)
+
+                        Button("Camera") {
+                            showCamera = true
+                        }
+                        .buttonStyle(.bordered)
+
+                        Button("Analyze") {
+                            analyzeImage()
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .disabled(isAnalyzing || selectedImage == nil || apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    }
+
+                    if isAnalyzing {
+                        HStack(spacing: 8) {
+                            ProgressView()
+                            Text("Analyzing image...")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+
+                    if let errorText {
+                        Text(errorText)
+                            .font(.caption)
+                            .foregroundStyle(.red)
+                    }
+
+                    if !resultText.isEmpty {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Result")
+                                .font(.headline)
+                            Text(resultText)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(12)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                        .fill(Color(.secondarySystemBackground))
+                                )
+                        }
+                    }
+                }
+                .padding()
+            }
+            .navigationTitle("Person Action")
+            .sheet(isPresented: $showCamera) {
+                CameraImagePicker { image in
+                    if let image {
+                        selectedImage = image
+                    }
+                }
+            }
+            .sheet(isPresented: $showPhotoLibrary) {
+                LocalUIImagePicker(sourceType: .photoLibrary) { image in
+                    if let image {
+                        selectedImage = image
+                    }
+                }
+            }
+            .onChange(of: apiKey) { _, newValue in
+                OpenRouterAPIKeyCache.save(newValue.trimmingCharacters(in: .whitespacesAndNewlines))
+            }
+        }
+    }
+
+    private func analyzeImage() {
+        guard !isAnalyzing else { return }
+
+        let trimmedKey = apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedKey.isEmpty else {
+            errorText = "Please enter your OpenRouter API key."
+            return
+        }
+
+        guard let jpegData = selectedImage?.jpegData(compressionQuality: 0.82) else {
+            errorText = "Please choose an image first."
+            return
+        }
+
+        errorText = nil
+        resultText = ""
+        isAnalyzing = true
+
+        Task {
+            do {
+                let reply = try await OpenRouterClient.shared.sendSingleImagePrompt(
+                    apiKey: trimmedKey,
+                    model: selectedModelID,
+                    prompt: "Describe what the person in this image is doing. Be concise and specific.",
+                    imageJPEGData: jpegData
+                )
+
+                await MainActor.run {
+                    resultText = reply
+                    isAnalyzing = false
+                }
+            } catch {
+                await MainActor.run {
+                    errorText = error.localizedDescription
+                    isAnalyzing = false
+                }
+            }
+        }
+    }
+}
+
 struct LocalAITabView: View {
     @StateObject private var viewModel = LocalAIChatViewModel()
     @State private var showCamera = false

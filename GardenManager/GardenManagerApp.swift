@@ -26,6 +26,11 @@ struct RootView: View {
             .tabItem {
                 Label("Local AI", systemImage: "cpu")
             }
+
+            PersonActionTabView()
+            .tabItem {
+                Label("Action", systemImage: "figure.walk")
+            }
         }
 
         .tint(.blue)
