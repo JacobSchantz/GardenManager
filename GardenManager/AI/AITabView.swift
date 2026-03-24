@@ -51,19 +51,51 @@ struct PersonActionTabView: View {
     @State private var showCamera = false
     @State private var showPhotoLibrary = false
     @State private var errorText: String?
+    @State private var showModelPicker = false
+    @State private var selectedModelID = "vision"
+    @State private var modelStatus = "Select a model"
+    
+    private let models = [
+        ("vision", "Vision Framework", "Apple's built-in (default)"),
+        ("resnet50", "ResNet-50", "~25M params - best accuracy"),
+        ("mobilenetv2", "MobileNetV2", "~3.5M params - fast"),
+        ("squeezenet", "SqueezeNet", "~1.2M params - smallest")
+    ]
+    
+    private var currentModelName: String {
+        models.first { $0.0 == selectedModelID }?.1 ?? "Select Model"
+    }
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    // Offline indicator
-                    HStack(spacing: 6) {
-                        Image(systemName: "cpu")
-                            .foregroundStyle(.green)
-                        Text("Offline CoreML")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                    // Model selector button
+                    Button {
+                        showModelPicker = true
+                    } label: {
+                        HStack {
+                            Image(systemName: "cpu")
+                                .foregroundStyle(.green)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(currentModelName)
+                                    .font(.subheadline.weight(.medium))
+                                Text(modelStatus)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            Image(systemName: "chevron.down")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        .padding(12)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color(.secondarySystemBackground))
+                        )
                     }
+                    .buttonStyle(.plain)
                     
                     if let selectedImage {
                         Image(uiImage: selectedImage)
@@ -144,6 +176,46 @@ struct PersonActionTabView: View {
                         selectedImage = image
                     }
                 }
+            }
+            .sheet(isPresented: $showModelPicker) {
+                NavigationStack {
+                    List {
+                        ForEach(models, id: \.0) { model in
+                            Button {
+                                selectedModelID = model.0
+                                if model.0 == "vision" {
+                                    modelStatus = "Using Vision Framework"
+                                } else {
+                                    modelStatus = "Tap Analyze to download/use model"
+                                }
+                                showModelPicker = false
+                            } label: {
+                                HStack {
+                                    VStack(alignment: .leading) {
+                                        Text(model.1)
+                                            .foregroundStyle(.primary)
+                                        Text(model.2)
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                    }
+                                    Spacer()
+                                    if model.0 == selectedModelID {
+                                        Image(systemName: "checkmark")
+                                            .foregroundStyle(.blue)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    .navigationTitle("Select Model")
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button("Done") { showModelPicker = false }
+                        }
+                    }
+                }
+                .presentationDetents([.medium])
             }
         }
     }
@@ -1174,6 +1246,82 @@ private struct DownloadableVisionModel: Identifiable, Hashable, Sendable {
                 .init(
                     remoteURLString: "https://huggingface.co/InsightKeeper/FastVLM-7B-MLX-4bit/resolve/main/fastvithd.mlpackage/Data/com.apple.CoreML/weights/weight.bin?download=true",
                     localRelativePath: "Data/com.apple.CoreML/weights/weight.bin"
+                )
+            ]
+        ),
+        // Image Classification Models for Action Recognition
+        .init(
+            id: "coreml-resnet50-imagenet",
+            displayName: "ResNet-50 (ImageNet)",
+            task: "Image Classification",
+            parameterCountLabel: "~25M params",
+            runtimeLabel: "Core ML",
+            format: "Core ML .mlpackage",
+            packageDirectoryName: "Resnet50.mlpackage",
+            files: [
+                .init(
+                    remoteURLString: "https://docs-assets.developer.apple.com/coreml-models/Resnet50.mlpackage/Resnet50.mlmodel/1/Resnet50.mlmodel",
+                    localRelativePath: "Resnet50.mlmodel"
+                )
+            ]
+        ),
+        .init(
+            id: "coreml-mobilenetv2-imagenet",
+            displayName: "MobileNetV2 (ImageNet)",
+            task: "Image Classification",
+            parameterCountLabel: "~3.5M params",
+            runtimeLabel: "Core ML",
+            format: "Core ML .mlpackage",
+            packageDirectoryName: "MobileNetV2.mlpackage",
+            files: [
+                .init(
+                    remoteURLString: "https://docs-assets.developer.apple.com/coreml-models/MobileNetV2.mlmodel/1/MobileNetV2.mlmodel",
+                    localRelativePath: "MobileNetV2.mlmodel"
+                )
+            ]
+        ),
+        .init(
+            id: "coreml-squeezenet-imagenet",
+            displayName: "SqueezeNet (ImageNet)",
+            task: "Image Classification",
+            parameterCountLabel: "~1.2M params",
+            runtimeLabel: "Core ML",
+            format: "Core ML .mlpackage",
+            packageDirectoryName: "SqueezeNet.mlpackage",
+            files: [
+                .init(
+                    remoteURLString: "https://docs-assets.developer.apple.com/coreml-models/SqueezeNet.mlmodel/1/SqueezeNet.mlmodel",
+                    localRelativePath: "SqueezeNet.mlmodel"
+                )
+            ]
+        ),
+        .init(
+            id: "coreml-vgg16-imagenet",
+            displayName: "VGG-16 (ImageNet)",
+            task: "Image Classification",
+            parameterCountLabel: "~138M params",
+            runtimeLabel: "Core ML",
+            format: "Core ML .mlpackage",
+            packageDirectoryName: "VGG16.mlpackage",
+            files: [
+                .init(
+                    remoteURLString: "https://docs-assets.developer.apple.com/coreml-models/VGG16.mlmodel/1/VGG16.mlmodel",
+                    localRelativePath: "VGG16.mlmodel"
+                )
+            ]
+        ),
+        .init(
+            id: "coreml-inceptionv3-imagenet",
+            displayName: "InceptionV3 (ImageNet)",
+            task: "Image Classification",
+            parameterCountLabel: "~23M params",
+            runtimeLabel: "Core ML",
+            format: "Core ML .mlpackage",
+            packageDirectoryName: "InceptionV3.mlpackage",
+            files: [
+                .init(
+                    remoteURLString: "https://docs-assets.developer.apple.com/coreml-models/InceptionV3.mlmodel/1/InceptionV3.mlmodel",
+                    localRelativePath: "InceptionV3.mlmodel"
                 )
             ]
         )
