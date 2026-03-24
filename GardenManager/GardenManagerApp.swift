@@ -8,7 +8,7 @@ struct GardenManagerApp: App {
     
     var body: some Scene {
         WindowGroup {
-            LocalAITabView()
+            RootView()
         }
     }
 }
@@ -36,7 +36,7 @@ struct RootView: View {
 
 
 #Preview("GrokVoiceView") {
-    LocalAITabView()
+    RootView()
 }
 
 //#Preview("SettingsSheet") {
