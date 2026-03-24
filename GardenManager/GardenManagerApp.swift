@@ -36,7 +36,7 @@ struct RootView: View {
 
 
 #Preview("GrokVoiceView") {
-    RootView()
+    LocalAITabView()
 }
 
 //#Preview("SettingsSheet") {
