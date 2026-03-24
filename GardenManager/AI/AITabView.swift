@@ -1,6 +1,7 @@
 import SwiftUI
 import UIKit
 import Vision
+import CoreML
 #if canImport(FoundationModels)
 import FoundationModels
 #endif
@@ -94,7 +95,13 @@ struct LocalAITabView: View {
                     LocalAISettingsView(
                         configuration: viewModel.configuration,
                         modelStatus: viewModel.modelStatus,
+                        downloadableModels: DownloadableVisionModel.catalog,
+                        downloadedModels: viewModel.downloadedModels,
+                        downloadingModelIDs: viewModel.downloadingModelIDs,
                         isSaving: viewModel.isUpdatingConfiguration,
+                        onDownloadModel: { model in
+                            viewModel.downloadModel(model)
+                        },
                         onSave: { updated in
                             viewModel.apply(configuration: updated)
                         }
@@ -103,6 +110,7 @@ struct LocalAITabView: View {
             }
             .task {
                 await viewModel.refreshModelStatus()
+                await viewModel.refreshDownloadedModels()
             }
             .alert("Local AI Error", isPresented: $viewModel.showError) {
                 Button("OK", role: .cancel) {}
@@ -294,8 +302,11 @@ private final class LocalAIChatViewModel: ObservableObject {
     @Published var modelStatus: LocalAIModelStatus = .checking
     @Published var configuration: LocalAIConfiguration = .load()
     @Published var isUpdatingConfiguration = false
+    @Published var downloadedModels: [LocalDownloadedModel] = []
+    @Published var downloadingModelIDs: Set<String> = []
 
     private let service = LocalAIService()
+    private let downloadService = LocalModelDownloadService()
 
     var sendDisabled: Bool {
         draftMessage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && selectedPhoto == nil
@@ -308,6 +319,10 @@ private final class LocalAIChatViewModel: ObservableObject {
 
     func refreshModelStatus() async {
         modelStatus = await service.status()
+    }
+
+    func refreshDownloadedModels() async {
+        downloadedModels = await downloadService.listDownloadedModels()
     }
 
     func sendCurrentMessage() {
@@ -364,6 +379,22 @@ private final class LocalAIChatViewModel: ObservableObject {
             await refreshModelStatus()
         }
     }
+
+    func downloadModel(_ model: DownloadableVisionModel) {
+        guard !downloadingModelIDs.contains(model.id) else { return }
+        downloadingModelIDs.insert(model.id)
+
+        Task {
+            defer { downloadingModelIDs.remove(model.id) }
+
+            do {
+                try await downloadService.download(model)
+                await refreshDownloadedModels()
+            } catch {
+                reportError(error.localizedDescription)
+            }
+        }
+    }
 }
 
 private actor LocalAIService {
@@ -402,7 +433,10 @@ private actor LocalAIService {
 
         var composedPrompt = prompt.trimmingCharacters(in: .whitespacesAndNewlines)
         if let imageJPEGData {
-            let visionSummary = try await LocalVisionAnalyzer.summarize(jpegData: imageJPEGData)
+            let visionSummary = try await LocalVisionAnalyzer.summarize(
+                jpegData: imageJPEGData,
+                selectedModelID: configuration.selectedVisionModelID
+            )
             let normalizedPrompt = composedPrompt.isEmpty ? "What do you see in this image?" : composedPrompt
             composedPrompt = """
             Image context extracted on-device:
@@ -475,7 +509,11 @@ private struct LocalAISettingsView: View {
 
     @State var configuration: LocalAIConfiguration
     let modelStatus: LocalAIModelStatus
+    let downloadableModels: [DownloadableVisionModel]
+    let downloadedModels: [LocalDownloadedModel]
+    let downloadingModelIDs: Set<String>
     let isSaving: Bool
+    let onDownloadModel: (DownloadableVisionModel) -> Void
     let onSave: (LocalAIConfiguration) -> Void
 
     var body: some View {
@@ -484,6 +522,19 @@ private struct LocalAISettingsView: View {
                 Text("Using Apple's built-in on-device Foundation Model.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+
+                Picker("Vision Model", selection: $configuration.selectedVisionModelID) {
+                    Text("Built-in Vision only").tag(String?.none)
+                    ForEach(downloadedModels) { downloaded in
+                        Text(downloaded.displayName).tag(Optional(downloaded.id))
+                    }
+                }
+
+                if configuration.selectedVisionModelID != nil {
+                    Text("Selected Core ML model will be used for additional on-device image analysis.")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
 
                 HStack {
                     Text("Status")
@@ -494,6 +545,52 @@ private struct LocalAISettingsView: View {
                 Text(modelStatus.detail)
                     .font(.caption)
                     .foregroundStyle(.secondary)
+            }
+
+            Section("Core ML Vision Models") {
+                Text("Download Core ML model packages for on-device vision analysis. You can select any downloaded model above.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                ForEach(downloadableModels) { model in
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(model.displayName)
+                                Text("\(model.task) • \(model.parameterCountLabel) • \(model.format)")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+
+                            if downloadedModels.contains(where: { $0.id == model.id }) {
+                                Label("Downloaded", systemImage: "checkmark.circle.fill")
+                                    .font(.caption)
+                                    .foregroundStyle(.green)
+                            } else {
+                                Button(downloadingModelIDs.contains(model.id) ? "Downloading..." : "Download") {
+                                    onDownloadModel(model)
+                                }
+                                .disabled(downloadingModelIDs.contains(model.id))
+                                .font(.caption)
+                            }
+                        }
+                    }
+                    .padding(.vertical, 2)
+                }
+
+                if !downloadedModels.isEmpty {
+                    Divider()
+                    ForEach(downloadedModels) { downloaded in
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(downloaded.displayName)
+                                .font(.caption)
+                            Text("Saved: \(downloaded.formattedSize)")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
             }
 
             Section("Generation") {
@@ -566,6 +663,302 @@ private struct LocalAIModelStatus: Sendable {
     static let checking = LocalAIModelStatus(title: "Checking", detail: "Validating local model availability...", isReady: false)
 }
 
+private struct DownloadableVisionModel: Identifiable, Hashable, Sendable {
+    struct FileResource: Hashable, Sendable {
+        let remoteURLString: String
+        let localRelativePath: String
+
+        var remoteURL: URL? {
+            URL(string: remoteURLString)
+        }
+    }
+
+    let id: String
+    let displayName: String
+    let task: String
+    let parameterCountLabel: String
+    let format: String
+    let packageDirectoryName: String
+    let files: [FileResource]
+
+    static let catalog: [DownloadableVisionModel] = [
+        .init(
+            id: "coreml-mobileclip-s0-image",
+            displayName: "MobileCLIP S0 (Image Encoder)",
+            task: "Image embeddings",
+            parameterCountLabel: "~33M params",
+            format: "Core ML .mlpackage",
+            packageDirectoryName: "mobileclip_s0_image.mlpackage",
+            files: [
+                .init(
+                    remoteURLString: "https://huggingface.co/apple/coreml-mobileclip/resolve/main/mobileclip_s0_image.mlpackage/Manifest.json?download=true",
+                    localRelativePath: "Manifest.json"
+                ),
+                .init(
+                    remoteURLString: "https://huggingface.co/apple/coreml-mobileclip/resolve/main/mobileclip_s0_image.mlpackage/Data/com.apple.CoreML/model.mlmodel?download=true",
+                    localRelativePath: "Data/com.apple.CoreML/model.mlmodel"
+                ),
+                .init(
+                    remoteURLString: "https://huggingface.co/apple/coreml-mobileclip/resolve/main/mobileclip_s0_image.mlpackage/Data/com.apple.CoreML/weights/weight.bin?download=true",
+                    localRelativePath: "Data/com.apple.CoreML/weights/weight.bin"
+                )
+            ]
+        ),
+        .init(
+            id: "coreml-depth-anything-v2-small-f16",
+            displayName: "Depth Anything V2 Small (F16)",
+            task: "Depth estimation",
+            parameterCountLabel: "~25M params",
+            format: "Core ML .mlpackage",
+            packageDirectoryName: "DepthAnythingV2SmallF16.mlpackage",
+            files: [
+                .init(
+                    remoteURLString: "https://huggingface.co/apple/coreml-depth-anything-v2-small/resolve/main/DepthAnythingV2SmallF16.mlpackage/Manifest.json?download=true",
+                    localRelativePath: "Manifest.json"
+                ),
+                .init(
+                    remoteURLString: "https://huggingface.co/apple/coreml-depth-anything-v2-small/resolve/main/DepthAnythingV2SmallF16.mlpackage/Data/com.apple.CoreML/model.mlmodel?download=true",
+                    localRelativePath: "Data/com.apple.CoreML/model.mlmodel"
+                ),
+                .init(
+                    remoteURLString: "https://huggingface.co/apple/coreml-depth-anything-v2-small/resolve/main/DepthAnythingV2SmallF16.mlpackage/Data/com.apple.CoreML/weights/weight.bin?download=true",
+                    localRelativePath: "Data/com.apple.CoreML/weights/weight.bin"
+                )
+            ]
+        ),
+        .init(
+            id: "coreml-detr-segmentation-f16",
+            displayName: "DETR Semantic Segmentation (F16)",
+            task: "Semantic segmentation",
+            parameterCountLabel: "~41M params",
+            format: "Core ML .mlpackage",
+            packageDirectoryName: "DETRResnet50SemanticSegmentationF16.mlpackage",
+            files: [
+                .init(
+                    remoteURLString: "https://huggingface.co/apple/coreml-detr-semantic-segmentation/resolve/main/DETRResnet50SemanticSegmentationF16.mlpackage/Manifest.json?download=true",
+                    localRelativePath: "Manifest.json"
+                ),
+                .init(
+                    remoteURLString: "https://huggingface.co/apple/coreml-detr-semantic-segmentation/resolve/main/DETRResnet50SemanticSegmentationF16.mlpackage/Data/com.apple.CoreML/model.mlmodel?download=true",
+                    localRelativePath: "Data/com.apple.CoreML/model.mlmodel"
+                ),
+                .init(
+                    remoteURLString: "https://huggingface.co/apple/coreml-detr-semantic-segmentation/resolve/main/DETRResnet50SemanticSegmentationF16.mlpackage/Data/com.apple.CoreML/weights/weight.bin?download=true",
+                    localRelativePath: "Data/com.apple.CoreML/weights/weight.bin"
+                )
+            ]
+        ),
+        .init(
+            id: "coreml-mobileclip-s1-image",
+            displayName: "MobileCLIP S1 (Image Encoder)",
+            task: "Image embeddings",
+            parameterCountLabel: "~73M params",
+            format: "Core ML .mlpackage",
+            packageDirectoryName: "mobileclip_s1_image.mlpackage",
+            files: [
+                .init(
+                    remoteURLString: "https://huggingface.co/apple/coreml-mobileclip/resolve/main/mobileclip_s1_image.mlpackage/Manifest.json?download=true",
+                    localRelativePath: "Manifest.json"
+                ),
+                .init(
+                    remoteURLString: "https://huggingface.co/apple/coreml-mobileclip/resolve/main/mobileclip_s1_image.mlpackage/Data/com.apple.CoreML/model.mlmodel?download=true",
+                    localRelativePath: "Data/com.apple.CoreML/model.mlmodel"
+                ),
+                .init(
+                    remoteURLString: "https://huggingface.co/apple/coreml-mobileclip/resolve/main/mobileclip_s1_image.mlpackage/Data/com.apple.CoreML/weights/weight.bin?download=true",
+                    localRelativePath: "Data/com.apple.CoreML/weights/weight.bin"
+                )
+            ]
+        ),
+        .init(
+            id: "coreml-mobileclip-s2-image",
+            displayName: "MobileCLIP S2 (Image Encoder)",
+            task: "Image embeddings",
+            parameterCountLabel: "~152M params",
+            format: "Core ML .mlpackage",
+            packageDirectoryName: "mobileclip_s2_image.mlpackage",
+            files: [
+                .init(
+                    remoteURLString: "https://huggingface.co/apple/coreml-mobileclip/resolve/main/mobileclip_s2_image.mlpackage/Manifest.json?download=true",
+                    localRelativePath: "Manifest.json"
+                ),
+                .init(
+                    remoteURLString: "https://huggingface.co/apple/coreml-mobileclip/resolve/main/mobileclip_s2_image.mlpackage/Data/com.apple.CoreML/model.mlmodel?download=true",
+                    localRelativePath: "Data/com.apple.CoreML/model.mlmodel"
+                ),
+                .init(
+                    remoteURLString: "https://huggingface.co/apple/coreml-mobileclip/resolve/main/mobileclip_s2_image.mlpackage/Data/com.apple.CoreML/weights/weight.bin?download=true",
+                    localRelativePath: "Data/com.apple.CoreML/weights/weight.bin"
+                )
+            ]
+        ),
+        .init(
+            id: "coreml-mobileclip-blt-image",
+            displayName: "MobileCLIP B(LT) (Image Encoder)",
+            task: "Image embeddings",
+            parameterCountLabel: "~307M params",
+            format: "Core ML .mlpackage",
+            packageDirectoryName: "mobileclip_blt_image.mlpackage",
+            files: [
+                .init(
+                    remoteURLString: "https://huggingface.co/apple/coreml-mobileclip/resolve/main/mobileclip_blt_image.mlpackage/Manifest.json?download=true",
+                    localRelativePath: "Manifest.json"
+                ),
+                .init(
+                    remoteURLString: "https://huggingface.co/apple/coreml-mobileclip/resolve/main/mobileclip_blt_image.mlpackage/Data/com.apple.CoreML/model.mlmodel?download=true",
+                    localRelativePath: "Data/com.apple.CoreML/model.mlmodel"
+                ),
+                .init(
+                    remoteURLString: "https://huggingface.co/apple/coreml-mobileclip/resolve/main/mobileclip_blt_image.mlpackage/Data/com.apple.CoreML/weights/weight.bin?download=true",
+                    localRelativePath: "Data/com.apple.CoreML/weights/weight.bin"
+                )
+            ]
+        ),
+        .init(
+            id: "coreml-depth-anything-small-f16",
+            displayName: "Depth Anything Small (F16)",
+            task: "Depth estimation",
+            parameterCountLabel: "~25M params",
+            format: "Core ML .mlpackage",
+            packageDirectoryName: "DepthAnythingSmallF16.mlpackage",
+            files: [
+                .init(
+                    remoteURLString: "https://huggingface.co/apple/coreml-depth-anything-small/resolve/main/DepthAnythingSmallF16.mlpackage/Manifest.json?download=true",
+                    localRelativePath: "Manifest.json"
+                ),
+                .init(
+                    remoteURLString: "https://huggingface.co/apple/coreml-depth-anything-small/resolve/main/DepthAnythingSmallF16.mlpackage/Data/com.apple.CoreML/model.mlmodel?download=true",
+                    localRelativePath: "Data/com.apple.CoreML/model.mlmodel"
+                ),
+                .init(
+                    remoteURLString: "https://huggingface.co/apple/coreml-depth-anything-small/resolve/main/DepthAnythingSmallF16.mlpackage/Data/com.apple.CoreML/weights/weight.bin?download=true",
+                    localRelativePath: "Data/com.apple.CoreML/weights/weight.bin"
+                )
+            ]
+        ),
+        .init(
+            id: "coreml-sam2-large-image-encoder",
+            displayName: "SAM2 Large (Image Encoder)",
+            task: "Mask generation encoder",
+            parameterCountLabel: "~224M params",
+            format: "Core ML .mlpackage",
+            packageDirectoryName: "SAM2LargeImageEncoderFLOAT16.mlpackage",
+            files: [
+                .init(
+                    remoteURLString: "https://huggingface.co/apple/coreml-sam2-large/resolve/main/SAM2LargeImageEncoderFLOAT16.mlpackage/Manifest.json?download=true",
+                    localRelativePath: "Manifest.json"
+                ),
+                .init(
+                    remoteURLString: "https://huggingface.co/apple/coreml-sam2-large/resolve/main/SAM2LargeImageEncoderFLOAT16.mlpackage/Data/com.apple.CoreML/model.mlmodel?download=true",
+                    localRelativePath: "Data/com.apple.CoreML/model.mlmodel"
+                ),
+                .init(
+                    remoteURLString: "https://huggingface.co/apple/coreml-sam2-large/resolve/main/SAM2LargeImageEncoderFLOAT16.mlpackage/Data/com.apple.CoreML/weights/weight.bin?download=true",
+                    localRelativePath: "Data/com.apple.CoreML/weights/weight.bin"
+                )
+            ]
+        )
+    ]
+}
+
+private struct LocalDownloadedModel: Identifiable {
+    let id: String
+    let displayName: String
+    let localPackageURL: URL
+    let fileSizeBytes: Int64
+
+    var formattedSize: String {
+        ByteCountFormatter.string(fromByteCount: fileSizeBytes, countStyle: .file)
+    }
+}
+
+private enum LocalModelDownloadError: LocalizedError {
+    case invalidURL
+
+    var errorDescription: String? {
+        switch self {
+        case .invalidURL:
+            return "The model download URL is invalid."
+        }
+    }
+}
+
+private actor LocalModelDownloadService {
+    private let fileManager = FileManager.default
+
+    func listDownloadedModels() -> [LocalDownloadedModel] {
+        DownloadableVisionModel.catalog.compactMap { model in
+            let packageURL = packageDirectoryURL(for: model)
+            let allFilesPresent = model.files.allSatisfy { file in
+                let fileURL = packageURL.appendingPathComponent(file.localRelativePath)
+                return fileManager.fileExists(atPath: fileURL.path)
+            }
+
+            guard allFilesPresent else {
+                return nil
+            }
+
+            let totalBytes = model.files.reduce(Int64(0)) { partial, file in
+                let fileURL = packageURL.appendingPathComponent(file.localRelativePath)
+                guard let attrs = try? fileManager.attributesOfItem(atPath: fileURL.path),
+                      let sizeNumber = attrs[.size] as? NSNumber else {
+                    return partial
+                }
+                return partial + sizeNumber.int64Value
+            }
+
+            return LocalDownloadedModel(
+                id: model.id,
+                displayName: model.displayName,
+                localPackageURL: packageURL,
+                fileSizeBytes: totalBytes
+            )
+        }
+    }
+
+    func download(_ model: DownloadableVisionModel) async throws {
+        try ensureModelsDirectoryExists()
+        let packageURL = packageDirectoryURL(for: model)
+
+        if fileManager.fileExists(atPath: packageURL.path) {
+            try fileManager.removeItem(at: packageURL)
+        }
+        try fileManager.createDirectory(at: packageURL, withIntermediateDirectories: true)
+
+        for file in model.files {
+            guard let remoteURL = file.remoteURL else {
+                throw LocalModelDownloadError.invalidURL
+            }
+            let destinationURL = packageURL.appendingPathComponent(file.localRelativePath)
+            try fileManager.createDirectory(at: destinationURL.deletingLastPathComponent(), withIntermediateDirectories: true)
+
+            let (temporaryURL, _) = try await URLSession.shared.download(from: remoteURL)
+            if fileManager.fileExists(atPath: destinationURL.path) {
+                try fileManager.removeItem(at: destinationURL)
+            }
+            try fileManager.moveItem(at: temporaryURL, to: destinationURL)
+        }
+    }
+
+    func packageDirectoryURL(for model: DownloadableVisionModel) -> URL {
+        modelsDirectoryURL().appendingPathComponent(model.packageDirectoryName, isDirectory: true)
+    }
+
+    private func modelsDirectoryURL() -> URL {
+        let base = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first
+            ?? fileManager.temporaryDirectory
+        return base.appendingPathComponent("local_models", isDirectory: true)
+    }
+
+    private func destinationURL(for model: DownloadableVisionModel) -> URL {
+        packageDirectoryURL(for: model)
+    }
+
+    private func ensureModelsDirectoryExists() throws {
+        try fileManager.createDirectory(at: modelsDirectoryURL(), withIntermediateDirectories: true)
+    }
+}
+
 private enum LocalAIServiceError: LocalizedError {
     case emptyPrompt
     case emptyResponse
@@ -587,11 +980,13 @@ private enum LocalAIServiceError: LocalizedError {
 }
 
 private struct LocalAIConfiguration: Codable, Sendable, Equatable {
+    var selectedVisionModelID: String?
     var systemPrompt: String
     var maxResponseTokens: Int
     var temperature: Double
 
     static let defaults = LocalAIConfiguration(
+        selectedVisionModelID: nil,
         systemPrompt: "You are a helpful assistant running entirely on-device. Prioritize concise, practical answers.",
         maxResponseTokens: 600,
         temperature: 0.5
@@ -614,6 +1009,7 @@ private struct LocalAIConfiguration: Codable, Sendable, Equatable {
 
     func normalized() -> LocalAIConfiguration {
         .init(
+            selectedVisionModelID: selectedVisionModelID,
             systemPrompt: systemPrompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? LocalAIConfiguration.defaults.systemPrompt : systemPrompt.trimmingCharacters(in: .whitespacesAndNewlines),
             maxResponseTokens: min(max(maxResponseTokens, 64), 2048),
             temperature: min(max(temperature, 0), 1.5)
@@ -621,8 +1017,21 @@ private struct LocalAIConfiguration: Codable, Sendable, Equatable {
     }
 }
 
+private enum LocalVisionModelStorage {
+    static func modelsDirectoryURL() -> URL {
+        let fileManager = FileManager.default
+        let base = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first
+            ?? fileManager.temporaryDirectory
+        return base.appendingPathComponent("local_models", isDirectory: true)
+    }
+
+    static func packageDirectoryURL(for model: DownloadableVisionModel) -> URL {
+        modelsDirectoryURL().appendingPathComponent(model.packageDirectoryName, isDirectory: true)
+    }
+}
+
 private enum LocalVisionAnalyzer {
-    static func summarize(jpegData: Data) async throws -> String {
+    static func summarize(jpegData: Data, selectedModelID: String?) async throws -> String {
         try await Task.detached(priority: .userInitiated) {
             guard let uiImage = UIImage(data: jpegData),
                   let cgImage = uiImage.cgImage else {
@@ -661,12 +1070,54 @@ private enum LocalVisionAnalyzer {
                 chunks.append("Detected faces: \(faceCount)")
             }
 
+            if let selectedModelID,
+               let model = DownloadableVisionModel.catalog.first(where: { $0.id == selectedModelID }),
+               let modelSummary = try? runCoreMLModelSummary(cgImage: cgImage, model: model) {
+                chunks.append(modelSummary)
+            }
+
             if chunks.isEmpty {
                 return "No strong visual features were detected."
             }
 
             return chunks.joined(separator: "\n")
         }.value
+    }
+
+    private static func runCoreMLModelSummary(cgImage: CGImage, model: DownloadableVisionModel) throws -> String? {
+        let packageURL = LocalVisionModelStorage.packageDirectoryURL(for: model)
+        guard FileManager.default.fileExists(atPath: packageURL.path) else {
+            return nil
+        }
+
+        let compiledURL = try MLModel.compileModel(at: packageURL)
+        defer { try? FileManager.default.removeItem(at: compiledURL) }
+
+        let mlModel = try MLModel(contentsOf: compiledURL)
+        let vnModel = try VNCoreMLModel(for: mlModel)
+
+        var summary: String?
+        let request = VNCoreMLRequest(model: vnModel) { request, _ in
+            if let classifications = request.results as? [VNClassificationObservation],
+               let best = classifications.first {
+                summary = "Core ML (\(model.displayName)): top class \(best.identifier) (\(Int(best.confidence * 100))%)."
+            } else if let objects = request.results as? [VNRecognizedObjectObservation] {
+                summary = "Core ML (\(model.displayName)): detected \(objects.count) objects."
+            } else if let featureValues = request.results as? [VNCoreMLFeatureValueObservation], !featureValues.isEmpty {
+                summary = "Core ML (\(model.displayName)): produced \(featureValues.count) feature outputs."
+            } else if let pixelBuffers = request.results as? [VNPixelBufferObservation], let first = pixelBuffers.first {
+                let width = CVPixelBufferGetWidth(first.pixelBuffer)
+                let height = CVPixelBufferGetHeight(first.pixelBuffer)
+                summary = "Core ML (\(model.displayName)): output map size \(width)x\(height)."
+            } else {
+                summary = "Core ML (\(model.displayName)) ran successfully."
+            }
+        }
+        request.imageCropAndScaleOption = .scaleFit
+
+        let handler = VNImageRequestHandler(cgImage: cgImage)
+        try handler.perform([request])
+        return summary
     }
 }
 
@@ -755,6 +1206,7 @@ struct AIChatView: View {
     @State private var showCamera = false
     @State private var showCameraUnavailableAlert = false
     @State private var errorText: String?
+    @State private var selectedOpenRouterModelID = OpenRouterVisionModel.defaults.id
 
     var body: some View {
         VStack(spacing: 0) {
@@ -787,6 +1239,12 @@ struct AIChatView: View {
 
     private var keyField: some View {
         VStack(alignment: .leading, spacing: 6) {
+            Picker("Vision Model", selection: $selectedOpenRouterModelID) {
+                ForEach(OpenRouterVisionModel.options) { model in
+                    Text(model.label).tag(model.id)
+                }
+            }
+
             Text("OpenRouter API Key")
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.secondary)
@@ -948,6 +1406,7 @@ struct AIChatView: View {
             do {
                 let reply = try await OpenRouterClient.shared.sendMessage(
                     apiKey: trimmedKey,
+                    model: selectedOpenRouterModelID,
                     history: previousMessages,
                     userText: trimmedMessage,
                     imageJPEGData: imageToSend?.jpegData(compressionQuality: 0.8)
@@ -1026,11 +1485,28 @@ enum OpenRouterClientError: LocalizedError {
     }
 }
 
+private struct OpenRouterVisionModel: Identifiable {
+    let id: String
+    let label: String
+
+    static let defaults = OpenRouterVisionModel(
+        id: "qwen/qwen2.5-vl-3b-instruct",
+        label: "Qwen2.5-VL 3B"
+    )
+
+    static let options: [OpenRouterVisionModel] = [
+        defaults,
+        .init(id: "qwen/qwen2.5-vl-3b-instruct:free", label: "Qwen2.5-VL 3B (Free)"),
+        .init(id: "openai/gpt-4o-mini", label: "GPT-4o Mini")
+    ]
+}
+
 struct OpenRouterClient {
     static let shared = OpenRouterClient()
 
     func sendMessage(
         apiKey: String,
+        model: String,
         history: [AIChatMessage],
         userText: String,
         imageJPEGData: Data?
@@ -1084,7 +1560,7 @@ struct OpenRouterClient {
         }
 
         let requestBody: [String: Any] = [
-            "model": "openai/gpt-4o-mini",
+            "model": model,
             "messages": messagesPayload
         ]
 
@@ -1111,6 +1587,7 @@ struct OpenRouterClient {
         let prompt = "is this a person brushing their teeth? Reply with only YES or NO."
         let reply = try await sendSingleImagePrompt(
             apiKey: apiKey,
+            model: OpenRouterVisionModel.defaults.id,
             prompt: prompt,
             imageJPEGData: imageJPEGData
         )
@@ -1129,7 +1606,7 @@ struct OpenRouterClient {
         return (isYes, reply)
     }
 
-    func sendSingleImagePrompt(apiKey: String, prompt: String, imageJPEGData: Data) async throws -> String {
+    func sendSingleImagePrompt(apiKey: String, model: String, prompt: String, imageJPEGData: Data) async throws -> String {
         guard let url = URL(string: "https://openrouter.ai/api/v1/chat/completions") else {
             throw OpenRouterClientError.invalidResponse
         }
@@ -1142,7 +1619,7 @@ struct OpenRouterClient {
         request.setValue("GardenManager", forHTTPHeaderField: "X-Title")
 
         let requestBody: [String: Any] = [
-            "model": "openai/gpt-4o-mini",
+            "model": model,
             "messages": [
                 [
                     "role": "user",
