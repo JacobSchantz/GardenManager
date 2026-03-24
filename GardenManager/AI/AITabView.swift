@@ -195,7 +195,7 @@ struct LocalAITabView: View {
                     if viewModel.isGenerating {
                         HStack {
                             ProgressView()
-                            Text("Thinking locally...")
+                            Text("Thinking...")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                             Spacer()
@@ -329,6 +329,7 @@ private final class LocalAIChatViewModel: ObservableObject {
         let trimmed = draftMessage.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !isGenerating, !trimmed.isEmpty || selectedPhoto != nil else { return }
 
+        let history = messages.map(\.conversationTurn)
         let image = selectedPhoto
         let imageData = image?.jpegData(compressionQuality: 0.82)
         let userMessage = LocalAIMessage(role: .user, text: trimmed, photo: image)
@@ -337,8 +338,6 @@ private final class LocalAIChatViewModel: ObservableObject {
         draftMessage = ""
         selectedPhoto = nil
         isGenerating = true
-
-        let history = messages.map(\.conversationTurn)
 
         Task {
             do {
@@ -401,11 +400,18 @@ private actor LocalAIService {
     private var configuration = LocalAIConfiguration.load()
     private var session: LanguageModelSession?
 
+    private func selectedChatModel() -> LocalChatModelOption {
+        LocalChatModelOption.option(for: configuration.selectedChatModelID)
+    }
+
     func updateConfiguration(_ newConfiguration: LocalAIConfiguration) async throws {
         configuration = newConfiguration.normalized()
         configuration.save()
         session = nil
-        try await ensureSession()
+
+        if case .appleFoundation = selectedChatModel().kind {
+            try await ensureSession()
+        }
     }
 
     func resetConversation() {
@@ -413,8 +419,27 @@ private actor LocalAIService {
     }
 
     func status() async -> LocalAIModelStatus {
+        let selectedModel = selectedChatModel()
+
+        if case .openRouter(let modelID) = selectedModel.kind {
+            let apiKey = OpenRouterAPIKeyCache.load().trimmingCharacters(in: .whitespacesAndNewlines)
+            if apiKey.isEmpty {
+                return .init(
+                    title: "API Key Needed",
+                    detail: "Selected: \(selectedModel.label) via OpenRouter. Add API key in OpenRouter Chat.",
+                    isReady: false
+                )
+            }
+
+            return .init(
+                title: "Ready",
+                detail: "Selected: \(selectedModel.label) via OpenRouter (\(modelID))",
+                isReady: true
+            )
+        }
+
         let model: SystemLanguageModel = .default
-        let detail = "Apple on-device model"
+        let detail = "Selected: \(selectedModel.label)"
 
         switch model.availability {
         case .available:
@@ -429,14 +454,28 @@ private actor LocalAIService {
         prompt: String,
         imageJPEGData: Data?
     ) async throws -> String {
+        let selectedModel = selectedChatModel()
+
+        if case .openRouter(let modelID) = selectedModel.kind {
+            let apiKey = OpenRouterAPIKeyCache.load().trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !apiKey.isEmpty else {
+                throw OpenRouterClientError.apiError("Missing OpenRouter API key. Open OpenRouter Chat to set your key.")
+            }
+
+            return try await OpenRouterClient.shared.sendMessage(
+                apiKey: apiKey,
+                model: modelID,
+                history: history,
+                userText: prompt,
+                imageJPEGData: imageJPEGData
+            )
+        }
+
         try await ensureSession()
 
         var composedPrompt = prompt.trimmingCharacters(in: .whitespacesAndNewlines)
         if let imageJPEGData {
-            let visionSummary = try await LocalVisionAnalyzer.summarize(
-                jpegData: imageJPEGData,
-                selectedModelID: configuration.selectedVisionModelID
-            )
+            let visionSummary = try await LocalVisionAnalyzer.summarize(jpegData: imageJPEGData)
             let normalizedPrompt = composedPrompt.isEmpty ? "What do you see in this image?" : composedPrompt
             composedPrompt = """
             Image context extracted on-device:
@@ -519,21 +558,14 @@ private struct LocalAISettingsView: View {
     var body: some View {
         Form {
             Section("Model") {
-                Text("Using Apple's built-in on-device Foundation Model.")
+                Text("Choose one chat model. The selected model handles both text and image prompts.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
 
-                Picker("Vision Model", selection: $configuration.selectedVisionModelID) {
-                    Text("Built-in Vision only").tag(String?.none)
-                    ForEach(downloadedModels) { downloaded in
-                        Text(downloaded.displayName).tag(Optional(downloaded.id))
+                Picker("Chat Model", selection: $configuration.selectedChatModelID) {
+                    ForEach(LocalChatModelOption.options) { model in
+                        Text(model.label).tag(Optional(model.id))
                     }
-                }
-
-                if configuration.selectedVisionModelID != nil {
-                    Text("Selected Core ML model will be used for additional on-device image analysis.")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
                 }
 
                 HStack {
@@ -544,6 +576,10 @@ private struct LocalAISettingsView: View {
                 }
                 Text(modelStatus.detail)
                     .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                Text("Downloaded Core ML models below are assets for local experimentation and are not used as direct chat LLMs in this simplified flow.")
+                    .font(.caption2)
                     .foregroundStyle(.secondary)
             }
 
@@ -661,6 +697,35 @@ private struct LocalAIModelStatus: Sendable {
     let isReady: Bool
 
     static let checking = LocalAIModelStatus(title: "Checking", detail: "Validating local model availability...", isReady: false)
+}
+
+private struct LocalChatModelOption: Identifiable, Sendable {
+    enum Kind: Sendable {
+        case appleFoundation
+        case openRouter(modelID: String)
+    }
+
+    let id: String
+    let label: String
+    let kind: Kind
+
+    static let options: [LocalChatModelOption] = [
+        .init(id: "apple-foundation", label: "Apple Foundation (On-Device)", kind: .appleFoundation),
+        .init(id: "openrouter-qwen25-vl-3b", label: "Qwen2.5-VL 3B (OpenRouter)", kind: .openRouter(modelID: "qwen/qwen2.5-vl-3b-instruct")),
+        .init(id: "openrouter-qwen3-vl-8b", label: "Qwen3-VL 8B (OpenRouter)", kind: .openRouter(modelID: "qwen/qwen3-vl-8b-instruct")),
+        .init(id: "openrouter-llama32-vision", label: "Llama 3.2 11B Vision (OpenRouter)", kind: .openRouter(modelID: "meta-llama/llama-3.2-11b-vision-instruct")),
+        .init(id: "openrouter-gpt4o-mini", label: "GPT-4o Mini (OpenRouter)", kind: .openRouter(modelID: "openai/gpt-4o-mini"))
+    ]
+
+    static let defaultID = "apple-foundation"
+
+    static func option(for id: String?) -> LocalChatModelOption {
+        guard let id,
+              let match = options.first(where: { $0.id == id }) else {
+            return options[0]
+        }
+        return match
+    }
 }
 
 private struct DownloadableVisionModel: Identifiable, Hashable, Sendable {
@@ -1058,12 +1123,14 @@ private enum LocalAIServiceError: LocalizedError {
 }
 
 private struct LocalAIConfiguration: Codable, Sendable, Equatable {
+    var selectedChatModelID: String?
     var selectedVisionModelID: String?
     var systemPrompt: String
     var maxResponseTokens: Int
     var temperature: Double
 
     static let defaults = LocalAIConfiguration(
+        selectedChatModelID: LocalChatModelOption.defaultID,
         selectedVisionModelID: nil,
         systemPrompt: "You are a helpful assistant running entirely on-device. Prioritize concise, practical answers.",
         maxResponseTokens: 600,
@@ -1086,7 +1153,15 @@ private struct LocalAIConfiguration: Codable, Sendable, Equatable {
     }
 
     func normalized() -> LocalAIConfiguration {
-        .init(
+        let normalizedChatModelID: String
+        if LocalChatModelOption.options.contains(where: { $0.id == selectedChatModelID }) {
+            normalizedChatModelID = selectedChatModelID ?? LocalChatModelOption.defaultID
+        } else {
+            normalizedChatModelID = LocalChatModelOption.defaultID
+        }
+
+        return .init(
+            selectedChatModelID: normalizedChatModelID,
             selectedVisionModelID: selectedVisionModelID,
             systemPrompt: systemPrompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? LocalAIConfiguration.defaults.systemPrompt : systemPrompt.trimmingCharacters(in: .whitespacesAndNewlines),
             maxResponseTokens: min(max(maxResponseTokens, 64), 2048),
@@ -1109,7 +1184,7 @@ private enum LocalVisionModelStorage {
 }
 
 private enum LocalVisionAnalyzer {
-    static func summarize(jpegData: Data, selectedModelID: String?) async throws -> String {
+    static func summarize(jpegData: Data) async throws -> String {
         try await Task.detached(priority: .userInitiated) {
             guard let uiImage = UIImage(data: jpegData),
                   let cgImage = uiImage.cgImage else {
@@ -1148,54 +1223,12 @@ private enum LocalVisionAnalyzer {
                 chunks.append("Detected faces: \(faceCount)")
             }
 
-            if let selectedModelID,
-               let model = DownloadableVisionModel.catalog.first(where: { $0.id == selectedModelID }),
-               let modelSummary = try? runCoreMLModelSummary(cgImage: cgImage, model: model) {
-                chunks.append(modelSummary)
-            }
-
             if chunks.isEmpty {
                 return "No strong visual features were detected."
             }
 
             return chunks.joined(separator: "\n")
         }.value
-    }
-
-    private static func runCoreMLModelSummary(cgImage: CGImage, model: DownloadableVisionModel) throws -> String? {
-        let packageURL = LocalVisionModelStorage.packageDirectoryURL(for: model)
-        guard FileManager.default.fileExists(atPath: packageURL.path) else {
-            return nil
-        }
-
-        let compiledURL = try MLModel.compileModel(at: packageURL)
-        defer { try? FileManager.default.removeItem(at: compiledURL) }
-
-        let mlModel = try MLModel(contentsOf: compiledURL)
-        let vnModel = try VNCoreMLModel(for: mlModel)
-
-        var summary: String?
-        let request = VNCoreMLRequest(model: vnModel) { request, _ in
-            if let classifications = request.results as? [VNClassificationObservation],
-               let best = classifications.first {
-                summary = "Core ML (\(model.displayName)): top class \(best.identifier) (\(Int(best.confidence * 100))%)."
-            } else if let objects = request.results as? [VNRecognizedObjectObservation] {
-                summary = "Core ML (\(model.displayName)): detected \(objects.count) objects."
-            } else if let featureValues = request.results as? [VNCoreMLFeatureValueObservation], !featureValues.isEmpty {
-                summary = "Core ML (\(model.displayName)): produced \(featureValues.count) feature outputs."
-            } else if let pixelBuffers = request.results as? [VNPixelBufferObservation], let first = pixelBuffers.first {
-                let width = CVPixelBufferGetWidth(first.pixelBuffer)
-                let height = CVPixelBufferGetHeight(first.pixelBuffer)
-                summary = "Core ML (\(model.displayName)): output map size \(width)x\(height)."
-            } else {
-                summary = "Core ML (\(model.displayName)) ran successfully."
-            }
-        }
-        request.imageCropAndScaleOption = .scaleFit
-
-        let handler = VNImageRequestHandler(cgImage: cgImage)
-        try handler.perform([request])
-        return summary
     }
 }
 
@@ -1581,6 +1614,30 @@ private struct OpenRouterVisionModel: Identifiable {
 
 struct OpenRouterClient {
     static let shared = OpenRouterClient()
+
+    fileprivate func sendMessage(
+        apiKey: String,
+        model: String,
+        history: [LocalAIConversationTurn],
+        userText: String,
+        imageJPEGData: Data?
+    ) async throws -> String {
+        let messageHistory = history.map { turn in
+            AIChatMessage(
+                role: turn.role == .user ? .user : .assistant,
+                text: turn.text,
+                photo: nil
+            )
+        }
+
+        return try await sendMessage(
+            apiKey: apiKey,
+            model: model,
+            history: messageHistory,
+            userText: userText,
+            imageJPEGData: imageJPEGData
+        )
+    }
 
     func sendMessage(
         apiKey: String,
