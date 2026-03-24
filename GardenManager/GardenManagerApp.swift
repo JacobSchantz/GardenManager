@@ -8,7 +8,7 @@ struct GardenManagerApp: App {
     
     var body: some Scene {
         WindowGroup {
-            RootView()
+            LocalAITabView()
         }
     }
 }
