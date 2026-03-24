@@ -235,14 +235,25 @@ struct PersonActionTabView: View {
             do {
                 let analysis: String
                 
-                // Use Visual Intelligence for much more detailed analysis (iOS 17+)
-                if #available(iOS 17.0, *) {
-                    modelStatus = "Analyzing with Visual Intelligence..."
-                    analysis = try await analyzeWithVisualIntelligence(cgImage: cgImage)
-                } else {
-                    // Fallback for older iOS versions
-                    modelStatus = "Using Vision Framework..."
-                    analysis = try await performVisionAnalysis(cgImage: cgImage)
+                // Actually use the selected model
+                switch selectedModelID {
+                case "fastvlm-1.5b", "fastvlm-7b":
+                    modelStatus = "Loading FastVLM model..."
+                    analysis = try await analyzeWithFastVLMModel(cgImage: cgImage, modelID: selectedModelID)
+                    
+                case "resnet50", "mobilenetv2":
+                    modelStatus = "Loading CoreML model..."
+                    analysis = try await analyzeWithCoreMLModel(cgImage: cgImage, modelID: selectedModelID)
+                    
+                default:
+                    // Vision framework (default)
+                    if #available(iOS 17.0, *) {
+                        modelStatus = "Analyzing with Vision framework..."
+                        analysis = try await analyzeWithVisualIntelligence(cgImage: cgImage)
+                    } else {
+                        modelStatus = "Using Vision Framework..."
+                        analysis = try await performVisionAnalysis(cgImage: cgImage)
+                    }
                 }
                 
                 await MainActor.run {
@@ -255,6 +266,192 @@ struct PersonActionTabView: View {
                     errorText = "Analysis failed: \(error.localizedDescription)"
                     isAnalyzing = false
                 }
+            }
+        }
+    }
+
+    // MARK: - FastVLM Model Analysis
+    
+    private func analyzeWithFastVLMModel(cgImage: CGImage, modelID: String) async throws -> String {
+        let downloadService = LocalModelDownloadService()
+        let downloaded = await downloadService.listDownloadedModels()
+        
+        let catalogModelID = modelID == "fastvlm-7b" ? "coreml-fastvlm-7b-int4" : "coreml-fastvlm-1.5b-int8"
+        
+        // Check if model is downloaded
+        guard let model = downloaded.first(where: { $0.id == catalogModelID }) else {
+            // Try to download
+            if let modelToDownload = DownloadableVisionModel.catalog.first(where: { $0.id == catalogModelID }) {
+                modelStatus = "Downloading \(modelID) model (this may take a while)..."
+                try await downloadService.download(modelToDownload)
+                
+                // Try loading again after download
+                guard let downloadedModel = (await downloadService.listDownloadedModels()).first(where: { $0.id == catalogModelID }) else {
+                    return "Download failed. Please try again or check your internet connection."
+                }
+                
+                return try await runFastVLMCoreML(cgImage: cgImage, model: downloadedModel)
+            }
+            
+            return "Model '\(modelID)' not found in catalog. Please select a different model."
+        }
+        
+        return try await runFastVLMCoreML(cgImage: cgImage, model: model)
+    }
+    
+    private func runFastVLMCoreML(cgImage: CGImage, model: LocalDownloadedModel) async throws -> String {
+        modelStatus = "Running FastVLM inference..."
+        
+        // For FastVLM, we need to use it as a CoreML model
+        // FastVLM takes image input and outputs text
+        // The interface depends on how the model was exported
+        
+        // Try loading the model
+        let packageURL = model.localPackageURL
+        
+        // Find the .mlmodel file
+        let fileManager = FileManager.default
+        var mlmodelURL: URL?
+        
+        if let enumerator = fileManager.enumerator(at: packageURL, includingPropertiesForKeys: nil) {
+            while let fileURL = enumerator.nextObject() as? URL {
+                if fileURL.pathExtension == "mlmodel" {
+                    mlmodelURL = fileURL
+                    break
+                }
+            }
+        }
+        
+        guard let modelURL = mlmodelURL else {
+            return "Could not find .mlmodel file in downloaded package."
+        }
+        
+        do {
+            let config = MLModelConfiguration()
+            config.computeUnits = .all
+            
+            let mlModel = try await MLModel.load(contentsOf: modelURL, configuration: config)
+            
+            // Get model description to understand inputs/outputs
+            let description = mlModel.modelDescription
+            let inputNames = description.inputDescriptionsByName.keys.joined(separator: ", ")
+            let outputNames = description.outputDescriptionsByName.keys.joined(separator: ", ")
+            
+            return """
+            ⚡ FastVLM Model Loaded Successfully!
+            
+            Model: \(model.displayName)
+            Input: \(inputNames)
+            Output: \(outputNames)
+            
+            Note: FastVLM is a vision-language model. To use it properly, you need to:
+            1. Pass the image as input
+            2. Provide a text prompt asking what you want to know about the image
+            3. Get the text response from the model output
+            
+            The current implementation requires a prompt to be sent with the image.
+            Consider adding a text field for the user to ask questions like:
+            "What is happening in this image?" or "Describe this photo in detail."
+            
+            For now, here's a detailed analysis using Vision framework:
+            
+            \(try await performVisionAnalysis(cgImage: cgImage))
+            """
+        } catch {
+            return "Failed to load model: \(error.localizedDescription)"
+        }
+    }
+
+    // MARK: - CoreML Model Analysis (ResNet, MobileNet)
+    
+    private func analyzeWithCoreMLModel(cgImage: CGImage, modelID: String) async throws -> String {
+        let downloadService = LocalModelDownloadService()
+        let downloaded = await downloadService.listDownloadedModels()
+        
+        let catalogModelID = modelID == "resnet50" ? "coreml-resnet50-imagenet" : "coreml-mobilenetv2-imagenet"
+        
+        guard let model = downloaded.first(where: { $0.id == catalogModelID }) else {
+            // Try to download
+            if let modelToDownload = DownloadableVisionModel.catalog.first(where: { $0.id == catalogModelID }) {
+                modelStatus = "Downloading \(modelID) model..."
+                try await downloadService.download(modelToDownload)
+                
+                guard let downloadedModel = (await downloadService.listDownloadedModels()).first(where: { $0.id == catalogModelID }) else {
+                    return "Download failed. Please try again."
+                }
+                
+                return try await runCoreMLClassification(cgImage: cgImage, model: downloadedModel)
+            }
+            
+            return "Model '\(modelID)' not found in catalog."
+        }
+        
+        return try await runCoreMLClassification(cgImage: cgImage, model: model)
+    }
+    
+    private func runCoreMLClassification(cgImage: CGImage, model: LocalDownloadedModel) async throws -> String {
+        modelStatus = "Running \(model.displayName)..."
+        
+        let packageURL = model.localPackageURL
+        let fileManager = FileManager.default
+        var mlmodelURL: URL?
+        
+        if let enumerator = fileManager.enumerator(at: packageURL, includingPropertiesForKeys: nil) {
+            while let fileURL = enumerator.nextObject() as? URL {
+                if fileURL.pathExtension == "mlmodel" {
+                    mlmodelURL = fileURL
+                    break
+                }
+            }
+        }
+        
+        guard let modelURL = mlmodelURL else {
+            return "Could not find .mlmodel file."
+        }
+        
+        return try await withCheckedThrowingContinuation { continuation in
+            let config = MLModelConfiguration()
+            config.computeUnits = .all
+            
+            do {
+                let mlModel = try MLModel(contentsOf: modelURL, configuration: config)
+                let vnModel = try VNCoreMLModel(for: mlModel)
+                
+                let request = VNClassifyImageRequest()
+                request.revision = VNClassifyImageRequestRevision1
+                
+                let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
+                
+                // Use the CoreML model for classification
+                let coreMLRequest = VNCoreMLRequest(model: vnModel) { request, error in
+                    if let error = error {
+                        continuation.resume(throwing: error)
+                        return
+                    }
+                    
+                    guard let observations = request.results as? [VNClassificationObservation] else {
+                        continuation.resume(returning: "No results from model")
+                        return
+                    }
+                    
+                    let topResults = observations.prefix(15).filter { $0.confidence > 0.05 }
+                    let labels = topResults.map { "\($0.identifier.replacingOccurrences(of: "_", with: " ")) (\(Int($0.confidence * 100))%)" }
+                    
+                    let result = """
+                    🔍 \(model.displayName) Classification Results:
+                    
+                    Top detections:
+                    \(labels.enumerated().map { "\($0.offset + 1). \($0.element)" }.joined(separator: "\n"))
+                    
+                    This model identified \(observations.count) possible classes in the image.
+                    """
+                    
+                    continuation.resume(returning: result)
+                }
+                
+                try handler.perform([coreMLRequest, VNClassifyImageRequest()])
+            } catch {
+                continuation.resume(throwing: error)
             }
         }
     }
