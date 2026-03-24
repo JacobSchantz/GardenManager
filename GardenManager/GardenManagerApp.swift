@@ -23,10 +23,10 @@ struct RootView: View {
                 Label("Grok", systemImage: "waveform")
             }
 
-            Text("AI Coming Soon")
+            LocalAITabView()
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .tabItem {
-                Label("AI", systemImage: "sparkles")
+                Label("Local AI", systemImage: "cpu")
             }
         }
 

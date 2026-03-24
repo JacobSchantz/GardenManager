@@ -1,5 +1,9 @@
 import SwiftUI
 import UIKit
+import Vision
+#if canImport(FoundationModels)
+import FoundationModels
+#endif
 
 struct AIAssistantTabView: View {
     @State private var showChat = false
@@ -38,6 +42,707 @@ struct AIAssistantTabView: View {
         }
     }
 }
+
+struct LocalAITabView: View {
+    @StateObject private var viewModel = LocalAIChatViewModel()
+    @State private var showCamera = false
+    @State private var showPhotoLibrary = false
+    @State private var showSettings = false
+
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 0) {
+                header
+                Divider()
+                messagesList
+                composer
+            }
+            .navigationTitle("Local AI")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItemGroup(placement: .navigationBarTrailing) {
+                    Button {
+                        showSettings = true
+                    } label: {
+                        Image(systemName: "slider.horizontal.3")
+                    }
+
+                    Button {
+                        viewModel.clearConversation()
+                    } label: {
+                        Image(systemName: "trash")
+                    }
+                    .disabled(viewModel.isGenerating)
+                }
+            }
+            .sheet(isPresented: $showCamera) {
+                LocalUIImagePicker(sourceType: .camera) { image in
+                    if let image {
+                        viewModel.selectedPhoto = image
+                    }
+                }
+            }
+            .sheet(isPresented: $showPhotoLibrary) {
+                LocalUIImagePicker(sourceType: .photoLibrary) { image in
+                    if let image {
+                        viewModel.selectedPhoto = image
+                    }
+                }
+            }
+            .sheet(isPresented: $showSettings) {
+                NavigationStack {
+                    LocalAISettingsView(
+                        configuration: viewModel.configuration,
+                        modelStatus: viewModel.modelStatus,
+                        isSaving: viewModel.isUpdatingConfiguration,
+                        onSave: { updated in
+                            viewModel.apply(configuration: updated)
+                        }
+                    )
+                }
+            }
+            .task {
+                await viewModel.refreshModelStatus()
+            }
+            .alert("Local AI Error", isPresented: $viewModel.showError) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(viewModel.errorText)
+            }
+        }
+    }
+
+    private var header: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label("On-device chat + vision", systemImage: "cpu")
+                .font(.headline)
+
+            Text("All inference happens locally. Attach a photo and ask questions offline.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+
+            HStack(spacing: 6) {
+                Circle()
+                    .fill(viewModel.modelStatus.isReady ? .green : .orange)
+                    .frame(width: 8, height: 8)
+                Text(viewModel.modelStatus.title)
+                    .font(.caption.weight(.semibold))
+                Text("•")
+                    .foregroundStyle(.secondary)
+                Text(viewModel.modelStatus.detail)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(12)
+    }
+
+    private var messagesList: some View {
+        ScrollViewReader { proxy in
+            ScrollView {
+                LazyVStack(spacing: 10) {
+                    if viewModel.messages.isEmpty {
+                        Text("Start a local conversation. Add an image for vision prompts.")
+                            .foregroundStyle(.secondary)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .padding(.top, 20)
+                    }
+
+                    ForEach(viewModel.messages) { message in
+                        HStack(alignment: .bottom) {
+                            if message.role == .assistant {
+                                Spacer(minLength: 34)
+                            }
+
+                            VStack(alignment: .leading, spacing: 8) {
+                                if let image = message.photo {
+                                    Image(uiImage: image)
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(width: 150, height: 150)
+                                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                                }
+
+                                if !message.text.isEmpty {
+                                    Text(message.text)
+                                        .font(.subheadline)
+                                        .foregroundStyle(message.role == .user ? .white : Color(.label))
+                                }
+                            }
+                            .padding(12)
+                            .background(
+                                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                    .fill(message.role == .user ? Color.blue : Color(.secondarySystemBackground))
+                            )
+
+                            if message.role == .user {
+                                Spacer(minLength: 34)
+                            }
+                        }
+                        .id(message.id)
+                    }
+
+                    if viewModel.isGenerating {
+                        HStack {
+                            ProgressView()
+                            Text("Thinking locally...")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            Spacer()
+                        }
+                    }
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+            }
+            .onChange(of: viewModel.messages.count) { _, _ in
+                guard let lastId = viewModel.messages.last?.id else { return }
+                withAnimation {
+                    proxy.scrollTo(lastId, anchor: .bottom)
+                }
+            }
+        }
+    }
+
+    private var composer: some View {
+        VStack(spacing: 10) {
+            if let selectedPhoto = viewModel.selectedPhoto {
+                HStack {
+                    Image(uiImage: selectedPhoto)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 70, height: 70)
+                        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+
+                    Text("Image attached")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+
+                    Spacer()
+
+                    Button {
+                        viewModel.selectedPhoto = nil
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundStyle(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                }
+                .padding(.horizontal, 12)
+            }
+
+            HStack(spacing: 10) {
+                Button {
+                    showPhotoLibrary = true
+                } label: {
+                    Image(systemName: "photo")
+                        .font(.headline)
+                        .frame(width: 36, height: 36)
+                        .background(Color(.secondarySystemBackground), in: Circle())
+                }
+                .buttonStyle(.plain)
+
+                Button {
+                    guard UIImagePickerController.isSourceTypeAvailable(.camera) else {
+                        viewModel.reportError("Camera unavailable on this device.")
+                        return
+                    }
+                    showCamera = true
+                } label: {
+                    Image(systemName: "camera")
+                        .font(.headline)
+                        .frame(width: 36, height: 36)
+                        .background(Color(.secondarySystemBackground), in: Circle())
+                }
+                .buttonStyle(.plain)
+
+                TextField("Message", text: $viewModel.draftMessage)
+                    .textFieldStyle(.roundedBorder)
+
+                Button {
+                    viewModel.sendCurrentMessage()
+                } label: {
+                    if viewModel.isGenerating {
+                        ProgressView()
+                            .frame(width: 32, height: 32)
+                    } else {
+                        Image(systemName: "arrow.up.circle.fill")
+                            .font(.title2)
+                    }
+                }
+                .buttonStyle(.plain)
+                .disabled(viewModel.isGenerating || viewModel.sendDisabled)
+            }
+            .padding(.horizontal, 12)
+            .padding(.bottom, 12)
+        }
+        .padding(.top, 10)
+        .background(Color(.systemBackground))
+    }
+}
+
+@MainActor
+private final class LocalAIChatViewModel: ObservableObject {
+    @Published var draftMessage = ""
+    @Published var selectedPhoto: UIImage?
+    @Published var messages: [LocalAIMessage] = []
+    @Published var isGenerating = false
+    @Published var showError = false
+    @Published var errorText = ""
+    @Published var modelStatus: LocalAIModelStatus = .checking
+    @Published var configuration: LocalAIConfiguration = .load()
+    @Published var isUpdatingConfiguration = false
+
+    private let service = LocalAIService()
+
+    var sendDisabled: Bool {
+        draftMessage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && selectedPhoto == nil
+    }
+
+    func reportError(_ message: String) {
+        errorText = message
+        showError = true
+    }
+
+    func refreshModelStatus() async {
+        modelStatus = await service.status()
+    }
+
+    func sendCurrentMessage() {
+        let trimmed = draftMessage.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !isGenerating, !trimmed.isEmpty || selectedPhoto != nil else { return }
+
+        let image = selectedPhoto
+        let imageData = image?.jpegData(compressionQuality: 0.82)
+        let userMessage = LocalAIMessage(role: .user, text: trimmed, photo: image)
+        messages.append(userMessage)
+
+        draftMessage = ""
+        selectedPhoto = nil
+        isGenerating = true
+
+        let history = messages.map(\.conversationTurn)
+
+        Task {
+            do {
+                let reply = try await service.generateReply(
+                    history: history,
+                    prompt: trimmed,
+                    imageJPEGData: imageData
+                )
+                messages.append(LocalAIMessage(role: .assistant, text: reply, photo: nil))
+                isGenerating = false
+            } catch {
+                isGenerating = false
+                reportError(error.localizedDescription)
+            }
+
+            await refreshModelStatus()
+        }
+    }
+
+    func clearConversation() {
+        messages.removeAll()
+        selectedPhoto = nil
+        draftMessage = ""
+        Task { await service.resetConversation() }
+    }
+
+    func apply(configuration newConfiguration: LocalAIConfiguration) {
+        isUpdatingConfiguration = true
+        Task {
+            do {
+                try await service.updateConfiguration(newConfiguration)
+                configuration = newConfiguration
+            } catch {
+                reportError(error.localizedDescription)
+            }
+
+            isUpdatingConfiguration = false
+            await refreshModelStatus()
+        }
+    }
+}
+
+private actor LocalAIService {
+    private var configuration = LocalAIConfiguration.load()
+    private var session: LanguageModelSession?
+
+    func updateConfiguration(_ newConfiguration: LocalAIConfiguration) async throws {
+        configuration = newConfiguration.normalized()
+        configuration.save()
+        session = nil
+        try await ensureSession()
+    }
+
+    func resetConversation() {
+        session = nil
+    }
+
+    func status() async -> LocalAIModelStatus {
+        let model: SystemLanguageModel = .default
+        let detail = "Apple on-device model"
+
+        switch model.availability {
+        case .available:
+            return .init(title: "Ready", detail: detail, isReady: true)
+        case .unavailable(let reason):
+            return .init(title: "Unavailable", detail: reason.localizedDescription, isReady: false)
+        }
+    }
+
+    func generateReply(
+        history: [LocalAIConversationTurn],
+        prompt: String,
+        imageJPEGData: Data?
+    ) async throws -> String {
+        try await ensureSession()
+
+        var composedPrompt = prompt.trimmingCharacters(in: .whitespacesAndNewlines)
+        if let imageJPEGData {
+            let visionSummary = try await LocalVisionAnalyzer.summarize(jpegData: imageJPEGData)
+            let normalizedPrompt = composedPrompt.isEmpty ? "What do you see in this image?" : composedPrompt
+            composedPrompt = """
+            Image context extracted on-device:
+            \(visionSummary)
+
+            User request:
+            \(normalizedPrompt)
+            """
+        }
+
+        if composedPrompt.isEmpty {
+            throw LocalAIServiceError.emptyPrompt
+        }
+
+        let response = try await currentSession().respond(
+            to: buildTranscriptPrompt(history: history, latestUserPrompt: composedPrompt),
+            options: GenerationOptions(
+                temperature: configuration.temperature,
+                maximumResponseTokens: configuration.maxResponseTokens
+            )
+        )
+
+        let text = response.content.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !text.isEmpty else {
+            throw LocalAIServiceError.emptyResponse
+        }
+        return text
+    }
+
+    private func buildTranscriptPrompt(history: [LocalAIConversationTurn], latestUserPrompt: String) -> String {
+        let recent = history.suffix(8)
+        var lines: [String] = ["Conversation context:"]
+
+        for turn in recent {
+            let rolePrefix = turn.role == .user ? "User" : "Assistant"
+            lines.append("\(rolePrefix): \(turn.text)")
+        }
+
+        lines.append("User: \(latestUserPrompt)")
+        lines.append("Assistant:")
+        return lines.joined(separator: "\n")
+    }
+
+    private func ensureSession() async throws {
+        _ = try await currentSession()
+    }
+
+    private func currentSession() async throws -> LanguageModelSession {
+        if let session {
+            return session
+        }
+
+        let model: SystemLanguageModel = .default
+
+        guard model.isAvailable else {
+            throw LocalAIServiceError.modelUnavailable(model.availability.localizedDescription)
+        }
+
+        let session = LanguageModelSession(
+            model: model,
+            instructions: configuration.systemPrompt
+        )
+        self.session = session
+        return session
+    }
+}
+
+private struct LocalAISettingsView: View {
+    @Environment(\.dismiss) private var dismiss
+
+    @State var configuration: LocalAIConfiguration
+    let modelStatus: LocalAIModelStatus
+    let isSaving: Bool
+    let onSave: (LocalAIConfiguration) -> Void
+
+    var body: some View {
+        Form {
+            Section("Model") {
+                Text("Using Apple's built-in on-device Foundation Model.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                HStack {
+                    Text("Status")
+                    Spacer()
+                    Text(modelStatus.title)
+                        .foregroundStyle(modelStatus.isReady ? .green : .orange)
+                }
+                Text(modelStatus.detail)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Section("Generation") {
+                Stepper(value: $configuration.maxResponseTokens, in: 64...2048, step: 32) {
+                    Text("Max tokens: \(configuration.maxResponseTokens)")
+                }
+
+                HStack {
+                    Text("Temperature")
+                    Spacer()
+                    Text(String(format: "%.2f", configuration.temperature))
+                        .foregroundStyle(.secondary)
+                }
+                Slider(value: $configuration.temperature, in: 0...1.5)
+            }
+
+            Section("System prompt") {
+                TextEditor(text: $configuration.systemPrompt)
+                    .frame(minHeight: 120)
+            }
+        }
+        .navigationTitle("Local AI Settings")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                Button("Cancel") { dismiss() }
+            }
+            ToolbarItem(placement: .confirmationAction) {
+                Button("Save") {
+                    onSave(configuration.normalized())
+                    dismiss()
+                }
+                .disabled(isSaving)
+            }
+        }
+    }
+}
+
+private struct LocalAIMessage: Identifiable {
+    enum Role {
+        case user
+        case assistant
+    }
+
+    let id = UUID()
+    let role: Role
+    let text: String
+    let photo: UIImage?
+
+    var conversationTurn: LocalAIConversationTurn {
+        .init(role: role == .user ? .user : .assistant, text: text)
+    }
+}
+
+private struct LocalAIConversationTurn: Sendable {
+    enum Role: Sendable {
+        case user
+        case assistant
+    }
+
+    let role: Role
+    let text: String
+}
+
+private struct LocalAIModelStatus: Sendable {
+    let title: String
+    let detail: String
+    let isReady: Bool
+
+    static let checking = LocalAIModelStatus(title: "Checking", detail: "Validating local model availability...", isReady: false)
+}
+
+private enum LocalAIServiceError: LocalizedError {
+    case emptyPrompt
+    case emptyResponse
+    case modelUnavailable(String)
+    case visionAnalysisFailed
+
+    var errorDescription: String? {
+        switch self {
+        case .emptyPrompt:
+            return "Please enter a message or attach an image."
+        case .emptyResponse:
+            return "The local model returned an empty response."
+        case .modelUnavailable(let details):
+            return "Local model unavailable: \(details)"
+        case .visionAnalysisFailed:
+            return "Unable to analyze the attached image locally."
+        }
+    }
+}
+
+private struct LocalAIConfiguration: Codable, Sendable, Equatable {
+    var systemPrompt: String
+    var maxResponseTokens: Int
+    var temperature: Double
+
+    static let defaults = LocalAIConfiguration(
+        systemPrompt: "You are a helpful assistant running entirely on-device. Prioritize concise, practical answers.",
+        maxResponseTokens: 600,
+        temperature: 0.5
+    )
+
+    private static let storageKey = "local_ai_configuration"
+
+    static func load() -> LocalAIConfiguration {
+        guard let data = UserDefaults.standard.data(forKey: storageKey),
+              let decoded = try? JSONDecoder().decode(LocalAIConfiguration.self, from: data) else {
+            return .defaults
+        }
+        return decoded.normalized()
+    }
+
+    func save() {
+        guard let data = try? JSONEncoder().encode(normalized()) else { return }
+        UserDefaults.standard.set(data, forKey: LocalAIConfiguration.storageKey)
+    }
+
+    func normalized() -> LocalAIConfiguration {
+        .init(
+            systemPrompt: systemPrompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? LocalAIConfiguration.defaults.systemPrompt : systemPrompt.trimmingCharacters(in: .whitespacesAndNewlines),
+            maxResponseTokens: min(max(maxResponseTokens, 64), 2048),
+            temperature: min(max(temperature, 0), 1.5)
+        )
+    }
+}
+
+private enum LocalVisionAnalyzer {
+    static func summarize(jpegData: Data) async throws -> String {
+        try await Task.detached(priority: .userInitiated) {
+            guard let uiImage = UIImage(data: jpegData),
+                  let cgImage = uiImage.cgImage else {
+                throw LocalAIServiceError.visionAnalysisFailed
+            }
+
+            let classificationRequest = VNClassifyImageRequest()
+            let textRequest = VNRecognizeTextRequest()
+            textRequest.recognitionLevel = .accurate
+            textRequest.usesLanguageCorrection = true
+            textRequest.minimumTextHeight = 0.02
+            let faceRequest = VNDetectFaceRectanglesRequest()
+
+            let handler = VNImageRequestHandler(cgImage: cgImage)
+            try handler.perform([classificationRequest, textRequest, faceRequest])
+
+            let labels = (classificationRequest.results ?? [])
+                .prefix(6)
+                .map { "\($0.identifier) (\(Int($0.confidence * 100))%)" }
+
+            let extractedText = (textRequest.results ?? [])
+                .compactMap { $0.topCandidates(1).first?.string }
+                .prefix(8)
+                .joined(separator: " | ")
+
+            let faceCount = faceRequest.results?.count ?? 0
+
+            var chunks: [String] = []
+            if !labels.isEmpty {
+                chunks.append("Top visual labels: \(labels.joined(separator: ", "))")
+            }
+            if !extractedText.isEmpty {
+                chunks.append("Recognized text: \(extractedText)")
+            }
+            if faceCount > 0 {
+                chunks.append("Detected faces: \(faceCount)")
+            }
+
+            if chunks.isEmpty {
+                return "No strong visual features were detected."
+            }
+
+            return chunks.joined(separator: "\n")
+        }.value
+    }
+}
+
+private struct LocalUIImagePicker: UIViewControllerRepresentable {
+    let sourceType: UIImagePickerController.SourceType
+    let onImagePicked: (UIImage?) -> Void
+    @Environment(\.dismiss) private var dismiss
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(onImagePicked: onImagePicked, dismiss: dismiss)
+    }
+
+    func makeUIViewController(context: Context) -> UIImagePickerController {
+        let picker = UIImagePickerController()
+        picker.sourceType = sourceType
+        picker.allowsEditing = false
+        picker.delegate = context.coordinator
+        return picker
+    }
+
+    func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
+
+    final class Coordinator: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+        let onImagePicked: (UIImage?) -> Void
+        let dismiss: DismissAction
+
+        init(onImagePicked: @escaping (UIImage?) -> Void, dismiss: DismissAction) {
+            self.onImagePicked = onImagePicked
+            self.dismiss = dismiss
+        }
+
+        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+            onImagePicked(nil)
+            dismiss()
+        }
+
+        func imagePickerController(
+            _ picker: UIImagePickerController,
+            didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]
+        ) {
+            let image = info[.originalImage] as? UIImage
+            onImagePicked(image)
+            dismiss()
+        }
+    }
+}
+
+#if canImport(FoundationModels)
+@available(iOS 26.0, *)
+private extension SystemLanguageModel.Availability.UnavailableReason {
+    var localizedDescription: String {
+        switch self {
+        case .deviceNotEligible:
+            return "This device does not support on-device foundation models."
+        case .appleIntelligenceNotEnabled:
+            return "Apple Intelligence is not enabled on this device."
+        case .modelNotReady:
+            return "The local model is still being prepared by the system."
+        @unknown default:
+            return "The local model is currently unavailable."
+        }
+    }
+}
+
+@available(iOS 26.0, *)
+private extension SystemLanguageModel.Availability {
+    var localizedDescription: String {
+        switch self {
+        case .available:
+            return "Available"
+        case .unavailable(let reason):
+            return reason.localizedDescription
+        }
+    }
+}
+#endif
 
 struct AIChatView: View {
     @Environment(\.dismiss) private var dismiss
