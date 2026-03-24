@@ -253,7 +253,7 @@ struct PersonActionTabView: View {
             
             // Multiple Vision requests for comprehensive analysis
             let classificationRequest = VNClassifyImageRequest()
-            // let personRequest = VNDetectPersonRectanglesRequest() // Not available in iOS 26
+            // // let personRequest = VNDetectPersonRectanglesRequest() // Not available // Not available in iOS 26
             let poseRequest = VNDetectHumanBodyPoseRequest()
             let faceRequest = VNDetectFaceRectanglesRequest()
             
@@ -271,7 +271,6 @@ struct PersonActionTabView: View {
             // if personCount > 0 {
             //     results.append("\(personCount) person(s) detected")
             // }
-            
             // 2. Classification - get all results above threshold
             if let classifications = classificationRequest.results, !classifications.isEmpty {
                 let relevant = classifications.prefix(10).filter { $0.confidence > 0.1 }
