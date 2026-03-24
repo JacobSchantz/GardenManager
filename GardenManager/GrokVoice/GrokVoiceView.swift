@@ -182,7 +182,7 @@ struct GrokVoiceView: View {
                             }
                         }
                     }
-                    .frame(minHeight: 100, maxHeight: 250)
+                    .frame(minHeight: 100)
                 }
             }
         }
@@ -261,7 +261,6 @@ struct GrokVoiceView: View {
                         }
                     }
                 }
-                .frame(maxHeight: 300)
             }
         } label: {
             HStack {
