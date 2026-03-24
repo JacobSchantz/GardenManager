@@ -326,13 +326,13 @@ struct PersonActionTabView: View {
                 }
             }
             
-            // 4. Saliency - what's the focus of the image
-            if let saliency = saliencyRequest.results?.first {
-                let saliencyPoints = saliency.pixelObservations?.count ?? 0
-                if saliencyPoints > 0 {
-                    results.append("🎯 Focus: Multiple points of interest detected")
-                }
-            }
+//             // 4. Saliency - what's the focus of the image
+//             if let saliency = saliencyRequest.results?.first {
+//                 let saliencyPoints = saliency.pixelObservations?.count ?? 0
+//                 if saliencyPoints > 0 {
+//                     results.append("🎯 Focus: Multiple points of interest detected")
+//                 }
+//             }
             
             // 5. Generate comprehensive summary
             let summary = generateComprehensiveSummary(
