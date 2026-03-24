@@ -32,8 +32,11 @@ struct GrokVoiceView: View {
                     apiMessagesSection
                 }
                 .padding()
+                .frame(maxWidth: .infinity, alignment: .topLeading)
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             .navigationTitle("Grok Voice")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { showSettings.toggle() }) {
