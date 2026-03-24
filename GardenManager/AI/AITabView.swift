@@ -60,7 +60,7 @@ struct PersonActionTabView: View {
                     HStack(spacing: 6) {
                         Image(systemName: "cpu")
                             .foregroundStyle(.green)
-                        Text("Using offline CoreML vision models")
+                        Text("Offline CoreML")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -93,7 +93,7 @@ struct PersonActionTabView: View {
                         .buttonStyle(.bordered)
 
                         Button("Analyze") {
-                            analyzeImageOffline()
+                            analyzeWithVision()
                         }
                         .buttonStyle(.borderedProminent)
                         .disabled(isAnalyzing || selectedImage == nil)
@@ -102,7 +102,7 @@ struct PersonActionTabView: View {
                     if isAnalyzing {
                         HStack(spacing: 8) {
                             ProgressView()
-                            Text("Analyzing with Vision framework...")
+                            Text("Analyzing...")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
@@ -148,7 +148,7 @@ struct PersonActionTabView: View {
         }
     }
 
-    private func analyzeImageOffline() {
+    private func analyzeWithVision() {
         guard !isAnalyzing, let uiImage = selectedImage, let cgImage = uiImage.cgImage else {
             errorText = "Please choose an image first."
             return
@@ -160,7 +160,7 @@ struct PersonActionTabView: View {
 
         Task {
             do {
-                let analysis = try await performOfflineVisionAnalysis(cgImage: cgImage)
+                let analysis = try await performVisionAnalysis(cgImage: cgImage)
                 
                 await MainActor.run {
                     resultText = analysis
@@ -175,19 +175,18 @@ struct PersonActionTabView: View {
         }
     }
 
-    private func performOfflineVisionAnalysis(cgImage: CGImage) async throws -> String {
+    private func performVisionAnalysis(cgImage: CGImage) async throws -> String {
         try await withCheckedThrowingContinuation { continuation in
-            let requestHandler = VNImageRequestHandler(cgImage: cgImage, options: [:])
+            let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
             
-            // Create requests for different analyses
+            // Multiple Vision requests for comprehensive analysis
             let classificationRequest = VNClassifyImageRequest()
-            let bodyPoseRequest = VNDetectHumanBodyPoseRequest()
+            let personRequest = VNDetectPersonRectanglesRequest()
+            let poseRequest = VNDetectHumanBodyPoseRequest()
             let faceRequest = VNDetectFaceRectanglesRequest()
             
-            let requests = [classificationRequest, bodyPoseRequest, faceRequest]
-            
             do {
-                try requestHandler.perform(requests)
+                try handler.perform([classificationRequest, personRequest, poseRequest, faceRequest])
             } catch {
                 continuation.resume(throwing: error)
                 return
@@ -195,119 +194,81 @@ struct PersonActionTabView: View {
             
             var results: [String] = []
             
-            // 1. Get classification results (what objects/activities are in the image)
-            if let classifications = classificationRequest.results?.prefix(10) {
-                let labels = classifications.map { "\($0.identifier) (\(Int($0.confidence * 100))%)" }
-                results.append("Detected: \(labels.joined(separator: ", "))")
+            // 1. Person detection
+            let personCount = personRequest.results?.count ?? 0
+            if personCount > 0 {
+                results.append("\(personCount) person(s) detected")
             }
             
-            // 2. Get body pose (if person detected)
-            if let poseObservation = bodyPoseRequest.results?.first {
-                let bodyParts = analyzeBodyPose(poseObservation)
-                if !bodyParts.isEmpty {
-                    results.append("Body position: \(bodyParts)")
-                }
+            // 2. Classification - get all results above threshold
+            if let classifications = classificationRequest.results, !classifications.isEmpty {
+                let relevant = classifications.prefix(10).filter { $0.confidence > 0.1 }
+                let labels = relevant.map { $0.identifier }
+                results.append("Scene: " + labels.joined(separator: ", "))
             }
             
-            // 3. Check for faces
+            // 3. Body pose analysis for activity
+            if let pose = poseRequest.results?.first {
+                let activity = describeActivityFromPose(pose)
+                results.append("Activity: \(activity)")
+            }
+            
+            // 4. Face detection
             let faceCount = faceRequest.results?.count ?? 0
             if faceCount > 0 {
-                results.append("Faces detected: \(faceCount)")
+                results.append("\(faceCount) face(s) visible")
             }
             
-            // Generate a human-readable activity description
-            let activityDescription = generateActivityDescription(
-                classifications: classificationRequest.results ?? [],
-                pose: bodyPoseRequest.results?.first,
-                faceCount: faceCount
-            )
-            
-            let finalResult = results.isEmpty ? 
-                "Unable to analyze the image." : 
-                activityDescription + "\n\nDetails: " + results.joined(separator: "\n")
-            
-            continuation.resume(returning: finalResult)
-        }
-    }
-
-    private func analyzeBodyPose(_ observation: VNHumanBodyPoseObservation) -> String {
-        // Extract key body points to determine activity
-        var parts: [String] = []
-        
-        // Check arm positions
-        if let leftWrist = try? observation.recognizedPoint(.leftWrist),
-           let rightWrist = try? observation.recognizedPoint(.rightWrist),
-           let nose = try? observation.recognizedPoint(.nose) {
-            
-            let avgWristY = (leftWrist.location.y + rightWrist.location.y) / 2
-            let isArmsRaised = avgWristY > nose.location.y + 0.1
-            
-            if isArmsRaised {
-                parts.append("arms raised")
-            }
-        }
-        
-        // Check if standing or sitting
-        if let leftHip = try? observation.recognizedPoint(.leftHip),
-           let rightHip = try? observation.recognizedPoint(.rightHip),
-           let leftKnee = try? observation.recognizedPoint(.leftKnee) {
-            
-            let hipY = (leftHip.location.y + rightHip.location.y) / 2
-            let kneeY = leftKnee.location.y
-            
-            // In Vision coordinates, lower Y = higher on screen = standing
-            if kneeY < hipY + 0.05 {
-                parts.append("standing")
-            } else {
-                parts.append("seated")
-            }
-        }
-        
-        return parts.isEmpty ? "position detected" : parts.joined(separator: ", ")
-    }
-
-    private func generateActivityDescription(classifications: [VNClassificationObservation], pose: VNHumanBodyPoseObservation?, faceCount: Int) -> String {
-        let topClassifications = classifications.prefix(5).map { $0.identifier.lowercased() }
-        let classString = topClassifications.joined(separator: ", ")
-        
-        // Activity keywords to look for
-        let activityKeywords = [
-            "running", "walking", "sitting", "standing", "lying", "sleeping",
-            "exercise", "workout", "gym", "yoga", "cycling", "swimming",
-            "cooking", "eating", "drinking", "reading", "writing", "working",
-            "playing", "sport", "dancing", "gardening", "cleaning"
-        ]
-        
-        var detectedActivity = "unknown activity"
-        
-        for keyword in activityKeywords {
-            if classString.contains(keyword) {
-                detectedActivity = "\(keyword)ing"
-                break
-            }
-        }
-        
-        // Additional context from pose
-        var context = ""
-        if let pose = pose {
-            if let leftWrist = try? pose.recognizedPoint(.leftWrist),
-               let rightWrist = try? pose.recognizedPoint(.rightWrist),
-               let nose = try? pose.recognizedPoint(.nose) {
-                
-                let avgWristY = (leftWrist.location.y + rightWrist.location.y) / 2
-                if avgWristY < nose.location.y - 0.1 {
-                    context = " (arms extended forward)"
-                } else if avgWristY > nose.location.y + 0.15 {
-                    context = " (arms raised above head)"
+            // Generate summary
+            let summary: String
+            if personCount > 0 {
+                if let pose = poseRequest.results?.first {
+                    let activity = describeActivityFromPose(pose)
+                    summary = "Person - \(activity)"
+                } else {
+                    summary = "Person detected"
                 }
+                
+                if let classifications = classificationRequest.results, !classifications.isEmpty {
+                    let top3 = classifications.prefix(3).map { $0.identifier }.joined(separator: ", ")
+                    summary += "\nLikely: \(top3)"
+                }
+                
+                if faceCount > 0 {
+                    summary += "\nFace visible"
+                }
+            } else {
+                summary = results.isEmpty ? "Unable to analyze" : results.joined(separator: "\n")
             }
+            
+            continuation.resume(returning: summary)
+        }
+    }
+
+    private func describeActivityFromPose(_ pose: VNHumanBodyPoseObservation) -> String {
+        guard let leftWrist = try? pose.recognizedPoint(.leftWrist),
+              let rightWrist = try? pose.recognizedPoint(.rightWrist),
+              let leftShoulder = try? pose.recognizedPoint(.leftShoulder),
+              let rightShoulder = try? pose.recognizedPoint(.rightShoulder),
+              let nose = try? pose.recognizedPoint(.nose) else {
+            return "position unclear"
         }
         
-        if faceCount > 0 {
-            return "Person \(detectedActivity)\(context). Face visible."
-        } else {
-            return "Person \(detectedActivity)\(context). No face visible."
+        let avgWristY = (leftWrist.location.y + rightWrist.location.y) / 2
+        let avgShoulderY = (leftShoulder.location.y + rightShoulder.location.y) / 2
+        let wristSpread = abs(leftWrist.location.x - rightWrist.location.x)
+        
+        if avgWristY < nose.location.y - 0.1 {
+            return "arms raised above head"
+        } else if avgWristY < avgShoulderY - 0.1 {
+            return "arms raised"
+        } else if wristSpread > 0.4 {
+            return "arms extended outward"
+        } else if avgWristY > avgShoulderY + 0.2 {
+            return "arms down/by side"
         }
+        
+        return "standing naturally"
     }
 }
 }
