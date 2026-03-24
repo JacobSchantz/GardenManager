@@ -557,7 +557,7 @@ private struct LocalAISettingsView: View {
                         HStack {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(model.displayName)
-                                Text("\(model.task) • \(model.parameterCountLabel) • \(model.format)")
+                                Text("\(model.task) • \(model.parameterCountLabel) • \(model.runtimeLabel) • \(model.format)")
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
                             }
@@ -677,6 +677,7 @@ private struct DownloadableVisionModel: Identifiable, Hashable, Sendable {
     let displayName: String
     let task: String
     let parameterCountLabel: String
+    let runtimeLabel: String
     let format: String
     let packageDirectoryName: String
     let files: [FileResource]
@@ -687,6 +688,7 @@ private struct DownloadableVisionModel: Identifiable, Hashable, Sendable {
             displayName: "MobileCLIP S0 (Image Encoder)",
             task: "Image embeddings",
             parameterCountLabel: "~33M params",
+            runtimeLabel: "Core ML",
             format: "Core ML .mlpackage",
             packageDirectoryName: "mobileclip_s0_image.mlpackage",
             files: [
@@ -709,6 +711,7 @@ private struct DownloadableVisionModel: Identifiable, Hashable, Sendable {
             displayName: "Depth Anything V2 Small (F16)",
             task: "Depth estimation",
             parameterCountLabel: "~25M params",
+            runtimeLabel: "Core ML",
             format: "Core ML .mlpackage",
             packageDirectoryName: "DepthAnythingV2SmallF16.mlpackage",
             files: [
@@ -731,6 +734,7 @@ private struct DownloadableVisionModel: Identifiable, Hashable, Sendable {
             displayName: "DETR Semantic Segmentation (F16)",
             task: "Semantic segmentation",
             parameterCountLabel: "~41M params",
+            runtimeLabel: "Core ML",
             format: "Core ML .mlpackage",
             packageDirectoryName: "DETRResnet50SemanticSegmentationF16.mlpackage",
             files: [
@@ -753,6 +757,7 @@ private struct DownloadableVisionModel: Identifiable, Hashable, Sendable {
             displayName: "MobileCLIP S1 (Image Encoder)",
             task: "Image embeddings",
             parameterCountLabel: "~73M params",
+            runtimeLabel: "Core ML",
             format: "Core ML .mlpackage",
             packageDirectoryName: "mobileclip_s1_image.mlpackage",
             files: [
@@ -775,6 +780,7 @@ private struct DownloadableVisionModel: Identifiable, Hashable, Sendable {
             displayName: "MobileCLIP S2 (Image Encoder)",
             task: "Image embeddings",
             parameterCountLabel: "~152M params",
+            runtimeLabel: "Core ML",
             format: "Core ML .mlpackage",
             packageDirectoryName: "mobileclip_s2_image.mlpackage",
             files: [
@@ -797,6 +803,7 @@ private struct DownloadableVisionModel: Identifiable, Hashable, Sendable {
             displayName: "MobileCLIP B(LT) (Image Encoder)",
             task: "Image embeddings",
             parameterCountLabel: "~307M params",
+            runtimeLabel: "Core ML",
             format: "Core ML .mlpackage",
             packageDirectoryName: "mobileclip_blt_image.mlpackage",
             files: [
@@ -819,6 +826,7 @@ private struct DownloadableVisionModel: Identifiable, Hashable, Sendable {
             displayName: "Depth Anything Small (F16)",
             task: "Depth estimation",
             parameterCountLabel: "~25M params",
+            runtimeLabel: "Core ML",
             format: "Core ML .mlpackage",
             packageDirectoryName: "DepthAnythingSmallF16.mlpackage",
             files: [
@@ -841,6 +849,7 @@ private struct DownloadableVisionModel: Identifiable, Hashable, Sendable {
             displayName: "SAM2 Large (Image Encoder)",
             task: "Mask generation encoder",
             parameterCountLabel: "~224M params",
+            runtimeLabel: "Core ML",
             format: "Core ML .mlpackage",
             packageDirectoryName: "SAM2LargeImageEncoderFLOAT16.mlpackage",
             files: [
@@ -854,6 +863,75 @@ private struct DownloadableVisionModel: Identifiable, Hashable, Sendable {
                 ),
                 .init(
                     remoteURLString: "https://huggingface.co/apple/coreml-sam2-large/resolve/main/SAM2LargeImageEncoderFLOAT16.mlpackage/Data/com.apple.CoreML/weights/weight.bin?download=true",
+                    localRelativePath: "Data/com.apple.CoreML/weights/weight.bin"
+                )
+            ]
+        ),
+        .init(
+            id: "coreml-fastvlm-1.5b-int8",
+            displayName: "FastVLM 1.5B (INT8)",
+            task: "Vision-language chat",
+            parameterCountLabel: "~1.5B params",
+            runtimeLabel: "Core ML",
+            format: "Core ML .mlpackage",
+            packageDirectoryName: "fastvithd-fastvlm-1_5b-int8.mlpackage",
+            files: [
+                .init(
+                    remoteURLString: "https://huggingface.co/apple/FastVLM-1.5B-int8/resolve/main/fastvithd.mlpackage/Manifest.json?download=true",
+                    localRelativePath: "Manifest.json"
+                ),
+                .init(
+                    remoteURLString: "https://huggingface.co/apple/FastVLM-1.5B-int8/resolve/main/fastvithd.mlpackage/Data/com.apple.CoreML/model.mlmodel?download=true",
+                    localRelativePath: "Data/com.apple.CoreML/model.mlmodel"
+                ),
+                .init(
+                    remoteURLString: "https://huggingface.co/apple/FastVLM-1.5B-int8/resolve/main/fastvithd.mlpackage/Data/com.apple.CoreML/weights/weight.bin?download=true",
+                    localRelativePath: "Data/com.apple.CoreML/weights/weight.bin"
+                )
+            ]
+        ),
+        .init(
+            id: "coreml-fastvlm-7b-int4",
+            displayName: "FastVLM 7B (INT4)",
+            task: "Vision-language chat",
+            parameterCountLabel: "~7B params",
+            runtimeLabel: "Core ML",
+            format: "Core ML .mlpackage",
+            packageDirectoryName: "fastvithd-fastvlm-7b-int4.mlpackage",
+            files: [
+                .init(
+                    remoteURLString: "https://huggingface.co/apple/FastVLM-7B-int4/resolve/main/fastvithd.mlpackage/Manifest.json?download=true",
+                    localRelativePath: "Manifest.json"
+                ),
+                .init(
+                    remoteURLString: "https://huggingface.co/apple/FastVLM-7B-int4/resolve/main/fastvithd.mlpackage/Data/com.apple.CoreML/model.mlmodel?download=true",
+                    localRelativePath: "Data/com.apple.CoreML/model.mlmodel"
+                ),
+                .init(
+                    remoteURLString: "https://huggingface.co/apple/FastVLM-7B-int4/resolve/main/fastvithd.mlpackage/Data/com.apple.CoreML/weights/weight.bin?download=true",
+                    localRelativePath: "Data/com.apple.CoreML/weights/weight.bin"
+                )
+            ]
+        ),
+        .init(
+            id: "coreml-fastvlm-7b-mlx-4bit",
+            displayName: "FastVLM 7B (MLX 4-bit, community)",
+            task: "Vision-language chat",
+            parameterCountLabel: "~7B params",
+            runtimeLabel: "Core ML (Community)",
+            format: "Core ML .mlpackage",
+            packageDirectoryName: "fastvithd-fastvlm-7b-mlx-4bit.mlpackage",
+            files: [
+                .init(
+                    remoteURLString: "https://huggingface.co/InsightKeeper/FastVLM-7B-MLX-4bit/resolve/main/fastvithd.mlpackage/Manifest.json?download=true",
+                    localRelativePath: "Manifest.json"
+                ),
+                .init(
+                    remoteURLString: "https://huggingface.co/InsightKeeper/FastVLM-7B-MLX-4bit/resolve/main/fastvithd.mlpackage/Data/com.apple.CoreML/model.mlmodel?download=true",
+                    localRelativePath: "Data/com.apple.CoreML/model.mlmodel"
+                ),
+                .init(
+                    remoteURLString: "https://huggingface.co/InsightKeeper/FastVLM-7B-MLX-4bit/resolve/main/fastvithd.mlpackage/Data/com.apple.CoreML/weights/weight.bin?download=true",
                     localRelativePath: "Data/com.apple.CoreML/weights/weight.bin"
                 )
             ]
