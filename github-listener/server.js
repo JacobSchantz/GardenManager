@@ -54,12 +54,25 @@ function pullRepo(repoName) {
   const repoPath = repoPaths[repoName];
   if (repoPath) {
     console.log(`📥 Pulling latest from ${repoName}...`);
-    exec(`cd "${repoPath}" && git pull`, (err, stdout, stderr) => {
-      if (err) {
-        console.log(`⚠️ Failed to pull ${repoName}:`, err.message);
-      } else {
-        console.log(`✅ Pulled ${repoName}:`, stdout.trim());
-      }
+    // Use git stash to preserve local changes, then pull, then stash pop
+    // If stash fails (no changes), it still pulls
+    // If pull conflicts with stash, we discard local changes and re-apply stash
+    exec(`cd "${repoPath}" && git stash push -m "auto-stash before build" --include-untracked || true`, (stashErr, stashOut, stashErr2) => {
+      exec(`cd "${repoPath}" && git fetch origin && git reset --hard origin/$(git rev-parse --abbrev-ref HEAD)`, (err, stdout, stderr) => {
+        if (err) {
+          console.log(`⚠️ Failed to fetch/reset ${repoName}:`, err.message);
+        } else {
+          console.log(`✅ Updated ${repoName}:`, stdout.trim());
+        }
+        // Try to restore stashed changes (will fail if nothing was stashed, which is fine)
+        exec(`cd "${repoPath}" && git stash pop || true`, (popErr, popOut, popErr2) => {
+          if (popErr) {
+            console.log(`No stash to restore (or clean checkout)`);
+          } else {
+            console.log(`Restored stashed changes:`, popOut.trim());
+          }
+        });
+      });
     });
   }
 }
