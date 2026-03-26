@@ -143,7 +143,7 @@ function handlePush(payload) {
     triggerBuild('/Users/peanut/.openclaw/workspace/keepMovin/run_release_iphone.sh', 'KeepMovin', commitMessage);
   } else if (repoName === 'BuyAHabit' || repoName === 'buyahabit') {
     console.log('💰 Triggering BuyAHabit iOS build...');
-    triggerBuild('/Users/peanut/.openclaw/workspace/buyahabit/build_same_wifi.sh', 'BuyAHabit', commitMessage);
+    triggerBuild('/Users/peanut/.openclaw/workspace/buyahabit/build_anywhere_or_local.sh', 'BuyAHabit', commitMessage);
   } else if (repoName === 'GardenManager') {
     console.log('🌱 Triggering GardenManager iOS build...');
     triggerBuild('/Users/peanut/.openclaw/workspace/GardenManager/run_release_iphone.sh', 'GardenManager', commitMessage);

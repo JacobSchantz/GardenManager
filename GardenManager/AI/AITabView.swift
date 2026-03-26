@@ -59,8 +59,7 @@ struct PersonActionTabView: View {
         ("vision", "Vision Framework", "Apple's built-in (basic)"),
         ("fastvlm-1.5b", "FastVLM 1.5B (INT8)", "~1.5B params - vision language"),
         ("fastvlm-7b", "FastVLM 7B (INT4)", "~7B params - most powerful"),
-        ("resnet50", "ResNet-50", "~25M params - image classification"),
-        ("mobilenetv2", "MobileNetV2", "~3.5M params - fast")
+        ("resnet50", "ResNet-50", "~25M params - image classification")
     ]
     
     private var currentModelName: String {
@@ -142,9 +141,26 @@ struct PersonActionTabView: View {
                     }
 
                     if let errorText {
-                        Text(errorText)
-                            .font(.caption)
-                            .foregroundStyle(.red)
+                        HStack(alignment: .top, spacing: 8) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundStyle(.red)
+                            Text(errorText)
+                                .font(.caption)
+                                .foregroundStyle(.red)
+                                .textSelection(.enabled)
+                            Button {
+                                UIPasteboard.general.string = errorText
+                            } label: {
+                                Image(systemName: "doc.on.doc")
+                                    .font(.caption)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                        .padding(12)
+                        .background(
+                            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                .fill(Color.red.opacity(0.1))
+                        )
                     }
 
                     if !resultText.isEmpty {
@@ -362,19 +378,23 @@ struct PersonActionTabView: View {
         }
     }
 
-    // MARK: - CoreML Model Analysis (ResNet, MobileNet)
+    // MARK: - CoreML Model Analysis (ResNet)
     
     private func analyzeWithCoreMLModel(cgImage: CGImage, modelID: String) async throws -> String {
         let downloadService = LocalModelDownloadService()
         let downloaded = await downloadService.listDownloadedModels()
         
-        let catalogModelID = modelID == "resnet50" ? "coreml-resnet50-imagenet" : "coreml-mobilenetv2-imagenet"
+        let catalogModelID = "coreml-resnet50-imagenet"
         
         guard let model = downloaded.first(where: { $0.id == catalogModelID }) else {
             // Try to download
             if let modelToDownload = DownloadableVisionModel.catalog.first(where: { $0.id == catalogModelID }) {
                 modelStatus = "Downloading \(modelID) model..."
-                try await downloadService.download(modelToDownload)
+                do {
+                    try await downloadService.download(modelToDownload)
+                } catch {
+                    return "Download failed: \(error.localizedDescription). Check your internet connection and try again."
+                }
                 
                 guard let downloadedModel = (await downloadService.listDownloadedModels()).first(where: { $0.id == catalogModelID }) else {
                     return "Download failed. Please try again."
@@ -1767,27 +1787,12 @@ private struct DownloadableVisionModel: Identifiable, Hashable, Sendable {
             task: "Image Classification",
             parameterCountLabel: "~25M params",
             runtimeLabel: "Core ML",
-            format: "Core ML .mlpackage",
-            packageDirectoryName: "Resnet50.mlpackage",
+            format: "Core ML .mlmodel",
+            packageDirectoryName: "Resnet50.mlmodel",
             files: [
                 .init(
-                    remoteURLString: "https://docs-assets.developer.apple.com/coreml-models/Resnet50.mlpackage/Resnet50.mlmodel/1/Resnet50.mlmodel",
+                    remoteURLString: "https://huggingface.co/apple/coreml-resnet-50/resolve/main/Resnet50.mlmodel",
                     localRelativePath: "Resnet50.mlmodel"
-                )
-            ]
-        ),
-        .init(
-            id: "coreml-mobilenetv2-imagenet",
-            displayName: "MobileNetV2 (ImageNet)",
-            task: "Image Classification",
-            parameterCountLabel: "~3.5M params",
-            runtimeLabel: "Core ML",
-            format: "Core ML .mlpackage",
-            packageDirectoryName: "MobileNetV2.mlpackage",
-            files: [
-                .init(
-                    remoteURLString: "https://docs-assets.developer.apple.com/coreml-models/MobileNetV2.mlmodel/1/MobileNetV2.mlmodel",
-                    localRelativePath: "MobileNetV2.mlmodel"
                 )
             ]
         ),
