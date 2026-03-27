@@ -2,6 +2,7 @@ import SwiftUI
 import UIKit
 import Vision
 import CoreML
+import UniformTypeIdentifiers
 #if canImport(FoundationModels)
 import FoundationModels
 #endif
@@ -55,6 +56,8 @@ struct PersonActionTabView: View {
     @State private var showModelPicker = false
     @State private var selectedModelID = "vision"
     @State private var modelStatus = "Select a model"
+    @State private var showGGUFFilePicker = false
+    @State private var selectedGGUFURL: URL?
     
     private let models = [
         ("vision", "Vision Framework", "Apple's built-in (basic)"),
@@ -98,6 +101,35 @@ struct PersonActionTabView: View {
                         )
                     }
                     .buttonStyle(.plain)
+                    
+                    // GGUF file browser button
+                    if selectedModelID == "gguf-lfm" {
+                        Button {
+                            showGGUFFilePicker = true
+                        } label: {
+                            HStack {
+                                Image(systemName: "folder")
+                                    .foregroundStyle(.orange)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(selectedGGUFURL?.lastPathComponent ?? "Browse for GGUF file")
+                                        .font(.subheadline.weight(.medium))
+                                    Text(selectedGGUFURL != nil ? "File selected" : "Tap to select a .gguf file")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            .padding(12)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .fill(Color(.secondarySystemBackground))
+                            )
+                        }
+                        .buttonStyle(.plain)
+                    }
                     
                     if let selectedImage {
                         Image(uiImage: selectedImage)
@@ -235,6 +267,9 @@ struct PersonActionTabView: View {
                     }
                 }
                 .presentationDetents([.medium])
+            }
+            .sheet(isPresented: $showGGUFFilePicker) {
+                DocumentPickerView(selectedURL: $selectedGGUFURL)
             }
         }
     }
@@ -485,8 +520,12 @@ struct PersonActionTabView: View {
     // MARK: - GGUF Model Analysis (LLaMA.cpp)
     
     private func analyzeWithGGUFModel(cgImage: CGImage) async throws -> String {
-        // Look for GGUF models in Documents directory
-        // Users can import models from the "Locally" app via Files app
+        // First check if user selected a specific GGUF file
+        if let selectedURL = selectedGGUFURL, FileManager.default.fileExists(atPath: selectedURL.path) {
+            return try await runGGUFInference(cgImage: cgImage, modelURL: selectedURL)
+        }
+        
+        // Otherwise look for any GGUF models in Documents directory
         var modelURL: URL?
         
         let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
@@ -505,9 +544,13 @@ struct PersonActionTabView: View {
         }
         
         guard let finalModelURL = modelURL else {
-            return "No GGUF model found.\n\nTo add a model:\n1. Download a model in the 'Locally' app\n2. Open Files app → tap ... → Add to Files\n3. Select Garden Manager's Documents folder\n4. Try analyzing again!"
+            return "No GGUF model found.\n\nTap 'Browse for GGUF file' above to select a model file, or:\n1. Download a model in the 'Locally' app\n2. Open Files app → tap ... → Add to Files\n3. Select Garden Manager's Documents folder\n4. Try analyzing again!"
         }
         
+        return try await runGGUFInference(cgImage: cgImage, modelURL: finalModelURL)
+    }
+    
+    private func runGGUFInference(cgImage: CGImage, modelURL: URL) async throws -> String {
         modelStatus = "Running GGUF inference..."
         
         // Use SwiftLlama to run inference
@@ -2765,6 +2808,46 @@ struct CameraImagePicker: UIViewControllerRepresentable {
         ) {
             let image = info[.originalImage] as? UIImage
             onImageCaptured(image)
+            dismiss()
+        }
+    }
+}
+// MARK: - Document Picker for GGUF Files
+
+private struct DocumentPickerView: UIViewControllerRepresentable {
+    @Binding var selectedURL: URL?
+    @Environment(\.dismiss) private var dismiss
+    
+    func makeUIViewController(context: Context) -> UIDocumentPickerViewController {
+        let picker = UIDocumentPickerViewController(forOpeningContentTypes: [UTType.data], asCopy: true)
+        picker.delegate = context.coordinator
+        picker.allowsMultipleSelection = false
+        return picker
+    }
+    
+    func updateUIViewController(_ uiViewController: UIDocumentPickerViewController, context: Context) {}
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator(selectedURL: $selectedURL, dismiss: dismiss)
+    }
+    
+    final class Coordinator: NSObject, UIDocumentPickerDelegate {
+        let selectedURL: Binding<URL?>
+        let dismiss: DismissAction
+        
+        init(selectedURL: Binding<URL?>, dismiss: DismissAction) {
+            self.selectedURL = selectedURL
+            self.dismiss = dismiss
+        }
+        
+        func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+            if let url = urls.first {
+                selectedURL.wrappedValue = url
+            }
+            dismiss()
+        }
+        
+        func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
             dismiss()
         }
     }
