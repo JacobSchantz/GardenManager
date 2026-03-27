@@ -206,9 +206,22 @@ struct PersonActionTabView: View {
 
                     if !resultText.isEmpty {
                         VStack(alignment: .leading, spacing: 8) {
-                            Text("Detected Action")
-                                .font(.headline)
+                            HStack {
+                                Text("Detected Action")
+                                    .font(.headline)
+                                Spacer()
+                                Button {
+                                    UIPasteboard.general.string = resultText
+                                } label: {
+                                    HStack(spacing: 4) {
+                                        Image(systemName: "doc.on.doc")
+                                        Text("Copy")
+                                    }
+                                    .font(.caption)
+                                }
+                            }
                             Text(resultText)
+                                .textSelection(.enabled)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .padding(12)
                                 .background(
