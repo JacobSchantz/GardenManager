@@ -32,9 +32,9 @@
 - [ ] Verify no network calls during inference
 
 ### Model Location Options
-1. **Bundle with app** - ~700MB, increases app size
-2. **Download on first launch** - User downloads from server once
-3. **iTunes File Sharing** - User manually adds files via Finder
+1. **iOS Files App (Current)** - User imports from Locally app via Files → Add to Files → Garden Manager Documents
+2. **Bundle with app** - Too large for GitHub (664MB > 100MB limit)
+3. **Download on first launch** - Future option
 
 ### Models Downloaded
 - `~/.cache/huggingface/models/LFM2.5-1.2B/LFM2.5-1.2B-Instruct-Q4_K_M.gguf` (697MB)

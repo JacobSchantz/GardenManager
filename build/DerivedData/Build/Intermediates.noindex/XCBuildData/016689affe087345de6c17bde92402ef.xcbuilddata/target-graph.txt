@@ -1,0 +1,6 @@
+Target dependency graph (3 targets)
+Target 'GardenManager' in project 'GardenManager'
+➜ Explicit dependency on target 'SwiftLlama' in project 'swift-llama-cpp'
+Target 'SwiftLlama' in project 'swift-llama-cpp'
+➜ Explicit dependency on target 'SwiftLlama' in project 'swift-llama-cpp'
+Target 'SwiftLlama' in project 'swift-llama-cpp' (no dependencies)

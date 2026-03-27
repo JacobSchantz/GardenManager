@@ -1,0 +1,49 @@
+{
+  "object" : {
+    "artifacts" : [
+      {
+        "kind" : {
+          "xcframework" : {
+
+          }
+        },
+        "packageRef" : {
+          "identity" : "swift-llama-cpp",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/pgorzelany/swift-llama-cpp",
+          "name" : "swift-llama-cpp"
+        },
+        "path" : "/Users/peanut/.openclaw/workspace/GardenManager/build/DerivedData/SourcePackages/artifacts/swift-llama-cpp/llama/llama.xcframework",
+        "source" : {
+          "checksum" : "257b8ffbdda68b377e1b75cd23055b201b0e9a24e18d5a42f2960456776eab8a",
+          "type" : "remote",
+          "url" : "https://github.com/ggml-org/llama.cpp/releases/download/b6102/llama-b6102-xcframework.zip"
+        },
+        "targetName" : "llama"
+      }
+    ],
+    "dependencies" : [
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "swift-llama-cpp",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/pgorzelany/swift-llama-cpp",
+          "name" : "swift-llama-cpp"
+        },
+        "state" : {
+          "checkoutState" : {
+            "revision" : "5496bc7c9820f04bba7268dc8a271235deae436d",
+            "version" : "1.2.0"
+          },
+          "name" : "sourceControlCheckout"
+        },
+        "subpath" : "swift-llama-cpp"
+      }
+    ],
+    "prebuilts" : [
+
+    ]
+  },
+  "version" : 7
+}

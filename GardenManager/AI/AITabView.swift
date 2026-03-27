@@ -485,26 +485,27 @@ struct PersonActionTabView: View {
     // MARK: - GGUF Model Analysis (LLaMA.cpp)
     
     private func analyzeWithGGUFModel(cgImage: CGImage) async throws -> String {
-        // Check if model exists in app bundle
-        let modelFileName = "LFM2.5-VL-1.6B-Q4_0.gguf"
-        
-        // Try bundle first, then documents directory
+        // Look for GGUF models in Documents directory
+        // Users can import models from the "Locally" app via Files app
         var modelURL: URL?
         
-        // Check app bundle
-        if let bundleURL = Bundle.main.url(forResource: "LFM2.5-VL-1.6B-Q4_0", withExtension: "gguf") {
-            modelURL = bundleURL
-        } else {
-            // Check documents directory
-            let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
-            let modelPath = documentsURL?.appendingPathComponent("models").appendingPathComponent(modelFileName)
-            if let path = modelPath, FileManager.default.fileExists(atPath: path.path) {
-                modelURL = path
+        let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
+        
+        // Check for models in Documents root or Models subfolder
+        if let docsURL = documentsURL {
+            // Look for any .gguf file in Documents
+            if let enumerator = FileManager.default.enumerator(at: docsURL, includingPropertiesForKeys: nil) {
+                while let fileURL = enumerator.nextObject() as? URL {
+                    if fileURL.pathExtension.lowercased() == "gguf" {
+                        modelURL = fileURL
+                        break
+                    }
+                }
             }
         }
         
         guard let finalModelURL = modelURL else {
-            return "GGUF model not found. Please download the LFM2.5 VL model and place it in the app's Documents/models folder."
+            return "No GGUF model found.\n\nTo add a model:\n1. Download a model in the 'Locally' app\n2. Open Files app → tap ... → Add to Files\n3. Select Garden Manager's Documents folder\n4. Try analyzing again!"
         }
         
         modelStatus = "Running GGUF inference..."

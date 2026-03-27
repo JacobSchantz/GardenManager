@@ -180,6 +180,11 @@
     "modulePath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/swift\/iphoneos\/prebuilt-modules\/26.4\/Swift.swiftmodule\/arm64e-apple-ios.swiftmodule"
   },
   {
+    "isFramework" : false,
+    "moduleName" : "SwiftLlama",
+    "modulePath" : "\/Users\/peanut\/.openclaw\/workspace\/GardenManager\/build\/DerivedData\/Build\/Products\/Release-iphoneos\/SwiftLlama.swiftmodule\/arm64-apple-ios.swiftmodule"
+  },
+  {
     "isFramework" : true,
     "moduleName" : "SwiftUI",
     "modulePath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Toolchains\/XcodeDefault.xctoolchain\/usr\/lib\/swift\/iphoneos\/prebuilt-modules\/26.4\/SwiftUI.swiftmodule\/arm64e-apple-ios.swiftmodule"
@@ -718,6 +723,13 @@
     "isBridgingHeaderDependency" : false,
     "isFramework" : false,
     "moduleName" : "dnssd"
+  },
+  {
+    "clangModuleMapPath" : "\/Users\/peanut\/.openclaw\/workspace\/GardenManager\/build\/DerivedData\/Build\/Products\/Release-iphoneos\/llama.framework\/Modules\/module.modulemap",
+    "clangModulePath" : "\/Users\/peanut\/.openclaw\/workspace\/GardenManager\/build\/DerivedData\/Build\/Intermediates.noindex\/SwiftExplicitPrecompiledModules\/llama-8XRXUYWEA3BDEIPAY8RBLMBX4.pcm",
+    "isBridgingHeaderDependency" : false,
+    "isFramework" : false,
+    "moduleName" : "llama"
   },
   {
     "clangModuleMapPath" : "\/Applications\/Xcode.app\/Contents\/Developer\/Platforms\/iPhoneOS.platform\/Developer\/SDKs\/iPhoneOS.sdk\/usr\/include\/os.modulemap",
