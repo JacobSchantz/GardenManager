@@ -59,7 +59,8 @@ struct PersonActionTabView: View {
         ("vision", "Vision Framework", "Apple's built-in (basic)"),
         ("fastvlm-1.5b", "FastVLM 1.5B (INT8)", "~1.5B params - vision language"),
         ("fastvlm-7b", "FastVLM 7B (INT4)", "~7B params - most powerful"),
-        ("resnet50", "ResNet-50", "~25M params - image classification")
+        ("resnet50", "ResNet-50", "~25M params - image classification"),
+        ("gguf-lfm", "LFM 2.5 VL 1.6B (GGUF)", "~1.6B params - local GGUF model")
     ]
     
     private var currentModelName: String {
@@ -260,6 +261,10 @@ struct PersonActionTabView: View {
                 case "resnet50", "mobilenetv2":
                     modelStatus = "Loading CoreML model..."
                     analysis = try await analyzeWithCoreMLModel(cgImage: cgImage, modelID: selectedModelID)
+                    
+                case "gguf-lfm":
+                    modelStatus = "Loading GGUF model..."
+                    analysis = try await analyzeWithGGUFModel(cgImage: cgImage)
                     
                 default:
                     // Vision framework (default)
@@ -472,6 +477,65 @@ struct PersonActionTabView: View {
                 try handler.perform([coreMLRequest, VNClassifyImageRequest()])
             } catch {
                 continuation.resume(throwing: error)
+            }
+        }
+    }
+
+    // MARK: - GGUF Model Analysis (LLaMA.cpp)
+    
+    private func analyzeWithGGUFModel(cgImage: CGImage) async throws -> String {
+        // Check if model exists in app bundle
+        let modelFileName = "LFM2.5-VL-1.6B-Q4_0.gguf"
+        
+        // Try bundle first, then documents directory
+        var modelURL: URL?
+        
+        // Check app bundle
+        if let bundleURL = Bundle.main.url(forResource: "LFM2.5-VL-1.6B-Q4_0", withExtension: "gguf") {
+            modelURL = bundleURL
+        } else {
+            // Check documents directory
+            let documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
+            let modelPath = documentsURL?.appendingPathComponent("models").appendingPathComponent(modelFileName)
+            if let path = modelPath, FileManager.default.fileExists(atPath: path.path) {
+                modelURL = path
+            }
+        }
+        
+        guard let finalModelURL = modelURL else {
+            return "GGUF model not found. Please download the LFM2.5 VL model and place it in the app's Documents/models folder."
+        }
+        
+        modelStatus = "Running GGUF inference..."
+        
+        // Use SwiftLlama to run inference
+        return try await withCheckedThrowingContinuation { continuation in
+            Task {
+                do {
+                    let llamaService = try LlamaService(
+                        modelUrl: finalModelURL,
+                        config: .init(batchSize: 512, maxTokenCount: 4096, useGPU: true)
+                    )
+                    
+                    // Create a prompt asking about the image
+                    let messages = [
+                        LlamaChatMessage(role: .user, content: "Describe what you see in this image in detail.")
+                    ]
+                    
+                    var result = ""
+                    let stream = try await llamaService.streamCompletion(
+                        of: messages,
+                        samplingConfig: .init(temperature: 0.7, seed: 42)
+                    )
+                    
+                    for try await token in stream {
+                        result += token
+                    }
+                    
+                    continuation.resume(returning: result.isEmpty ? "No response from model" : result)
+                } catch {
+                    continuation.resume(throwing: error)
+                }
             }
         }
     }

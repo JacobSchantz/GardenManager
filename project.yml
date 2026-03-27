@@ -5,6 +5,11 @@ options:
     iOS: "26.0"
   xcodeVersion: "16.0"
 
+packages:
+  SwiftLlama:
+    url: https://github.com/pgorzelany/swift-llama-cpp
+    from: "1.0.0"
+
 settings:
   base:
     SWIFT_VERSION: "6.0"
@@ -21,6 +26,10 @@ targets:
       - path: GardenManager
         excludes:
           - "**/.DS_Store"
+    dependencies:
+      - package: MLX
+      - package: MLXLM
+      - package: SwiftLlama
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.gardenmanager.application

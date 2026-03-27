@@ -1,0 +1,71 @@
+{
+  "buildCommand" : {
+    "command" : "build",
+    "skipDependencies" : false,
+    "style" : "buildOnly"
+  },
+  "configuredTargets" : [
+    {
+      "guid" : "0690a927a3304bd1bbf5de51c51a363cf684720dcae8a551834b4c9a498d6f83"
+    }
+  ],
+  "containerPath" : "/Users/peanut/.openclaw/workspace/GardenManager/GardenManager.xcodeproj",
+  "continueBuildingAfterErrors" : false,
+  "dependencyScope" : "workspace",
+  "enableIndexBuildArena" : false,
+  "hideShellScriptEnvironment" : false,
+  "parameters" : {
+    "action" : "build",
+    "activeArchitecture" : "undefined_arch",
+    "activeRunDestination" : {
+      "disableOnlyActiveArch" : true,
+      "hostTargetedPlatform" : null,
+      "platform" : "iphoneos",
+      "sdk" : "iphoneos26.4",
+      "sdkVariant" : "iphoneos",
+      "supportedArchitectures" : [
+        "armv4t",
+        "armv5",
+        "armv6",
+        "armv7",
+        "armv7f",
+        "armv7s",
+        "armv7k",
+        "arm64",
+        "arm64e"
+      ],
+      "targetArchitecture" : "undefined_arch"
+    },
+    "arenaInfo" : {
+      "buildIntermediatesPath" : "/Users/peanut/.openclaw/workspace/GardenManager/build/DerivedData/Build/Intermediates.noindex",
+      "buildProductsPath" : "/Users/peanut/.openclaw/workspace/GardenManager/build/DerivedData/Build/Products",
+      "derivedDataPath" : "/Users/peanut/.openclaw/workspace/GardenManager/build/DerivedData",
+      "indexDataStoreFolderPath" : "/Users/peanut/.openclaw/workspace/GardenManager/build/DerivedData/Index.noindex/DataStore",
+      "indexEnableDataStore" : true,
+      "indexPCHPath" : "/Users/peanut/.openclaw/workspace/GardenManager/build/DerivedData/Index.noindex/PrecompiledHeaders",
+      "pchPath" : "/Users/peanut/.openclaw/workspace/GardenManager/build/DerivedData/Build/Intermediates.noindex/PrecompiledHeaders"
+    },
+    "configurationName" : "Release",
+    "overrides" : {
+      "commandLine" : {
+        "table" : {
+          "IPHONEOS_DEPLOYMENT_TARGET" : "26.0"
+        }
+      },
+      "synthesized" : {
+        "table" : {
+          "ACTION" : "build",
+          "ENABLE_PREVIEWS" : "NO",
+          "ENABLE_XOJIT_PREVIEWS" : "YES",
+          "ONLY_ACTIVE_ARCH" : "YES"
+        }
+      }
+    }
+  },
+  "schemeCommand" : "launch",
+  "showNonLoggedProgress" : true,
+  "useDryRun" : false,
+  "useImplicitDependencies" : true,
+  "useLegacyBuildLocations" : false,
+  "useParallelTargets" : true
+}

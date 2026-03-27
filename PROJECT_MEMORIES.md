@@ -7,24 +7,44 @@
 ### Current Options:
 1. **FastVLM** - Already integrated, uses CoreML (.mlpackage)
 2. **ResNet-50** - CoreML, works for image classification
-3. **GGUF Models** - LLaMA.cpp format, not yet integrated
+3. **GGUF Models** - LLaMA.cpp format, in progress
 
-### GGUF Integration (In Progress)
-- Model format: GGUF (Generic Graph Unified Format) from llama.cpp
-- Downloaded to: `~/.cache/huggingface/models/`
-- Current models:
-  - `LFM2.5-1.2B-Instruct-Q4_K_M.gguf` (text model, 697MB)
-  - `LFM2.5-VL-1.6B-Q4_0.gguf` (vision model, 664MB)
-  - `mmproj-LFM2.5-VL-1.6b-Q8_0.gguf` (multimodal projector, 556MB)
+### GGUF Integration Plan
 
-### Challenges:
-- llama.cpp CLI hangs on this Mac (M4) - needs investigation
-- Need to integrate llama.cpp into iOS app (Swift wrapper or native)
-- GGUF files must be bundled in app or downloaded on first launch
+**Step 1: Fix Package Dependencies**
+- [x] Add SwiftLlama (llama.cpp Swift wrapper) package reference
+- [ ] Remove MLX dependencies causing build failures
+- [ ] Get successful build
 
-### References:
-- swift-llama-cpp (GitHub: pgorzelany/swift-llama-cpp) - Swift wrapper for llama.cpp
-- ONNX export also available from LiquidAI but incomplete
+**Step 2: Add GGUF Model to App Bundle**
+- [ ] Create `GardenManager/Models/` folder
+- [ ] Add GGUF file to bundle or implement download on first launch
+- [ ] Update project.yml to include model in Copy Bundle Resources
+
+**Step 3: Implement SwiftLlama Integration**
+- [ ] Add `import SwiftLlama` to AITabView.swift
+- [ ] Fix `analyzeWithGGUFModel()` function to properly use LlamaService
+- [ ] Handle image input for vision models
+
+**Step 4: Testing**
+- [ ] Build for simulator
+- [ ] Test with actual GGUF model files
+- [ ] Verify no network calls during inference
+
+### Model Location Options
+1. **Bundle with app** - ~700MB, increases app size
+2. **Download on first launch** - User downloads from server once
+3. **iTunes File Sharing** - User manually adds files via Finder
+
+### Models Downloaded
+- `~/.cache/huggingface/models/LFM2.5-1.2B/LFM2.5-1.2B-Instruct-Q4_K_M.gguf` (697MB)
+- `~/.cache/huggingface/models/LFM2.5-VL-1.6B/LFM2.5-VL-1.6B-Q4_0.gguf` (664MB)
+- `~/.cache/huggingface/models/LFM2.5-VL-1.6B/mmproj-LFM2.5-VL-1.6b-Q8_0.gguf` (556MB)
+
+### References
+- SwiftLlama: https://github.com/pgorzelany/swift-llama-cpp
+- MLX Swift: https://github.com/ml-explore/mlx-swift (for future VLM support)
+- LFM Models: https://huggingface.co/LiquidAI
 
 ## GitHub Listener
 
