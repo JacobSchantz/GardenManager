@@ -102,33 +102,39 @@ struct PersonActionTabView: View {
                     }
                     .buttonStyle(.plain)
                     
-                    // GGUF file browser button
-                    if selectedModelID == "gguf-lfm" {
-                        Button {
-                            showGGUFFilePicker = true
-                        } label: {
-                            HStack {
-                                Image(systemName: "folder")
-                                    .foregroundStyle(.orange)
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(selectedGGUFURL?.lastPathComponent ?? "Browse for GGUF file")
-                                        .font(.subheadline.weight(.medium))
-                                    Text(selectedGGUFURL != nil ? "File selected" : "Tap to select a .gguf file")
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                }
-                                Spacer()
-                                Image(systemName: "chevron.right")
+                    // GGUF file browser button - always visible so user can pick a file
+                    Button {
+                        showGGUFFilePicker = true
+                    } label: {
+                        HStack {
+                            Image(systemName: "folder")
+                                .foregroundStyle(.orange)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(selectedGGUFURL?.lastPathComponent ?? "Browse for GGUF file")
+                                    .font(.subheadline.weight(.medium))
+                                Text(selectedGGUFURL != nil ? "File selected" : "Tap to select a .gguf file")
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
                             }
-                            .padding(12)
-                            .background(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .fill(Color(.secondarySystemBackground))
-                            )
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
                         }
-                        .buttonStyle(.plain)
+                        .padding(12)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color(.secondarySystemBackground))
+                        )
+                    }
+                    .buttonStyle(.plain)
+                    .opacity(selectedModelID == "gguf-lfm" || selectedGGUFURL != nil ? 1 : 0.5)
+                    
+                    // Hint when GGUF model not selected
+                    if selectedModelID != "gguf-lfm" && selectedGGUFURL == nil {
+                        Text("Select GGUF model above to use local model")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                     }
                     
                     if let selectedImage {
