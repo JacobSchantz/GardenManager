@@ -41,6 +41,32 @@
 - `~/.cache/huggingface/models/LFM2.5-VL-1.6B/LFM2.5-VL-1.6B-Q4_0.gguf` (664MB)
 - `~/.cache/huggingface/models/LFM2.5-VL-1.6B/mmproj-LFM2.5-VL-1.6b-Q8_0.gguf` (556MB)
 
+### Vision-Language GGUF Models - IMPORTANT
+
+**Current Issue:** SwiftLlama (llama.cpp wrapper) is **text-only** - doesn't support image input.
+
+**Solution:** Need a vision-language GGUF model + mmproj (vision projector)
+
+**Required for vision GGUF:**
+1. **Model file (.gguf)** - The LLM with vision capabilities (e.g., LLaVA, BakLLaVA, LFM-VL)
+2. **Projector file (mmproj-*.gguf)** - Vision projector that encodes images for the model
+
+**Libraries to explore:**
+1. **llama.cpp (native)** - Has vision support via `llava` architecture
+   - Need to build llama.cpp with VISION=ON
+   - Then create Swift bindings or use via C interop
+   
+2. **ggml-opt** - Another option with vision support
+
+3. **llava.cpp** - Dedicated vision-language implementation
+   - https://github.com/ggerganov/llama.cpp/tree/master/examples/llava
+   - Would need Swift bindings
+
+4. **Alternative: Use CoreML** - FastVLM already works, skip GGUF for vision
+
+**Short-term fix:** Use Vision framework to describe image, pass to GGUF (current workaround)
+**Long-term:** Find/build Swift library with GGUF vision support
+
 ### References
 - SwiftLlama: https://github.com/pgorzelany/swift-llama-cpp
 - MLX Swift: https://github.com/ml-explore/mlx-swift (for future VLM support)
