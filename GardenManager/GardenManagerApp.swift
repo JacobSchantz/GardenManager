@@ -11,6 +11,7 @@ struct GardenManagerApp: App {
             RootView()
         }
     }
+    
 }
 
 @MainActor
