@@ -558,7 +558,7 @@ struct PersonActionTabView: View {
             Task {
                 do {
                     let llamaService = try LlamaService(
-                        modelUrl: finalModelURL,
+                        modelUrl: modelURL,
                         config: .init(batchSize: 512, maxTokenCount: 4096, useGPU: true)
                     )
                     
