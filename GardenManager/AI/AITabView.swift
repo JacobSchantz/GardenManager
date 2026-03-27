@@ -46,6 +46,9 @@ struct AIAssistantTabView: View {
     }
 }
 
+// Keys for UserDefaults
+private let kSelectedGGUFURLBookmark = "selectedGGUFURLBookmark"
+
 struct PersonActionTabView: View {
     @State private var selectedImage: UIImage?
     @State private var resultText = ""
@@ -57,6 +60,10 @@ struct PersonActionTabView: View {
     @State private var modelStatus = "Select a GGUF file"
     @State private var showGGUFFilePicker = false
     @State private var selectedGGUFURL: URL?
+    
+    // Shared GGUF URL for chat (persisted)
+    @AppStorage(kSelectedGGUFURLBookmark, store: UserDefaults.standard) 
+    private var ggufBookmarkData: Data?
 
     var body: some View {
         NavigationStack {
@@ -223,6 +230,12 @@ struct PersonActionTabView: View {
                 .padding()
             }
             .navigationTitle("Person Action")
+            .onAppear { loadSavedGGUFURL() }
+            .onChange(of: selectedGGUFURL) { _, newURL in
+                if let url = newURL {
+                    saveGGUFURL(url)
+                }
+            }
             .sheet(isPresented: $showCamera) {
                 CameraImagePicker { image in
                     if let image {
@@ -277,6 +290,31 @@ struct PersonActionTabView: View {
                 }
             }
         }
+    }
+    
+    // MARK: - GGUF URL Persistence
+    
+    private func loadSavedGGUFURL() {
+        // Since DocumentPicker uses asCopy: true, the file is in app's documents
+        let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.path
+        guard let savedPath = UserDefaults.standard.string(forKey: "selectedGGUFPath"),
+              let docsPath = documentsPath,
+              savedPath.contains(docsPath) || savedPath.hasPrefix("/var/") else {
+            return
+        }
+        
+        let url = URL(fileURLWithPath: savedPath)
+        if FileManager.default.fileExists(atPath: url.path) {
+            selectedGGUFURL = url
+            modelStatus = "Loaded saved model"
+        } else {
+            UserDefaults.standard.removeObject(forKey: "selectedGGUFPath")
+        }
+    }
+    
+    private func saveGGUFURL(_ url: URL) {
+        // Save the absolute path since asCopy: true copies to app sandbox
+        UserDefaults.standard.set(url.path, forKey: "selectedGGUFPath")
     }
 
     // MARK: - FastVLM Model Analysis
@@ -1370,6 +1408,108 @@ private actor LocalAIService {
     }
 
     func generateReply(
+        history: [LocalAIConversationTurn],
+        prompt: String,
+        imageJPEGData: Data?
+    ) async throws -> String {
+        // Check for GGUF model URL first
+        if let ggufURL = getSavedGGUFURL() {
+            return try await generateReplyWithGGUF(
+                history: history,
+                prompt: prompt,
+                imageJPEGData: imageJPEGData,
+                modelURL: ggufURL
+            )
+        }
+        
+        // Fall back to Apple Foundation model
+        return try await generateReplyWithAppleModel(
+            history: history,
+            prompt: prompt,
+            imageJPEGData: imageJPEGData
+        )
+    }
+    
+    private func getSavedGGUFURL() -> URL? {
+        guard let savedPath = UserDefaults.standard.string(forKey: "selectedGGUFPath") else {
+            return nil
+        }
+        let url = URL(fileURLWithPath: savedPath)
+        if FileManager.default.fileExists(atPath: url.path) {
+            return url
+        }
+        return nil
+    }
+    
+    private func generateReplyWithGGUF(
+        history: [LocalAIConversationTurn],
+        prompt: String,
+        imageJPEGData: Data?,
+        modelURL: URL
+    ) async throws -> String {
+        var composedPrompt = prompt.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        // If there's an image, analyze it with Vision first
+        if let imageJPEGData {
+            let visionSummary = try await LocalVisionAnalyzer.summarize(jpegData: imageJPEGData)
+            let normalizedPrompt = composedPrompt.isEmpty ? "What do you see in this image?" : composedPrompt
+            composedPrompt = """
+            Based on this image analysis: \(visionSummary)
+
+            User question: \(normalizedPrompt)
+
+            Provide a detailed, helpful response.
+            """
+        }
+
+        if composedPrompt.isEmpty {
+            throw LocalAIServiceError.emptyPrompt
+        }
+
+        // Build conversation context
+        let historyText = history.suffix(8).map { turn -> String in
+            let role = turn.role == .user ? "User" : "Assistant"
+            return "\(role): \(turn.text)"
+        }.joined(separator: "\n")
+        
+        let fullPrompt = """
+        \(historyText)
+        User: \(composedPrompt)
+        Assistant:
+        """
+
+        // Use SwiftLlama for GGUF inference
+        return try await withCheckedThrowingContinuation { continuation in
+            Task {
+                do {
+                    let llamaService = try LlamaService(
+                        modelUrl: modelURL,
+                        config: .init(batchSize: 512, maxTokenCount: 4096, useGPU: true)
+                    )
+                    
+                    let messages = [
+                        LlamaChatMessage(role: .user, content: fullPrompt)
+                    ]
+                    
+                    var result = ""
+                    let stream = try await llamaService.streamCompletion(
+                        of: messages,
+                        samplingConfig: .init(temperature: 0.7, seed: 42)
+                    )
+                    
+                    for try await token in stream {
+                        result += token
+                    }
+                    
+                    continuation.resume(returning: result.isEmpty ? "No response from model" : result)
+                } catch {
+                    continuation.resume(throwing: error)
+                }
+            }
+        }
+    }
+    
+    private func generateReplyWithAppleModel(
         history: [LocalAIConversationTurn],
         prompt: String,
         imageJPEGData: Data?
