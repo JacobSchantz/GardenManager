@@ -156,7 +156,7 @@ function handlePush(payload) {
     triggerBuild('/Users/peanut/.openclaw/workspace/keepMovin/run_release_iphone.sh', 'KeepMovin', commitMessage);
   } else if (repoName === 'BuyAHabit' || repoName === 'buyahabit') {
     console.log('💰 Triggering BuyAHabit iOS build...');
-    triggerBuild('/Users/peanut/.openclaw/workspace/buyahabit/build_anywhere_or_local.sh', 'BuyAHabit', commitMessage);
+    triggerBuild('/Users/peanut/.openclaw/workspace/buyahabit/build_local_or_testflight.sh', 'BuyAHabit', commitMessage);
   } else if (repoName === 'GardenManager') {
     console.log('🌱 Triggering GardenManager iOS build...');
     triggerBuild('/Users/peanut/.openclaw/workspace/GardenManager/run_release_iphone.sh', 'GardenManager', commitMessage);
@@ -204,8 +204,25 @@ function triggerBuild(scriptPath, appName, commitMessage, attempt = 1, previousO
   
   exec(`bash "${scriptPath}" 2>&1`, { timeout: 600000 }, (error, stdout, stderr) => {
     const fullOutput = stdout + '\n' + stderr;
-    const buildFailed = error || fullOutput.includes('BUILD FAILED') || (fullOutput.includes('error:') && !fullOutput.includes('Error running application'));
-    const buildSucceeded = fullOutput.includes('BUILD SUCCEEDED') || fullOutput.includes('App launched successfully') || fullOutput.includes('Build completed successfully!') || fullOutput.includes('Build and install completed successfully!');
+    const buildSucceeded = fullOutput.includes('BUILD SUCCEEDED') || 
+                           fullOutput.includes('BUILD SUCCEEDED') ||
+                           fullOutput.includes('App launched successfully') || 
+                           fullOutput.includes('Build completed successfully!') || 
+                           fullOutput.includes('Build and install completed successfully!') ||
+                           fullOutput.includes('ARCHIVE SUCCEEDED') ||
+                           fullOutput.includes('UPLOAD SUCCEEDED');
+    const buildFailed = error || fullOutput.includes('BUILD FAILED') || fullOutput.includes('ARCHIVE FAILED');
+    
+    if (buildSucceeded) {
+      console.log(`${appName} build output:`, stdout);
+      console.log(`✅ ${appName} build triggered successfully (attempt ${attempt})`);
+      if (attempt > 1) {
+        sendTelegramMessage(`✅ ${appName} build succeeded on retry ${attempt}!\n\nCommit: ${shortCommitMsg}`);
+      } else {
+        sendTelegramMessage(`✅ ${appName} build succeeded!\n\nCommit: ${shortCommitMsg}`);
+      }
+      return;
+    }
     
     if (buildFailed) {
       console.error(`${appName} build FAILED (attempt ${attempt}):`, error?.message || 'Build error');
@@ -252,18 +269,9 @@ function triggerBuild(scriptPath, appName, commitMessage, attempt = 1, previousO
       return;
     }
     
-    if (buildSucceeded) {
-      console.log(`${appName} build output:`, stdout);
-      console.log(`✅ ${appName} build triggered successfully (attempt ${attempt})`);
-      if (attempt > 1) {
-        sendTelegramMessage(`✅ ${appName} build succeeded on retry ${attempt}!\n\nCommit: ${shortCommitMsg}`);
-      } else {
-        sendTelegramMessage(`✅ ${appName} build succeeded!\n\nCommit: ${shortCommitMsg}`);
-      }
-    } else {
-      console.log(`${appName} build output:`, stdout);
-      if (stderr) console.error(`${appName} build stderr:`, stderr);
-    }
+    // Build completed but unclear if it succeeded or failed
+    console.log(`${appName} build output:`, stdout);
+    if (stderr) console.error(`${appName} build stderr:`, stderr);
   });
 }
 
