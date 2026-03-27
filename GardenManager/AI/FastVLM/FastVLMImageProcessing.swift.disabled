@@ -1,0 +1,70 @@
+import Accelerate
+import CoreImage
+
+// MARK: - MLX Integration (Disabled for GGUF build)
+// import MLX
+// import MLXLMCommon
+// import MLXVLM
+
+enum FastVLMImageProcessing {
+
+    static func apply(_ image: CIImage, processing: UserInput.Processing?) -> CIImage {
+        var image = image
+        if let resize = processing?.resize {
+            let scale = MediaProcessing.bestFitScale(image.extent.size, in: resize)
+            image = image.transformed(by: CGAffineTransform(scaleX: scale, y: scale))
+        }
+        return image
+    }
+
+    static func centerCrop(_ image: CIImage, size: CGSize) -> CIImage {
+        let extent = image.extent
+        if extent.width <= size.width && extent.height <= size.height {
+            return image
+        }
+        let targetWidth = min(extent.width, size.width)
+        let targetHeight = min(extent.height, size.height)
+        let crop = CGRect(
+            x: (extent.maxX - targetWidth) / 2,
+            y: (extent.maxY - targetHeight) / 2,
+            width: targetWidth, height: targetHeight
+        )
+        return image
+            .cropped(to: crop)
+            .transformed(by: CGAffineTransform(translationX: -crop.minX, y: -crop.minY))
+    }
+
+    static func fitIn(_ size: CGSize, shortestEdge: Int) -> CGSize {
+        let floatShortestEdge = CGFloat(shortestEdge)
+        let (short, long) =
+            size.width <= size.height ? (size.width, size.height) : (size.height, size.width)
+        let newShort = floatShortestEdge
+        let newLong = floatShortestEdge * long / short
+        return size.width <= size.height
+            ? CGSize(width: newShort, height: newLong) : CGSize(width: newLong, height: newShort)
+    }
+
+    static func resampleBicubic(_ image: CIImage, to size: CGSize) -> CIImage {
+        let yScale = size.height / image.extent.height
+        let xScale = size.width / image.extent.width
+        let filter = CIFilter.bicubicScaleTransform()
+        filter.inputImage = image
+        filter.scale = Float(yScale)
+        filter.aspectRatio = Float(xScale / yScale)
+        let scaledImage = filter.outputImage!
+        let exactRect = CGRect(x: 0, y: 0, width: size.width, height: size.height)
+        return scaledImage.cropped(to: exactRect)
+    }
+
+    // MARK: - MLX Functions (Disabled - requires MLX package)
+    // Re-enable when MLX package is properly integrated
+    
+    private static let context = CIContext()
+
+    @available(*, unavailable, message: "MLX integration disabled for GGUF build")
+    static func asPlanarMLXArray(_ image: CIImage, colorSpace: CGColorSpace? = nil) -> Data {
+        // Stub - returns empty data when MLX is not available
+        // This disables FastVLM but allows GGUF build to work
+        return Data()
+    }
+}

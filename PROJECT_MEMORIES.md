@@ -13,21 +13,21 @@
 
 **Step 1: Fix Package Dependencies**
 - [x] Add SwiftLlama (llama.cpp Swift wrapper) package reference
-- [ ] Remove MLX dependencies causing build failures
-- [ ] Get successful build
+- [x] Remove MLX dependencies causing build failures (temporarily disabled FastVLM)
+- [x] Get successful build ✅
 
 **Step 2: Add GGUF Model to App Bundle**
-- [ ] Create `GardenManager/Models/` folder
-- [ ] Add GGUF file to bundle or implement download on first launch
-- [ ] Update project.yml to include model in Copy Bundle Resources
+- [x] Create `GardenManager/Models/` folder
+- [x] Add GGUF file to bundle (LFM2.5-VL-1.6B-Q4_0.gguf - 664MB)
+- [x] Update project.yml to include model in Copy Bundle Resources ✅
 
 **Step 3: Implement SwiftLlama Integration**
-- [ ] Add `import SwiftLlama` to AITabView.swift
+- [x] Add `import SwiftLlama` to AITabView.swift
 - [ ] Fix `analyzeWithGGUFModel()` function to properly use LlamaService
 - [ ] Handle image input for vision models
 
 **Step 4: Testing**
-- [ ] Build for simulator
+- [x] Build for simulator ✅
 - [ ] Test with actual GGUF model files
 - [ ] Verify no network calls during inference
 

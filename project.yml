@@ -27,8 +27,6 @@ targets:
         excludes:
           - "**/.DS_Store"
     dependencies:
-      - package: MLX
-      - package: MLXLM
       - package: SwiftLlama
     settings:
       base:

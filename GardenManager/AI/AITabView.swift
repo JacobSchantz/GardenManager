@@ -5,6 +5,7 @@ import CoreML
 #if canImport(FoundationModels)
 import FoundationModels
 #endif
+import SwiftLlama
 
 struct AIAssistantTabView: View {
     @State private var showChat = false
