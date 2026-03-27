@@ -54,44 +54,30 @@ struct PersonActionTabView: View {
     @State private var showCamera = false
     @State private var showPhotoLibrary = false
     @State private var errorText: String?
-    @State private var showModelPicker = false
-    @State private var selectedModelID = "vision"
-    @State private var modelStatus = "Select a model"
+    @State private var modelStatus = "Select a GGUF file"
     @State private var showGGUFFilePicker = false
     @State private var selectedGGUFURL: URL?
-    
-    private let models = [
-        ("vision", "Vision Framework", "Apple's built-in (basic)"),
-        ("fastvlm-1.5b", "FastVLM 1.5B (INT8)", "~1.5B params - vision language"),
-        ("fastvlm-7b", "FastVLM 7B (INT4)", "~7B params - most powerful"),
-        ("resnet50", "ResNet-50", "~25M params - image classification"),
-        ("gguf-lfm", "LFM 2.5 VL 1.6B (GGUF)", "~1.6B params - local GGUF model")
-    ]
-    
-    private var currentModelName: String {
-        models.first { $0.0 == selectedModelID }?.1 ?? "Select Model"
-    }
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    // Model selector button
+                    // GGUF file browser button - main interaction
                     Button {
-                        showModelPicker = true
+                        showGGUFFilePicker = true
                     } label: {
                         HStack {
-                            Image(systemName: "cpu")
-                                .foregroundStyle(.green)
+                            Image(systemName: "folder")
+                                .foregroundStyle(.orange)
                             VStack(alignment: .leading, spacing: 2) {
-                                Text(currentModelName)
+                                Text(selectedGGUFURL?.lastPathComponent ?? "Browse for GGUF file")
                                     .font(.subheadline.weight(.medium))
-                                Text(modelStatus)
+                                Text(selectedGGUFURL != nil ? "File selected" : "Tap to select a .gguf file")
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
                             }
                             Spacer()
-                            Image(systemName: "chevron.down")
+                            Image(systemName: "chevron.right")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
@@ -129,14 +115,6 @@ struct PersonActionTabView: View {
                         )
                     }
                     .buttonStyle(.plain)
-                    .opacity(selectedModelID == "gguf-lfm" || selectedGGUFURL != nil ? 1 : 0.5)
-                    
-                    // Hint when GGUF model not selected
-                    if selectedModelID != "gguf-lfm" && selectedGGUFURL == nil {
-                        Text("Select GGUF model above to use local model")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
                     
                     if let selectedImage {
                         Image(uiImage: selectedImage)
@@ -259,46 +237,6 @@ struct PersonActionTabView: View {
                     }
                 }
             }
-            .sheet(isPresented: $showModelPicker) {
-                NavigationStack {
-                    List {
-                        ForEach(models, id: \.0) { model in
-                            Button {
-                                selectedModelID = model.0
-                                if model.0 == "vision" {
-                                    modelStatus = "Using Vision Framework"
-                                } else {
-                                    modelStatus = "Tap Analyze to download/use model"
-                                }
-                                showModelPicker = false
-                            } label: {
-                                HStack {
-                                    VStack(alignment: .leading) {
-                                        Text(model.1)
-                                            .foregroundStyle(.primary)
-                                        Text(model.2)
-                                            .font(.caption)
-                                            .foregroundStyle(.secondary)
-                                    }
-                                    Spacer()
-                                    if model.0 == selectedModelID {
-                                        Image(systemName: "checkmark")
-                                            .foregroundStyle(.blue)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    .navigationTitle("Select Model")
-                    .navigationBarTitleDisplayMode(.inline)
-                    .toolbar {
-                        ToolbarItem(placement: .cancellationAction) {
-                            Button("Done") { showModelPicker = false }
-                        }
-                    }
-                }
-                .presentationDetents([.medium])
-            }
             .sheet(isPresented: $showGGUFFilePicker) {
                 DocumentPickerView(selectedURL: $selectedGGUFURL)
             }
@@ -310,6 +248,11 @@ struct PersonActionTabView: View {
             errorText = "Please choose an image first."
             return
         }
+        
+        guard selectedGGUFURL != nil else {
+            errorText = "Please select a GGUF model file first."
+            return
+        }
 
         errorText = nil
         resultText = ""
@@ -317,36 +260,10 @@ struct PersonActionTabView: View {
 
         Task {
             do {
-                let analysis: String
-                
-                // Actually use the selected model
-                switch selectedModelID {
-                case "fastvlm-1.5b", "fastvlm-7b":
-                    modelStatus = "Loading FastVLM model..."
-                    analysis = try await analyzeWithFastVLMModel(cgImage: cgImage, modelID: selectedModelID)
-                    usedModelName = modelStatus
-                    
-                case "resnet50", "mobilenetv2":
-                    modelStatus = "Loading CoreML model..."
-                    analysis = try await analyzeWithCoreMLModel(cgImage: cgImage, modelID: selectedModelID)
-                    usedModelName = modelStatus
-                    
-                case "gguf-lfm":
-                    modelStatus = "Loading GGUF model..."
-                    analysis = try await analyzeWithGGUFModel(cgImage: cgImage)
-                    usedModelName = "LFM 2.5 VL 1.6B (GGUF)"
-                    
-                default:
-                    // Vision framework (default)
-                    if #available(iOS 17.0, *) {
-                        modelStatus = "Analyzing with Vision framework..."
-                        analysis = try await analyzeWithVisualIntelligence(cgImage: cgImage)
-                    } else {
-                        modelStatus = "Using Vision Framework..."
-                        analysis = try await performVisionAnalysis(cgImage: cgImage)
-                    }
-                    usedModelName = "Apple Vision Framework"
-                }
+                modelStatus = "Loading GGUF model..."
+                let analysis = try await analyzeWithGGUFModel(cgImage: cgImage)
+                let modelName = selectedGGUFURL?.lastPathComponent ?? "GGUF Model"
+                usedModelName = modelName
                 
                 await MainActor.run {
                     resultText = analysis
