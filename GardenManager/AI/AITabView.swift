@@ -49,6 +49,7 @@ struct AIAssistantTabView: View {
 struct PersonActionTabView: View {
     @State private var selectedImage: UIImage?
     @State private var resultText = ""
+    @State private var usedModelName = ""
     @State private var isAnalyzing = false
     @State private var showCamera = false
     @State private var showPhotoLibrary = false
@@ -214,6 +215,17 @@ struct PersonActionTabView: View {
                                     RoundedRectangle(cornerRadius: 14, style: .continuous)
                                         .fill(Color(.secondarySystemBackground))
                                 )
+                            
+                            // Show which model was actually used
+                            if !usedModelName.isEmpty {
+                                HStack {
+                                    Image(systemName: "cpu")
+                                        .font(.caption)
+                                    Text("Model: \(usedModelName)")
+                                        .font(.caption)
+                                }
+                                .foregroundStyle(.secondary)
+                            }
                         }
                     }
                 }
@@ -299,14 +311,17 @@ struct PersonActionTabView: View {
                 case "fastvlm-1.5b", "fastvlm-7b":
                     modelStatus = "Loading FastVLM model..."
                     analysis = try await analyzeWithFastVLMModel(cgImage: cgImage, modelID: selectedModelID)
+                    usedModelName = modelStatus
                     
                 case "resnet50", "mobilenetv2":
                     modelStatus = "Loading CoreML model..."
                     analysis = try await analyzeWithCoreMLModel(cgImage: cgImage, modelID: selectedModelID)
+                    usedModelName = modelStatus
                     
                 case "gguf-lfm":
                     modelStatus = "Loading GGUF model..."
                     analysis = try await analyzeWithGGUFModel(cgImage: cgImage)
+                    usedModelName = "LFM 2.5 VL 1.6B (GGUF)"
                     
                 default:
                     // Vision framework (default)
@@ -317,6 +332,7 @@ struct PersonActionTabView: View {
                         modelStatus = "Using Vision Framework..."
                         analysis = try await performVisionAnalysis(cgImage: cgImage)
                     }
+                    usedModelName = "Apple Vision Framework"
                 }
                 
                 await MainActor.run {
