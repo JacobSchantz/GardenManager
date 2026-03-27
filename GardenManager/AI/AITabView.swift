@@ -586,9 +586,14 @@ struct PersonActionTabView: View {
     }
     
     private func runGGUFInference(cgImage: CGImage, modelURL: URL) async throws -> String {
+        modelStatus = "Analyzing image with Vision..."
+        
+        // First get image description using Vision framework
+        let visionDescription = try await describeImageWithVision(cgImage: cgImage)
+        
         modelStatus = "Running GGUF inference..."
         
-        // Use SwiftLlama to run inference
+        // Use SwiftLlama to run inference with Vision description as context
         return try await withCheckedThrowingContinuation { continuation in
             Task {
                 do {
@@ -597,9 +602,19 @@ struct PersonActionTabView: View {
                         config: .init(batchSize: 512, maxTokenCount: 4096, useGPU: true)
                     )
                     
-                    // Create a prompt asking about the image
+                    // Use Vision framework description as context for the LLM
+                    let prompt = """
+                    Based on this image analysis: \(visionDescription)
+                    
+                    Provide a detailed, natural description of what's in the image. Focus on:
+                    - What objects and items are visible
+                    - The setting/location
+                    - Any text that appears
+                    - The overall scene composition
+                    """
+                    
                     let messages = [
-                        LlamaChatMessage(role: .user, content: "Describe what you see in this image in detail.")
+                        LlamaChatMessage(role: .user, content: prompt)
                     ]
                     
                     var result = ""
@@ -612,11 +627,54 @@ struct PersonActionTabView: View {
                         result += token
                     }
                     
-                    continuation.resume(returning: result.isEmpty ? "No response from model" : result)
+                    continuation.resume(returning: result.isEmpty ? "Model returned empty response" : result)
                 } catch {
                     continuation.resume(throwing: error)
                 }
             }
+        }
+    }
+    
+    // Helper to get image description using Vision framework
+    private func describeImageWithVision(cgImage: CGImage) async throws -> String {
+        try await withCheckedThrowingContinuation { continuation in
+            let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
+            
+            let classificationRequest = VNClassifyImageRequest()
+            let faceRequest = VNDetectFaceRectanglesRequest()
+            let rectangleRequest = VNDetectRectanglesRequest()
+            
+            do {
+                try handler.perform([classificationRequest, faceRequest, rectangleRequest])
+            } catch {
+                // Continue with what we have
+            }
+            
+            var descriptions: [String] = []
+            
+            // Get classification results
+            if let classifications = classificationRequest.results, !classifications.isEmpty {
+                let topLabels = classifications
+                    .filter { $0.confidence > 0.1 }
+                    .prefix(10)
+                    .map { $0.identifier.replacingOccurrences(of: "_", with: " ") }
+                if !topLabels.isEmpty {
+                    descriptions.append("Detected: \(topLabels.joined(separator: ", "))")
+                }
+            }
+            
+            // Get face count
+            if let faceCount = faceRequest.results?.count, faceCount > 0 {
+                descriptions.append("\(faceCount) face(s) detected")
+            }
+            
+            // Get rectangle/object detections
+            if let rectCount = rectangleRequest.results?.count, rectCount > 0 {
+                descriptions.append("\(rectCount) objects detected")
+            }
+            
+            let result = descriptions.isEmpty ? "General scene" : descriptions.joined(separator: ". ")
+            continuation.resume(returning: result)
         }
     }
 
