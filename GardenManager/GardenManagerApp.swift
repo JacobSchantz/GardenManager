@@ -18,6 +18,11 @@ struct GardenManagerApp: App {
 struct RootView: View {
     var body: some View {
         TabView {
+            OpenClawVoiceView()
+            .tabItem {
+                Label("Voice", systemImage: "phone.fill")
+            }
+
             GrokVoiceView()
             .tabItem {
                 Label("Grok", systemImage: "waveform")
