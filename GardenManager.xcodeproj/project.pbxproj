@@ -11,22 +11,26 @@
 		58DE49DAEDCCB7C78C2A0477 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57E25AB53CF1C8F7AA8580F3 /* AppDelegate.swift */; };
 		6E3167BB648BC2CD41D27869 /* FastVLMImageProcessing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1049E218AF2165B175282CB0 /* FastVLMImageProcessing.swift */; };
 		84FD4CCF1677F305B05EF540 /* FastVLMImageProcessing.swift.disabled in Resources */ = {isa = PBXBuildFile; fileRef = E9B87885E3ECC34BF04DD67B /* FastVLMImageProcessing.swift.disabled */; };
+		C2B4034382C121BDC4CBDACA /* OpenClawVoiceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 332F05ABAFB5325904140E8E /* OpenClawVoiceService.swift */; };
 		CAC1431134AE16D836E163CD /* SwiftLlama in Frameworks */ = {isa = PBXBuildFile; productRef = F995B001296578981A14E5AF /* SwiftLlama */; };
 		CEB5386EA518934CD63F9F4B /* GrokVoiceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39305927F4656B443DBA3B5A /* GrokVoiceService.swift */; };
 		D3D5864AB12A7B038FEB2DEC /* GrokVoiceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02E4DE8CF024785D92B1EBC4 /* GrokVoiceView.swift */; };
 		F2B195715BA20D9343012D8B /* AITabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB4A48BF09269F9169962D57 /* AITabView.swift */; };
 		F40B7A27987F32C13BDC2DBE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F238D1F176156184E7E8AFAA /* Assets.xcassets */; };
+		FB0BA55947CD1AAF0076E906 /* OpenClawVoiceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDEF68A88E27820CBB9D30A8 /* OpenClawVoiceView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		02E4DE8CF024785D92B1EBC4 /* GrokVoiceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrokVoiceView.swift; sourceTree = "<group>"; };
 		1049E218AF2165B175282CB0 /* FastVLMImageProcessing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FastVLMImageProcessing.swift; sourceTree = "<group>"; };
 		1C388DA753AFE5093063A2A4 /* GardenManager.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = GardenManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		332F05ABAFB5325904140E8E /* OpenClawVoiceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenClawVoiceService.swift; sourceTree = "<group>"; };
 		39305927F4656B443DBA3B5A /* GrokVoiceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrokVoiceService.swift; sourceTree = "<group>"; };
 		57E25AB53CF1C8F7AA8580F3 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		613D126342A6B10D41E68D1C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8919C9873ED7317E8A8E62AC /* GardenManagerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GardenManagerApp.swift; sourceTree = "<group>"; };
 		AB4A48BF09269F9169962D57 /* AITabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AITabView.swift; sourceTree = "<group>"; };
+		CDEF68A88E27820CBB9D30A8 /* OpenClawVoiceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenClawVoiceView.swift; sourceTree = "<group>"; };
 		E9B87885E3ECC34BF04DD67B /* FastVLMImageProcessing.swift.disabled */ = {isa = PBXFileReference; path = FastVLMImageProcessing.swift.disabled; sourceTree = "<group>"; };
 		F238D1F176156184E7E8AFAA /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -69,6 +73,7 @@
 				613D126342A6B10D41E68D1C /* Info.plist */,
 				05C9135B623C42A08919A79A /* AI */,
 				6E97B3C3FB5CB8DC34912ADF /* GrokVoice */,
+				E770E5C94FFF313DA202571D /* OpenClawVoice */,
 			);
 			path = GardenManager;
 			sourceTree = "<group>";
@@ -97,6 +102,15 @@
 				E9B87885E3ECC34BF04DD67B /* FastVLMImageProcessing.swift.disabled */,
 			);
 			path = FastVLM;
+			sourceTree = "<group>";
+		};
+		E770E5C94FFF313DA202571D /* OpenClawVoice */ = {
+			isa = PBXGroup;
+			children = (
+				332F05ABAFB5325904140E8E /* OpenClawVoiceService.swift */,
+				CDEF68A88E27820CBB9D30A8 /* OpenClawVoiceView.swift */,
+			);
+			path = OpenClawVoice;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -182,6 +196,8 @@
 				2190DBF72C1AC02F2AB01302 /* GardenManagerApp.swift in Sources */,
 				CEB5386EA518934CD63F9F4B /* GrokVoiceService.swift in Sources */,
 				D3D5864AB12A7B038FEB2DEC /* GrokVoiceView.swift in Sources */,
+				C2B4034382C121BDC4CBDACA /* OpenClawVoiceService.swift in Sources */,
+				FB0BA55947CD1AAF0076E906 /* OpenClawVoiceView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

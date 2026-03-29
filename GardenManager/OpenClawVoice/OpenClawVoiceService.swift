@@ -1,5 +1,6 @@
 import Foundation
 import AVFoundation
+import Speech
 import Combine
 
 enum OpenClawVoiceError: Error, LocalizedError {
@@ -27,7 +28,7 @@ enum OpenClawVoiceState: Equatable {
     case error(String)
 }
 
-enum PermissionStatus: Equatable {
+enum OpenClawPermissionStatus: Equatable {
     case unknown
     case notDetermined
     case granted
@@ -44,14 +45,14 @@ enum PermissionStatus: Equatable {
 }
 
 @MainActor
-class OpenClawVoiceService: NSObject, ObservableObject {
+class OpenClawVoiceService: NSObject, ObservableObject, AVSpeechSynthesizerDelegate {
     @Published var state: OpenClawVoiceState = .disconnected
     @Published var transcribedText: String = ""
     @Published var responseText: String = ""
     @Published var debugLogs: [String] = []
     @Published var isPlaying = false
     @Published var errorMessage: String? = nil
-    @Published private(set) var microphonePermissionStatus: PermissionStatus = .unknown
+    @Published private(set) var microphonePermissionStatus: OpenClawPermissionStatus = .unknown
     
     // Telegram configuration
     @Published var telegramBotToken: String = ""
@@ -67,6 +68,7 @@ class OpenClawVoiceService: NSObject, ObservableObject {
     
     override init() {
         super.init()
+        synthesizer.delegate = self
         loadSettings()
         checkPermissions()
     }
@@ -295,18 +297,15 @@ class OpenClawVoiceService: NSObject, ObservableObject {
         responseText = text
         
         synthesizer.speak(utterance)
-        
-        // Monitor speaking state
-        NotificationCenter.default.addObserver(
-            forName: AVSpeechSynthesizer.didFinishNotification,
-            object: synthesizer,
-            queue: .main
-        ) { [weak self] _ in
-            Task { @MainActor in
-                self?.isPlaying = false
-                if self?.state == .speaking {
-                    self?.state = .listening
-                }
+    }
+    
+    // MARK: - AVSpeechSynthesizerDelegate
+    
+    nonisolated func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
+        Task { @MainActor in
+            self.isPlaying = false
+            if self.state == .speaking {
+                self.state = .listening
             }
         }
     }

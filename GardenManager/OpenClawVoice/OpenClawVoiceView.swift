@@ -43,7 +43,7 @@ struct OpenClawVoiceView: View {
                 }
             }
             .sheet(isPresented: $showSettings) {
-                SettingsSheet(service: service, apiKey: $apiKey, chatId: $chatId)
+                OpenClawSettingsSheet(service: service, apiKey: $apiKey, chatId: $chatId)
             }
             .onAppear {
                 loadSettings()
@@ -287,7 +287,7 @@ struct OpenClawVoiceView: View {
 
 // MARK: - Settings Sheet
 
-struct SettingsSheet: View {
+struct OpenClawSettingsSheet: View {
     @ObservedObject var service: OpenClawVoiceService
     @Binding var apiKey: String
     @Binding var chatId: String
