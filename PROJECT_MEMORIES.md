@@ -74,18 +74,30 @@
 
 ## GitHub Listener
 
-The `github-listener/` folder contains the webhook listener that auto-builds iOS apps when you push to specific repos.
+**Source of Truth:** The `github-listener/` directory in the GardenManager repository is the canonical source. All listener code lives here and must be pushed to GitHub after any changes.
+
+The listener auto-builds iOS apps when you push to specific repos.
+
+### Repository Structure
+```
+GardenManager/
+  github-listener/          # ← Source of truth for webhook listener
+    server.js               # Main webhook handler
+    setup.sh                # Setup script
+    package.json
+    README.md
+```
 
 ### Repos and Branches Configured:
 - **atg_monorepo** (branch: `Peaches`) → builds ATG iOS
 - **keepMovin** → builds KeepMovin iOS
-- **BuyAHabit / buyahabit** → builds BuyAHabit iOS
+- **buyHabit / buyahabit** → builds BuyAHabit iOS
 - **GardenManager** → builds GardenManager iOS
 
-### Important
-- **Always push listener changes** to GardenManager repo after modifying `github-listener/server.js`
-- The listener runs locally from `~/.openclaw/workspace/GardenManager/github-listener/`
-- Android builds are currently disabled (commented out)
+### Workflow
+1. Make changes to `github-listener/server.js` or any listener code
+2. **Always push changes to GardenManager repo** (`git push origin main`)
+3. Pull on any machine running the listener, then restart
 
 ### Running the Listener
 ```bash
@@ -95,3 +107,7 @@ node server.js
 
 ### Ngrok
 The listener is accessible via ngrok on port 8765. Webhook URL needs to be updated in GitHub repo settings.
+
+### Important
+- **Never modify listener code outside of this repo** — changes will be overwritten on next pull
+- Android builds are currently disabled (commented out)
