@@ -6,7 +6,7 @@ struct BuildStatusTabView: View {
     @State private var errorMessage: String?
     @State private var lastRefresh = Date()
     
-    private let listenerURL = "http://127.0.0.1:8765/status"
+    private let listenerURL = "http://192.168.0.242:8765/status"
     
     var body: some View {
         NavigationStack {
