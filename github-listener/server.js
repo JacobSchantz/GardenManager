@@ -6,6 +6,17 @@ const urlencodedParser = express.urlencoded({ extended: true });
 const app = express();
 const PORT = process.env.PORT || 8765;
 
+// Build status tracker
+let buildStatus = {
+  lastBuild: null,
+  lastCommit: null,
+  lastCommitMessage: null,
+  lastRepo: null,
+  lastBranch: null,
+  isBuilding: false,
+  lastBuildTime: null
+};
+
 // GitHub webhook secret (set in environment)
 const GITHUB_SECRET = process.env.GITHUB_SECRET || '';
 
@@ -27,6 +38,11 @@ function verifySignature(req, res, buf) {
 // Health check
 app.get('/', (req, res) => {
   res.json({ status: 'GitHub Listener running', events: ['push', 'pull_request', 'release'] });
+});
+
+// Build status endpoint
+app.get('/status', (req, res) => {
+  res.json(buildStatus);
 });
 
 // Kill any previous builds to avoid queued builds
@@ -144,6 +160,14 @@ function handlePush(payload) {
   // Kill any previous builds before starting new one
   killPreviousBuilds();
   
+  // Update build status
+  buildStatus.lastCommit = after;
+  buildStatus.lastCommitMessage = commitMessage;
+  buildStatus.lastRepo = repoName;
+  buildStatus.lastBranch = branch;
+  buildStatus.isBuilding = true;
+  buildStatus.lastBuildTime = new Date().toISOString();
+  
   // Pull latest from the triggered repo
   pullRepo(repoName);
   
@@ -216,6 +240,8 @@ function triggerBuild(scriptPath, appName, commitMessage, attempt = 1, previousO
     if (buildSucceeded) {
       console.log(`${appName} build output:`, stdout);
       console.log(`✅ ${appName} build triggered successfully (attempt ${attempt})`);
+      buildStatus.isBuilding = false;
+      buildStatus.lastBuild = 'success';
       if (attempt > 1) {
         sendTelegramMessage(`✅ ${appName} build succeeded on retry ${attempt}!\n\nCommit: ${shortCommitMsg}`);
       } else {
@@ -266,6 +292,8 @@ function triggerBuild(scriptPath, appName, commitMessage, attempt = 1, previousO
       
       // Attempt AI auto-fix (for future reference)
       console.log('🤖 All retries exhausted. Notifying about failure.');
+      buildStatus.isBuilding = false;
+      buildStatus.lastBuild = 'failed';
       return;
     }
     

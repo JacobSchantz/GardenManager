@@ -1,0 +1,5 @@
+---
+triple:          'arm64-apple-darwin'
+binary-path:     '/Users/peanut/.openclaw/workspace/GardenManager/build/DerivedData/Build/Products/Release-iphoneos/GardenManager.app/GardenManager'
+relocations:     []
+...

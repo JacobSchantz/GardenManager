@@ -38,6 +38,16 @@
     "llvm-bc" : "/Users/peanut/.openclaw/workspace/GardenManager/build/DerivedData/Build/Intermediates.noindex/GardenManager.build/Release-iphoneos/GardenManager.build/Objects-normal/arm64/GrokVoiceView.bc",
     "object" : "/Users/peanut/.openclaw/workspace/GardenManager/build/DerivedData/Build/Intermediates.noindex/GardenManager.build/Release-iphoneos/GardenManager.build/Objects-normal/arm64/GrokVoiceView.o"
   },
+  "/Users/peanut/.openclaw/workspace/GardenManager/GardenManager/OpenClawVoice/OpenClawVoiceService.swift" : {
+    "index-unit-output-path" : "/GardenManager.build/Release-iphoneos/GardenManager.build/Objects-normal/arm64/OpenClawVoiceService.o",
+    "llvm-bc" : "/Users/peanut/.openclaw/workspace/GardenManager/build/DerivedData/Build/Intermediates.noindex/GardenManager.build/Release-iphoneos/GardenManager.build/Objects-normal/arm64/OpenClawVoiceService.bc",
+    "object" : "/Users/peanut/.openclaw/workspace/GardenManager/build/DerivedData/Build/Intermediates.noindex/GardenManager.build/Release-iphoneos/GardenManager.build/Objects-normal/arm64/OpenClawVoiceService.o"
+  },
+  "/Users/peanut/.openclaw/workspace/GardenManager/GardenManager/OpenClawVoice/OpenClawVoiceView.swift" : {
+    "index-unit-output-path" : "/GardenManager.build/Release-iphoneos/GardenManager.build/Objects-normal/arm64/OpenClawVoiceView.o",
+    "llvm-bc" : "/Users/peanut/.openclaw/workspace/GardenManager/build/DerivedData/Build/Intermediates.noindex/GardenManager.build/Release-iphoneos/GardenManager.build/Objects-normal/arm64/OpenClawVoiceView.bc",
+    "object" : "/Users/peanut/.openclaw/workspace/GardenManager/build/DerivedData/Build/Intermediates.noindex/GardenManager.build/Release-iphoneos/GardenManager.build/Objects-normal/arm64/OpenClawVoiceView.o"
+  },
   "/Users/peanut/.openclaw/workspace/GardenManager/build/DerivedData/Build/Intermediates.noindex/GardenManager.build/Release-iphoneos/GardenManager.build/DerivedSources/GeneratedAssetSymbols.swift" : {
     "index-unit-output-path" : "/GardenManager.build/Release-iphoneos/GardenManager.build/Objects-normal/arm64/GeneratedAssetSymbols.o",
     "llvm-bc" : "/Users/peanut/.openclaw/workspace/GardenManager/build/DerivedData/Build/Intermediates.noindex/GardenManager.build/Release-iphoneos/GardenManager.build/Objects-normal/arm64/GeneratedAssetSymbols.bc",

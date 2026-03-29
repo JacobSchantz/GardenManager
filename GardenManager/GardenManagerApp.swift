@@ -37,6 +37,11 @@ struct RootView: View {
             .tabItem {
                 Label("Action", systemImage: "figure.walk")
             }
+
+            BuildStatusTabView()
+            .tabItem {
+                Label("Builds", systemImage: "hammer")
+            }
         }
 
         .tint(.blue)
