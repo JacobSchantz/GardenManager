@@ -2,11 +2,13 @@ import SwiftUI
 
 struct BuildStatusTabView: View {
     @State private var buildStatus: BuildStatus?
+    @State private var openClawStatus: OpenClawStatus?
     @State private var isLoading = false
     @State private var errorMessage: String?
     @State private var lastRefresh = Date()
     
     private let listenerURL = "http://192.168.0.242:8765/status"
+    private let openClawURL = "http://192.168.0.242:8765/openclaw"
     
     var body: some View {
         NavigationStack {
@@ -21,6 +23,10 @@ struct BuildStatusTabView: View {
                     loadingSection
                 } else if let error = errorMessage {
                     errorSection(error)
+                }
+                
+                if let oc = openClawStatus {
+                    openClawSection(oc)
                 }
             }
             .navigationTitle("Build Status")
@@ -141,6 +147,47 @@ struct BuildStatusTabView: View {
         }
     }
     
+    private func openClawSection(_ status: OpenClawStatus) -> some View {
+        Section {
+            HStack {
+                Circle()
+                    .fill(status.isWorking ? Color.green : Color.gray)
+                    .frame(width: 10, height: 10)
+                Text("OpenClaw")
+                    .font(.headline)
+                Spacer()
+                Text(status.isWorking ? "Active" : "Idle")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            
+            if let task = status.currentTask {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Working on:")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Text(task)
+                        .font(.body)
+                        .foregroundStyle(.primary)
+                }
+            }
+            
+            if let userMsg = status.lastUserMessage {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Last request:")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Text(userMsg)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(2)
+                }
+            }
+        } header: {
+            Text("OpenClaw Activity")
+        }
+    }
+    
     // MARK: - Actions
     
     private func fetchStatus() {
@@ -173,6 +220,24 @@ struct BuildStatusTabView: View {
                     lastRefresh = Date()
                     errorMessage = "Cannot connect to listener"
                 }
+            }
+        }
+        
+        // Also fetch OpenClaw status
+        guard let ocUrl = URL(string: openClawURL) else { return }
+        Task {
+            do {
+                let (data, _) = try await URLSession.shared.data(from: ocUrl)
+                await MainActor.run {
+                    do {
+                        let decoder = JSONDecoder()
+                        openClawStatus = try decoder.decode(OpenClawStatus.self, from: data)
+                    } catch {
+                        // Silently fail for OpenClaw status
+                    }
+                }
+            } catch {
+                // Silently fail
             }
         }
     }
@@ -209,6 +274,13 @@ struct BuildStatus: Codable {
     let lastBranch: String?
     let isBuilding: Bool
     let lastBuildTime: String?
+}
+
+struct OpenClawStatus: Codable {
+    let isWorking: Bool
+    let lastUserMessage: String?
+    let lastAssistantMessage: String?
+    let currentTask: String?
 }
 
 #Preview {

@@ -45,6 +45,65 @@ app.get('/status', (req, res) => {
   res.json(buildStatus);
 });
 
+// OpenClaw current activity endpoint
+app.get('/openclaw', (req, res) => {
+  const fs = require('fs');
+  const os = require('os');
+  
+  // Find the most recent session file
+  const sessionsDir = os.homedir() + '/.openclaw/agents/garden/sessions';
+  let openClawStatus = { isWorking: false, lastUserMessage: null, lastAssistantMessage: null, currentTask: null };
+  
+  try {
+    const files = fs.readdirSync(sessionsDir).filter(f => f.endsWith('.jsonl'));
+    if (files.length === 0) {
+      return res.json(openClawStatus);
+    }
+    
+    // Sort by modification time, newest first
+    const sorted = files.map(f => ({
+      name: f,
+      mtime: fs.statSync(sessionsDir + '/' + f).mtime
+    })).sort((a, b) => b.mtime - a.mtime);
+    
+    const latestSession = sessionsDir + '/' + sorted[0].name;
+    const lines = fs.readFileSync(latestSession, 'utf8').trim().split('\n').filter(l => l.trim());
+    
+    // Find last user and assistant messages
+    let lastUser = null;
+    let lastAssistant = null;
+    
+    for (let i = lines.length - 1; i >= 0; i--) {
+      try {
+        const msg = JSON.parse(lines[i]);
+        if (msg.message?.role === 'user' && !lastUser) {
+          const content = msg.message.content;
+          lastUser = Array.isArray(content) ? content.find(c => c.type === 'text')?.text?.substring(0, 200) : content?.substring(0, 200);
+        }
+        if (msg.message?.role === 'assistant' && !lastAssistant) {
+          const content = msg.message.content;
+          if (Array.isArray(content)) {
+            const textPart = content.find(c => c.type === 'text');
+            lastAssistant = textPart?.text?.substring(0, 200);
+          }
+        }
+        if (lastUser && lastAssistant) break;
+      } catch (e) {}
+    }
+    
+    openClawStatus = {
+      isWorking: sorted[0].mtime > new Date(Date.now() - 60000), // active in last minute
+      lastUserMessage: lastUser,
+      lastAssistantMessage: lastAssistant,
+      currentTask: lastAssistant ? lastAssistant.substring(0, 100) : null
+    };
+  } catch (e) {
+    console.log('Error reading OpenClaw session:', e.message);
+  }
+  
+  res.json(openClawStatus);
+});
+
 // Kill any previous builds to avoid queued builds
 function killPreviousBuilds() {
   console.log('🛑 Killing previous builds...');
