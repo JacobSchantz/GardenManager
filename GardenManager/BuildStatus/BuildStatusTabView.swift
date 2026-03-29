@@ -55,6 +55,16 @@ struct BuildStatusTabView: View {
                 }
             }
             
+            if status.isBuilding, let repo = status.lastRepo {
+                HStack {
+                    Image(systemName: "arrow.triangle.branch")
+                        .foregroundStyle(.blue)
+                    Text("Building \(repo)")
+                        .font(.subheadline)
+                        .foregroundStyle(.orange)
+                }
+            }
+            
             if let lastBuildTime = status.lastBuildTime {
                 HStack {
                     Image(systemName: "clock")
