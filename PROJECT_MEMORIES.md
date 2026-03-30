@@ -1,5 +1,17 @@
 # GardenManager Project Memories
 
+## ⚠️ ALWAYS PUSH AFTER MAKING CHANGES
+
+**Rule:** After making any code change, always commit and push before continuing or switching tasks.
+
+```bash
+git add . && git commit -m "describe change" && git push
+```
+
+This prevents merge conflicts when multiple machines or agents work on the same repo. Never leave changes uncommitted.
+
+---
+
 ## Local AI Models (Self-Contained)
 
 **Goal:** Run vision-language models entirely on-device in the iOS app, no external API calls.
