@@ -1,2 +1,12 @@
 GardenManager build FAILED (attempt 1): Command failed: bash "/Users/peanut/.openclaw/workspace/GardenManager/run_release_iphone.sh" 2>&1
 
+GardenManager build FAILED (attempt 1): Command failed: bash "/Users/peanut/.openclaw/workspace/GardenManager/run_release_iphone.sh" 2>&1
+
+ATG build FAILED (attempt 1): Command failed: bash "/Users/peanut/.openclaw/workspace/atg_monorepo/run_release_iphone.sh" 2>&1
+
+ATG build FAILED (attempt 2): Command failed: bash "/Users/peanut/.openclaw/workspace/atg_monorepo/run_release_iphone.sh" 2>&1
+
+ATG build FAILED (attempt 1): Command failed: bash "/Users/peanut/.openclaw/workspace/atg_monorepo/run_release_iphone.sh" 2>&1
+
+ATG build FAILED (attempt 2): Command failed: bash "/Users/peanut/.openclaw/workspace/atg_monorepo/run_release_iphone.sh" 2>&1
+

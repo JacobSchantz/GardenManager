@@ -1961,3 +1961,15 @@ Latest commit: feat: add /status endpoint and BuildStatus tab
 🌱 Triggering GardenManager iOS build...
 GitHub Listener running on port 8765
 Webhook URL: /webhook
+Received push event
+Repo: GardenManager Branch: main
+Push to main by butterber347 (repo: GardenManager)
+Commits: 1, before: 537ed5ce6e8a5ff0f31e4699fec29321f3149b51, after: a87c2eabb3e1bbaf53da2737cb9c25664b0f3c78
+Latest commit: feat: add OpenClaw activity section to BuildStatus tab
+
+- Add /openclaw endpoint to listener returning current session activity
+- Show OpenClaw working status, current task, and last user request
+- Shows green dot when active, gray when idle
+🛑 Killing previous builds...
+📥 Pulling latest from GardenManager...
+🌱 Triggering GardenManager iOS build...
