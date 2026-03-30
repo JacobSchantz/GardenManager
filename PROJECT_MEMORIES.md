@@ -2,9 +2,13 @@
 
 ## ⚠️ ALWAYS PUSH AFTER MAKING CHANGES
 
-**Rule:** After making any code change, always commit and push before continuing or switching tasks.
+**Rule:** Always pull before making changes, and always push after making changes.
 
 ```bash
+# Before making any change:
+git pull
+
+# After making any change:
 git add . && git commit -m "describe change" && git push
 ```
 
