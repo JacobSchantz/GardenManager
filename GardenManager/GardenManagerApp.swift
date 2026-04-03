@@ -28,14 +28,9 @@ struct RootView: View {
                 Label("Grok", systemImage: "waveform")
             }
 
-            LocalAITabView()
+            UnifiedChatView()
             .tabItem {
-                Label("Local AI", systemImage: "cpu")
-            }
-
-            PersonActionTabView()
-            .tabItem {
-                Label("Action", systemImage: "figure.walk")
+                Label("Chat", systemImage: "message.fill")
             }
 
             BuildStatusTabView()
