@@ -1,8 +1,60 @@
 import SwiftUI
 import UIKit
+import PhotosUI
 import Vision
 import CoreML
 import UniformTypeIdentifiers
+// MARK: - Photo Picker
+
+struct PhotoPickerView: UIViewControllerRepresentable {
+    @Binding var selectedImageData: Data?
+    @Environment(\.dismiss) private var dismiss
+
+    func makeUIViewController(context: Context) -> PHPickerViewController {
+        var config = PHPickerConfiguration()
+        config.filter = .images
+        config.selectionLimit = 1
+        let picker = PHPickerViewController(configuration: config)
+        picker.delegate = context.coordinator
+        return picker
+    }
+
+    func updateUIViewController(_ uiViewController: PHPickerViewController, context: Context) {}
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(selectedImageData: $selectedImageData, dismiss: dismiss)
+    }
+
+    final class Coordinator: NSObject, PHPickerViewControllerDelegate {
+        let selectedImageData: Binding<Data?>
+        let dismiss: DismissAction
+
+        init(selectedImageData: Binding<Data?>, dismiss: DismissAction) {
+            self.selectedImageData = selectedImageData
+            self.dismiss = dismiss
+        }
+
+        func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
+            guard let result = results.first else {
+                dismiss()
+                return
+            }
+
+            result.itemProvider.loadObject(ofClass: UIImage.self) { [weak self] object, _ in
+                guard let image = object as? UIImage else {
+                    DispatchQueue.main.async { self?.dismiss() }
+                    return
+                }
+                let data = image.jpegData(compressionQuality: 0.8)
+                DispatchQueue.main.async {
+                    self?.selectedImageData.wrappedValue = data
+                    self?.dismiss()
+                }
+            }
+        }
+    }
+}
+
 #if canImport(FoundationModels)
 import FoundationModels
 #endif
@@ -41,6 +93,9 @@ struct UnifiedChatView: View {
             }
             .sheet(isPresented: $viewModel.showFilePicker) {
                 DocumentPickerView(selectedURL: $viewModel.selectedGGUFURL)
+            }
+            .sheet(isPresented: $viewModel.showImagePicker) {
+                PhotoPickerView(selectedImageData: $viewModel.selectedImageData)
             }
             .alert("Error", isPresented: $viewModel.showError) {
                 Button("OK", role: .cancel) {}
@@ -229,12 +284,52 @@ struct UnifiedChatView: View {
 
     private var composer: some View {
         VStack(spacing: 0) {
-            Divider()
+            // Image preview when attached
+            if let imageData = viewModel.selectedImageData,
+               let uiImage = UIImage(data: imageData) {
+                HStack {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 60, height: 60)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+
+                    Text("Image attached")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+
+                    Spacer()
+
+                    Button {
+                        viewModel.selectedImageData = nil
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundStyle(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                }
+                .padding(.horizontal, 12)
+                .padding(.top, 8)
+
+                Divider()
+            }
 
             HStack(spacing: 10) {
                 TextField("Message", text: $viewModel.draftMessage)
                     .textFieldStyle(.roundedBorder)
                     .disabled(viewModel.composerDisabled)
+
+                // Image attachment button
+                Button {
+                    viewModel.showImagePicker = true
+                } label: {
+                    Image(systemName: viewModel.selectedImageData != nil
+                          ? "photo.fill"
+                          : "photo")
+                        .font(.title3)
+                        .foregroundStyle(viewModel.selectedImageData != nil ? .blue : .secondary)
+                }
+                .buttonStyle(.plain)
 
                 Button {
                     viewModel.sendCurrentMessage()
@@ -336,6 +431,10 @@ private final class UnifiedChatViewModel: ObservableObject {
     @Published var cloudModelID: String = OpenRouterVisionModel.defaults.id
     @Published var showCloudSettings = false
 
+    // Image attachment
+    @Published var selectedImageData: Data?
+    @Published var showImagePicker = false
+
     // MARK: - Private State
     private var llamaService: LlamaService?
     private var conversationHistory: [UnifiedChatMessage] = []
@@ -356,8 +455,7 @@ private final class UnifiedChatViewModel: ObservableObject {
 
     var composerDisabled: Bool {
         if isGenerating { return true }
-        if draftMessage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { return true }
-        if selectedMode == .gguf && selectedGGUFURL == nil { return true }
+        // Only block send if cloud mode needs an API key
         if selectedMode == .cloud && !hasAPIKey { return true }
         return false
     }
@@ -414,16 +512,32 @@ private final class UnifiedChatViewModel: ObservableObject {
         messages.append(userMessage)
         conversationHistory.append(userMessage)
         draftMessage = ""
+
+        // Capture and clear image before async operations
+        let imageData = selectedImageData
+        selectedImageData = nil
+
         isGenerating = true
 
         if selectedMode == .gguf {
-            sendGGUFMessage(trimmed)
+            sendGGUFMessage(trimmed, imageData: imageData)
         } else {
-            sendCloudMessage(trimmed)
+            sendCloudMessage(trimmed, imageData: imageData)
         }
     }
 
-    private func sendGGUFMessage(_ prompt: String) {
+    private func sendGGUFMessage(_ prompt: String, imageData: Data?) {
+        // If image provided but GGUF doesn't support it, show inline error
+        if imageData != nil {
+            if selectedGGUFURL == nil {
+                lastError = "Please select a GGUF model first to send images."
+                isGenerating = false
+                return
+            }
+            // TODO: Extend LlamaService to support multimodal GGUF models (LLaVA, etc.)
+            // For now, include image as base64 in the prompt
+        }
+
         guard let url = selectedGGUFURL else {
             lastError = "Please select a GGUF model file first."
             isGenerating = false
@@ -444,7 +558,7 @@ private final class UnifiedChatViewModel: ObservableObject {
             }
 
             do {
-                let reply = try await generateGGUFReply(for: prompt, service: service)
+                let reply = try await generateGGUFReply(for: prompt, service: service, imageData: imageData)
                 await MainActor.run {
                     let assistantMessage = UnifiedChatMessage(role: .assistant, text: reply)
                     messages.append(assistantMessage)
@@ -460,7 +574,7 @@ private final class UnifiedChatViewModel: ObservableObject {
         }
     }
 
-    private func sendCloudMessage(_ prompt: String) {
+    private func sendCloudMessage(_ prompt: String, imageData: Data?) {
         let apiKey = cloudAPIKey.trimmingCharacters(in: .whitespacesAndNewlines)
 
         Task {
@@ -469,7 +583,8 @@ private final class UnifiedChatViewModel: ObservableObject {
                     for: prompt,
                     apiKey: apiKey,
                     model: cloudModelID,
-                    history: conversationHistory.dropLast().map { ChatHistoryMessage(role: $0.role == .user ? "user" : "assistant", text: $0.text) }
+                    history: conversationHistory.dropLast().map { ChatHistoryMessage(role: $0.role == .user ? "user" : "assistant", text: $0.text) },
+                    imageData: imageData
                 )
                 await MainActor.run {
                     let assistantMessage = UnifiedChatMessage(role: .assistant, text: reply)
@@ -486,7 +601,7 @@ private final class UnifiedChatViewModel: ObservableObject {
         }
     }
 
-    private func generateGGUFReply(for prompt: String, service: LlamaService) async throws -> String {
+    private func generateGGUFReply(for prompt: String, service: LlamaService, imageData: Data?) async throws -> String {
         let historyText = conversationHistory
             .dropLast()
             .suffix(10)
@@ -496,11 +611,21 @@ private final class UnifiedChatViewModel: ObservableObject {
             }
             .joined(separator: "\n")
 
-        let fullPrompt: String
-        if historyText.isEmpty {
-            fullPrompt = "User: \(prompt)\nAssistant:"
+        var fullPrompt: String
+        if let imageData = imageData {
+            let base64Image = imageData.base64EncodedString()
+            let imagePart = "[Image: data:image/jpeg;base64,\(base64Image)]"
+            if historyText.isEmpty {
+                fullPrompt = "User: \(imagePart)\nCaption: \(prompt)\nAssistant:"
+            } else {
+                fullPrompt = "\(historyText)\nUser: \(imagePart)\nCaption: \(prompt)\nAssistant:"
+            }
         } else {
-            fullPrompt = "\(historyText)\nUser: \(prompt)\nAssistant:"
+            if historyText.isEmpty {
+                fullPrompt = "User: \(prompt)\nAssistant:"
+            } else {
+                fullPrompt = "\(historyText)\nUser: \(prompt)\nAssistant:"
+            }
         }
 
         guard !conversationHistory.isEmpty else {
@@ -524,14 +649,15 @@ private final class UnifiedChatViewModel: ObservableObject {
         for prompt: String,
         apiKey: String,
         model: String,
-        history: [ChatHistoryMessage]
+        history: [ChatHistoryMessage],
+        imageData: Data?
     ) async throws -> String {
         return try await OpenRouterClient.shared.sendMessage(
             apiKey: apiKey,
             model: model,
             history: history,
             userText: prompt,
-            imageJPEGData: nil
+            imageJPEGData: imageData
         )
     }
 
