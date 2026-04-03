@@ -317,7 +317,6 @@ struct UnifiedChatView: View {
             HStack(spacing: 10) {
                 TextField("Message", text: $viewModel.draftMessage)
                     .textFieldStyle(.roundedBorder)
-                    .disabled(viewModel.composerDisabled)
 
                 // Image attachment button
                 Button {
