@@ -157,6 +157,7 @@
 				LastUpgradeCheck = 1600;
 				TargetAttributes = {
 					8090CD793CA5DB251BF5BFF4 = {
+						DevelopmentTeam = 563V2QK49N;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -278,8 +279,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGNING_REQUIRED = YES;
-				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = 563V2QK49N;
 				INFOPLIST_FILE = GardenManager/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -361,8 +362,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGNING_REQUIRED = NO;
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = 563V2QK49N;
 				INFOPLIST_FILE = GardenManager/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
