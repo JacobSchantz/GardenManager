@@ -31,3 +31,10 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.gardenmanager.application
         INFOPLIST_FILE: GardenManager/Info.plist
+      configs:
+        Debug:
+          CODE_SIGN_IDENTITY: "-"
+          CODE_SIGNING_REQUIRED: YES
+        Release:
+          CODE_SIGN_IDENTITY: ""
+          CODE_SIGNING_REQUIRED: NO
