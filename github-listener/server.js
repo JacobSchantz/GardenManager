@@ -6,6 +6,17 @@ const urlencodedParser = express.urlencoded({ extended: true });
 const app = express();
 const PORT = process.env.PORT || 8765;
 
+// Build status tracker
+let buildStatus = {
+  lastBuild: null,
+  lastCommit: null,
+  lastCommitMessage: null,
+  lastRepo: null,
+  lastBranch: null,
+  isBuilding: false,
+  lastBuildTime: null
+};
+
 // GitHub webhook secret (set in environment)
 const GITHUB_SECRET = process.env.GITHUB_SECRET || '';
 
@@ -27,6 +38,70 @@ function verifySignature(req, res, buf) {
 // Health check
 app.get('/', (req, res) => {
   res.json({ status: 'GitHub Listener running', events: ['push', 'pull_request', 'release'] });
+});
+
+// Build status endpoint
+app.get('/status', (req, res) => {
+  res.json(buildStatus);
+});
+
+// OpenClaw current activity endpoint
+app.get('/openclaw', (req, res) => {
+  const fs = require('fs');
+  const os = require('os');
+  
+  // Find the most recent session file
+  const sessionsDir = os.homedir() + '/.openclaw/agents/garden/sessions';
+  let openClawStatus = { isWorking: false, lastUserMessage: null, lastAssistantMessage: null, currentTask: null };
+  
+  try {
+    const files = fs.readdirSync(sessionsDir).filter(f => f.endsWith('.jsonl'));
+    if (files.length === 0) {
+      return res.json(openClawStatus);
+    }
+    
+    // Sort by modification time, newest first
+    const sorted = files.map(f => ({
+      name: f,
+      mtime: fs.statSync(sessionsDir + '/' + f).mtime
+    })).sort((a, b) => b.mtime - a.mtime);
+    
+    const latestSession = sessionsDir + '/' + sorted[0].name;
+    const lines = fs.readFileSync(latestSession, 'utf8').trim().split('\n').filter(l => l.trim());
+    
+    // Find last user and assistant messages
+    let lastUser = null;
+    let lastAssistant = null;
+    
+    for (let i = lines.length - 1; i >= 0; i--) {
+      try {
+        const msg = JSON.parse(lines[i]);
+        if (msg.message?.role === 'user' && !lastUser) {
+          const content = msg.message.content;
+          lastUser = Array.isArray(content) ? content.find(c => c.type === 'text')?.text?.substring(0, 200) : content?.substring(0, 200);
+        }
+        if (msg.message?.role === 'assistant' && !lastAssistant) {
+          const content = msg.message.content;
+          if (Array.isArray(content)) {
+            const textPart = content.find(c => c.type === 'text');
+            lastAssistant = textPart?.text?.substring(0, 200);
+          }
+        }
+        if (lastUser && lastAssistant) break;
+      } catch (e) {}
+    }
+    
+    openClawStatus = {
+      isWorking: sorted[0].mtime > new Date(Date.now() - 60000), // active in last minute
+      lastUserMessage: lastUser,
+      lastAssistantMessage: lastAssistant,
+      currentTask: lastAssistant ? lastAssistant.substring(0, 100) : null
+    };
+  } catch (e) {
+    console.log('Error reading OpenClaw session:', e.message);
+  }
+  
+  res.json(openClawStatus);
 });
 
 // Kill any previous builds to avoid queued builds
@@ -54,25 +129,13 @@ function pullRepo(repoName) {
   const repoPath = repoPaths[repoName];
   if (repoPath) {
     console.log(`📥 Pulling latest from ${repoName}...`);
-    // Use git stash to preserve local changes, then pull, then stash pop
-    // If stash fails (no changes), it still pulls
-    // If pull conflicts with stash, we discard local changes and re-apply stash
-    exec(`cd "${repoPath}" && git stash push -m "auto-stash before build" --include-untracked || true`, (stashErr, stashOut, stashErr2) => {
-      exec(`cd "${repoPath}" && git fetch origin && git reset --hard origin/$(git rev-parse --abbrev-ref HEAD)`, (err, stdout, stderr) => {
-        if (err) {
-          console.log(`⚠️ Failed to fetch/reset ${repoName}:`, err.message);
-        } else {
-          console.log(`✅ Updated ${repoName}:`, stdout.trim());
-        }
-        // Try to restore stashed changes (will fail if nothing was stashed, which is fine)
-        exec(`cd "${repoPath}" && git stash pop || true`, (popErr, popOut, popErr2) => {
-          if (popErr) {
-            console.log(`No stash to restore (or clean checkout)`);
-          } else {
-            console.log(`Restored stashed changes:`, popOut.trim());
-          }
-        });
-      });
+    // Simple fetch + hard reset (avoids stash conflicts with gitignored files)
+    exec(`cd "${repoPath}" && git fetch origin && git reset --hard origin/$(git rev-parse --abbrev-ref HEAD) && git clean -fd`, (err, stdout, stderr) => {
+      if (err) {
+        console.log(`⚠️ Failed to fetch/reset ${repoName}:`, err.message);
+      } else {
+        console.log(`✅ Updated ${repoName}:`, stdout.trim());
+      }
     });
   }
 }
@@ -144,6 +207,14 @@ function handlePush(payload) {
   // Kill any previous builds before starting new one
   killPreviousBuilds();
   
+  // Update build status
+  buildStatus.lastCommit = after;
+  buildStatus.lastCommitMessage = commitMessage;
+  buildStatus.lastRepo = repoName;
+  buildStatus.lastBranch = branch;
+  buildStatus.isBuilding = true;
+  buildStatus.lastBuildTime = new Date().toISOString();
+  
   // Pull latest from the triggered repo
   pullRepo(repoName);
   
@@ -156,7 +227,7 @@ function handlePush(payload) {
     triggerBuild('/Users/peanut/.openclaw/workspace/keepMovin/run_release_iphone.sh', 'KeepMovin', commitMessage);
   } else if (repoName === 'BuyAHabit' || repoName === 'buyahabit') {
     console.log('💰 Triggering BuyAHabit iOS build...');
-    triggerBuild('/Users/peanut/.openclaw/workspace/buyahabit/build_local_or_testflight.sh', 'BuyAHabit', commitMessage);
+    triggerBuild('/Users/peanut/.openclaw/workspace/buyahabit/build_local.sh', 'BuyAHabit', commitMessage);
   } else if (repoName === 'GardenManager') {
     console.log('🌱 Triggering GardenManager iOS build...');
     triggerBuild('/Users/peanut/.openclaw/workspace/GardenManager/run_release_iphone.sh', 'GardenManager', commitMessage);
@@ -216,6 +287,8 @@ function triggerBuild(scriptPath, appName, commitMessage, attempt = 1, previousO
     if (buildSucceeded) {
       console.log(`${appName} build output:`, stdout);
       console.log(`✅ ${appName} build triggered successfully (attempt ${attempt})`);
+      buildStatus.isBuilding = false;
+      buildStatus.lastBuild = 'success';
       if (attempt > 1) {
         sendTelegramMessage(`✅ ${appName} build succeeded on retry ${attempt}!\n\nCommit: ${shortCommitMsg}`);
       } else {
@@ -266,6 +339,8 @@ function triggerBuild(scriptPath, appName, commitMessage, attempt = 1, previousO
       
       // Attempt AI auto-fix (for future reference)
       console.log('🤖 All retries exhausted. Notifying about failure.');
+      buildStatus.isBuilding = false;
+      buildStatus.lastBuild = 'failed';
       return;
     }
     
