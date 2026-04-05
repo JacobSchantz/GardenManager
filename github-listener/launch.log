@@ -1944,3 +1944,21 @@ Latest commit: docs: clarify GardenManager as source of truth for github-listene
 🛑 Killing previous builds...
 📥 Pulling latest from GardenManager...
 🌱 Triggering GardenManager iOS build...
+GitHub Listener running on port 8765
+Webhook URL: /webhook
+GitHub Listener running on port 8765
+Webhook URL: /webhook
+GitHub Listener running on port 8765
+Webhook URL: /webhook
+Received push event
+Repo: buyahabit Branch: main
+Push to main by JacobSchantz (repo: buyahabit)
+Commits: 1, before: 18a25f682af0100635f468e91fd9ed35246655cc, after: 03f9ccfc93473e51107e124063266fa3abcd530b
+Latest commit: small change
+🛑 Killing previous builds...
+⚠️ Repo path for buyahabit does not exist: /Users/jakeschantz/.openclaw/workspace/buyahabit
+Set BUYAHABIT_PATH or OPENCLAW_WORKSPACE to the correct path on this machine.
+⚠️ Repo path for buyahabit does not exist: /Users/jakeschantz/.openclaw/workspace/buyahabit
+Set BUYAHABIT_PATH or OPENCLAW_WORKSPACE to the correct path on this machine.
+⚠️ Build script path for buyahabit is unavailable on this machine.
+No previous builds to kill (or none found)

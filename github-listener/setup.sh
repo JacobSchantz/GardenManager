@@ -12,7 +12,16 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LAUNCH_AGENT_DIR="$HOME/Library/LaunchAgents"
+LISTENER_LAUNCH_AGENT="$LAUNCH_AGENT_DIR/com.openclaw.github-listener.plist"
+NGROK_LAUNCH_AGENT="$LAUNCH_AGENT_DIR/com.ngrok.webhook.plist"
+NODE_BIN="$(command -v node || true)"
 NGROK_BIN="$(command -v ngrok || true)"
+
+if [ -z "$NODE_BIN" ] && [ -x /opt/homebrew/bin/node ]; then
+    NODE_BIN=/opt/homebrew/bin/node
+elif [ -z "$NODE_BIN" ] && [ -x /usr/local/bin/node ]; then
+    NODE_BIN=/usr/local/bin/node
+fi
 
 if [ -z "$NGROK_BIN" ] && [ -x /opt/homebrew/bin/ngrok ]; then
     NGROK_BIN=/opt/homebrew/bin/ngrok
@@ -21,6 +30,11 @@ elif [ -z "$NGROK_BIN" ] && [ -x /usr/local/bin/ngrok ]; then
 fi
 
 echo "=== GitHub Webhook Listener Setup ==="
+
+if [ -z "$NODE_BIN" ]; then
+    echo "ERROR: node is not installed or not on PATH."
+    exit 1
+fi
 
 if [ -z "$NGROK_BIN" ]; then
     echo "ERROR: ngrok is not installed or not on PATH."
@@ -46,7 +60,7 @@ npm install
 
 # Create ngrok launch agent
 echo "Setting up ngrok auto-start..."
-cat > "$LAUNCH_AGENT_DIR/com.ngrok.webhook.plist" << EOF
+cat > "$NGROK_LAUNCH_AGENT" << EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -68,24 +82,58 @@ cat > "$LAUNCH_AGENT_DIR/com.ngrok.webhook.plist" << EOF
 </plist>
 EOF
 
+echo "Setting up webhook listener auto-start..."
+cat > "$LISTENER_LAUNCH_AGENT" << EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.openclaw.github-listener</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>${NODE_BIN}</string>
+        <string>${SCRIPT_DIR}/server.js</string>
+    </array>
+    <key>WorkingDirectory</key>
+    <string>${SCRIPT_DIR}</string>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>StandardOutPath</key>
+    <string>${SCRIPT_DIR}/launch.log</string>
+    <key>StandardErrorPath</key>
+    <string>${SCRIPT_DIR}/launch.error.log</string>
+</dict>
+</plist>
+EOF
+
 # Start the webhook listener
 echo "Starting GitHub webhook listener..."
 LISTENER_PID=""
 EXISTING_LISTENER_PID="$(lsof -tiTCP:8765 -sTCP:LISTEN 2>/dev/null | head -n 1 || true)"
 
 if [ -n "$EXISTING_LISTENER_PID" ]; then
-    LISTENER_HEALTH="$(curl -fsS http://localhost:8765/ 2>/dev/null || true)"
-    if echo "$LISTENER_HEALTH" | grep -q "GitHub Listener running"; then
-        echo "Webhook listener already running on port 8765 (PID $EXISTING_LISTENER_PID)."
-    else
-        echo "ERROR: Port 8765 is already in use by PID $EXISTING_LISTENER_PID."
-        echo "Stop that process or change the listener port, then run setup again."
-        exit 1
-    fi
-else
-    node "$SCRIPT_DIR/server.js" &
-    LISTENER_PID=$!
+    echo "Stopping existing webhook listener on port 8765 (PID $EXISTING_LISTENER_PID)..."
+    kill "$EXISTING_LISTENER_PID" 2>/dev/null || true
+    sleep 1
 fi
+
+launchctl unload "$LISTENER_LAUNCH_AGENT" 2>/dev/null || true
+launchctl load "$LISTENER_LAUNCH_AGENT"
+
+sleep 2
+LISTENER_PID="$(lsof -tiTCP:8765 -sTCP:LISTEN 2>/dev/null | head -n 1 || true)"
+LISTENER_HEALTH="$(curl -fsS http://localhost:8765/ 2>/dev/null || true)"
+
+if [ -z "$LISTENER_PID" ] || ! echo "$LISTENER_HEALTH" | grep -q "GitHub Listener running"; then
+    echo "ERROR: Webhook listener failed to start."
+    echo "Listener log: $SCRIPT_DIR/launch.error.log"
+    exit 1
+fi
+
+echo "Webhook listener running on port 8765 (PID $LISTENER_PID)."
 
 # Start ngrok
 echo "Starting ngrok tunnel..."

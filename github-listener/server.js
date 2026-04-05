@@ -1,10 +1,120 @@
-const express = require('express');
-const crypto = require('crypto');
-const { exec } = require('child_process');
+const express = require("express");
+const crypto = require("crypto");
+const fs = require("fs");
+const os = require("os");
+const path = require("path");
+const { exec } = require("child_process");
 const urlencodedParser = express.urlencoded({ extended: true });
 
 const app = express();
 const PORT = process.env.PORT || 8765;
+const CURRENT_REPO_ROOT = path.resolve(__dirname, "..");
+const DEFAULT_WORKSPACE_ROOT =
+  process.env.OPENCLAW_WORKSPACE ||
+  path.join(os.homedir(), ".openclaw", "workspace");
+const BUY_A_HABIT_CONFIG = {
+  appName: "BuyAHabit",
+  branch: null,
+  buildScript: "build_local.sh",
+  dirName: "buyahabit",
+  repoPathEnv: "BUYAHABIT_PATH",
+};
+const REPO_CONFIGS = {
+  atg_monorepo: {
+    appName: "ATG",
+    branch: "Peaches",
+    buildScript: "run_release_iphone.sh",
+    dirName: "atg_monorepo",
+    repoPathEnv: "ATG_MONOREPO_PATH",
+  },
+  keepMovin: {
+    appName: "KeepMovin",
+    branch: null,
+    buildScript: "run_release_iphone.sh",
+    dirName: "keepMovin",
+    repoPathEnv: "KEEPMOVIN_PATH",
+  },
+  BuyAHabit: BUY_A_HABIT_CONFIG,
+  buyahabit: BUY_A_HABIT_CONFIG,
+  GardenManager: {
+    appName: "GardenManager",
+    branch: null,
+    buildScript: "run_release_iphone.sh",
+    dirName: "GardenManager",
+    repoPathEnv: "GARDENMANAGER_PATH",
+  },
+};
+
+function resolveRepoPath(repoName) {
+  const repoConfig = REPO_CONFIGS[repoName];
+  if (!repoConfig) {
+    return null;
+  }
+
+  const explicitRepoPath = process.env[repoConfig.repoPathEnv];
+  if (explicitRepoPath) {
+    return explicitRepoPath;
+  }
+
+  if (
+    repoName === "GardenManager" &&
+    path.basename(CURRENT_REPO_ROOT) === "GardenManager"
+  ) {
+    return CURRENT_REPO_ROOT;
+  }
+
+  return path.join(DEFAULT_WORKSPACE_ROOT, repoConfig.dirName);
+}
+
+function resolveBuildScriptPath(repoName) {
+  const repoConfig = REPO_CONFIGS[repoName];
+  const repoPath = resolveRepoPath(repoName);
+
+  if (!repoConfig || !repoPath) {
+    return null;
+  }
+
+  return path.join(repoPath, repoConfig.buildScript);
+}
+
+function ensureBuildScriptPath(repoName) {
+  const repoConfig = REPO_CONFIGS[repoName];
+  const repoPath = ensureRepoPath(repoName);
+
+  if (!repoConfig || !repoPath) {
+    return null;
+  }
+
+  const scriptPath = path.join(repoPath, repoConfig.buildScript);
+  if (fs.existsSync(scriptPath)) {
+    return scriptPath;
+  }
+
+  console.log(`⚠️ Build script for ${repoName} does not exist: ${scriptPath}`);
+  console.log(
+    `Update ${repoConfig.repoPathEnv} or OPENCLAW_WORKSPACE to point at a checkout with ${repoConfig.buildScript}.`,
+  );
+  return null;
+}
+
+function ensureRepoPath(repoName) {
+  const repoConfig = REPO_CONFIGS[repoName];
+  const repoPath = resolveRepoPath(repoName);
+
+  if (!repoConfig || !repoPath) {
+    return null;
+  }
+
+  if (fs.existsSync(repoPath)) {
+    return repoPath;
+  }
+
+  console.log(`⚠️ Repo path for ${repoName} does not exist: ${repoPath}`);
+  console.log(
+    `Set ${repoConfig.repoPathEnv} or OPENCLAW_WORKSPACE to the correct path on this machine.`,
+  );
+  return null;
+}
 
 // Build status tracker
 let buildStatus = {
@@ -14,199 +124,221 @@ let buildStatus = {
   lastRepo: null,
   lastBranch: null,
   isBuilding: false,
-  lastBuildTime: null
+  lastBuildTime: null,
 };
 
 // GitHub webhook secret (set in environment)
-const GITHUB_SECRET = process.env.GITHUB_SECRET || '';
+const GITHUB_SECRET = process.env.GITHUB_SECRET || "";
 
 app.use(express.json());
 
 // Verify GitHub webhook signature
 function verifySignature(req, res, buf) {
   if (!GITHUB_SECRET) return true;
-  
-  const signature = req.headers['x-hub-signature-256'];
+
+  const signature = req.headers["x-hub-signature-256"];
   if (!signature) return false;
-  
-  const hmac = crypto.createHmac('sha256', GITHUB_SECRET);
-  const digest = 'sha256=' + hmac.update(buf).digest('hex');
-  
+
+  const hmac = crypto.createHmac("sha256", GITHUB_SECRET);
+  const digest = "sha256=" + hmac.update(buf).digest("hex");
+
   return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(digest));
 }
 
 // Health check
-app.get('/', (req, res) => {
-  res.json({ status: 'GitHub Listener running', events: ['push', 'pull_request', 'release'] });
+app.get("/", (req, res) => {
+  res.json({
+    status: "GitHub Listener running",
+    events: ["push", "pull_request", "release"],
+  });
 });
 
 // Build status endpoint
-app.get('/status', (req, res) => {
+app.get("/status", (req, res) => {
   res.json(buildStatus);
 });
 
 // OpenClaw current activity endpoint
-app.get('/openclaw', (req, res) => {
-  const fs = require('fs');
-  const os = require('os');
-  
+app.get("/openclaw", (req, res) => {
+  const fs = require("fs");
+  const os = require("os");
+
   // Find the most recent session file
-  const sessionsDir = os.homedir() + '/.openclaw/agents/garden/sessions';
-  let openClawStatus = { isWorking: false, lastUserMessage: null, lastAssistantMessage: null, currentTask: null };
-  
+  const sessionsDir = os.homedir() + "/.openclaw/agents/garden/sessions";
+  let openClawStatus = {
+    isWorking: false,
+    lastUserMessage: null,
+    lastAssistantMessage: null,
+    currentTask: null,
+  };
+
   try {
-    const files = fs.readdirSync(sessionsDir).filter(f => f.endsWith('.jsonl'));
+    const files = fs
+      .readdirSync(sessionsDir)
+      .filter((f) => f.endsWith(".jsonl"));
     if (files.length === 0) {
       return res.json(openClawStatus);
     }
-    
+
     // Sort by modification time, newest first
-    const sorted = files.map(f => ({
-      name: f,
-      mtime: fs.statSync(sessionsDir + '/' + f).mtime
-    })).sort((a, b) => b.mtime - a.mtime);
-    
-    const latestSession = sessionsDir + '/' + sorted[0].name;
-    const lines = fs.readFileSync(latestSession, 'utf8').trim().split('\n').filter(l => l.trim());
-    
+    const sorted = files
+      .map((f) => ({
+        name: f,
+        mtime: fs.statSync(sessionsDir + "/" + f).mtime,
+      }))
+      .sort((a, b) => b.mtime - a.mtime);
+
+    const latestSession = sessionsDir + "/" + sorted[0].name;
+    const lines = fs
+      .readFileSync(latestSession, "utf8")
+      .trim()
+      .split("\n")
+      .filter((l) => l.trim());
+
     // Find last user and assistant messages
     let lastUser = null;
     let lastAssistant = null;
-    
+
     for (let i = lines.length - 1; i >= 0; i--) {
       try {
         const msg = JSON.parse(lines[i]);
-        if (msg.message?.role === 'user' && !lastUser) {
+        if (msg.message?.role === "user" && !lastUser) {
           const content = msg.message.content;
-          lastUser = Array.isArray(content) ? content.find(c => c.type === 'text')?.text?.substring(0, 200) : content?.substring(0, 200);
+          lastUser = Array.isArray(content)
+            ? content.find((c) => c.type === "text")?.text?.substring(0, 200)
+            : content?.substring(0, 200);
         }
-        if (msg.message?.role === 'assistant' && !lastAssistant) {
+        if (msg.message?.role === "assistant" && !lastAssistant) {
           const content = msg.message.content;
           if (Array.isArray(content)) {
-            const textPart = content.find(c => c.type === 'text');
+            const textPart = content.find((c) => c.type === "text");
             lastAssistant = textPart?.text?.substring(0, 200);
           }
         }
         if (lastUser && lastAssistant) break;
       } catch (e) {}
     }
-    
+
     openClawStatus = {
       isWorking: sorted[0].mtime > new Date(Date.now() - 60000), // active in last minute
       lastUserMessage: lastUser,
       lastAssistantMessage: lastAssistant,
-      currentTask: lastAssistant ? lastAssistant.substring(0, 100) : null
+      currentTask: lastAssistant ? lastAssistant.substring(0, 100) : null,
     };
   } catch (e) {
-    console.log('Error reading OpenClaw session:', e.message);
+    console.log("Error reading OpenClaw session:", e.message);
   }
-  
+
   res.json(openClawStatus);
 });
 
 // Kill any previous builds to avoid queued builds
 function killPreviousBuilds() {
-  console.log('🛑 Killing previous builds...');
-  exec('pkill -9 -f flutter; pkill -9 -f xcodebuild; pkill -9 -f "flutter run"; pkill -9 -f "flutter build"', (err) => {
-    if (err) {
-      console.log('No previous builds to kill (or none found)');
-    } else {
-      console.log('✅ Previous builds killed');
-    }
-  });
+  console.log("🛑 Killing previous builds...");
+  exec(
+    'pkill -9 -f flutter; pkill -9 -f xcodebuild; pkill -9 -f "flutter run"; pkill -9 -f "flutter build"',
+    (err) => {
+      if (err) {
+        console.log("No previous builds to kill (or none found)");
+      } else {
+        console.log("✅ Previous builds killed");
+      }
+    },
+  );
 }
 
 // Pull latest from the triggered repo
 function pullRepo(repoName) {
-  const repoPaths = {
-    'atg_monorepo': '/Users/peanut/.openclaw/workspace/atg_monorepo',
-    'keepMovin': '/Users/peanut/.openclaw/workspace/keepMovin',
-    'BuyAHabit': '/Users/peanut/.openclaw/workspace/buyahabit',
-    'buyahabit': '/Users/peanut/.openclaw/workspace/buyahabit',
-    'GardenManager': '/Users/peanut/.openclaw/workspace/GardenManager'
-  };
-  
-  const repoPath = repoPaths[repoName];
+  const repoPath = ensureRepoPath(repoName);
   if (repoPath) {
     console.log(`📥 Pulling latest from ${repoName}...`);
-    // Simple fetch + hard reset (avoids stash conflicts with gitignored files)
-    exec(`cd "${repoPath}" && git fetch origin && git reset --hard origin/$(git rev-parse --abbrev-ref HEAD) && git clean -fd`, (err, stdout, stderr) => {
-      if (err) {
-        console.log(`⚠️ Failed to fetch/reset ${repoName}:`, err.message);
-      } else {
-        console.log(`✅ Updated ${repoName}:`, stdout.trim());
-      }
-    });
+    exec(
+      "git fetch origin && git reset --hard origin/$(git rev-parse --abbrev-ref HEAD) && git clean -fd",
+      { cwd: repoPath },
+      (err, stdout, stderr) => {
+        if (err) {
+          console.log(`⚠️ Failed to fetch/reset ${repoName}:`, err.message);
+        } else {
+          console.log(`✅ Updated ${repoName}:`, stdout.trim());
+        }
+      },
+    );
   }
 }
 
 // Webhook endpoint - handles GitHub webhooks (form-urlencoded)
 app.use(express.urlencoded({ extended: true }));
-app.post('/webhook', (req, res) => {
-  const event = req.headers['x-github-event'];
-  
+app.post("/webhook", (req, res) => {
+  const event = req.headers["x-github-event"];
+
   // Handle form-urlencoded (payload in "payload" field)
   let payload = req.body;
-  if (typeof payload.payload === 'string') {
+  if (typeof payload.payload === "string") {
     try {
       payload = JSON.parse(payload.payload);
     } catch (e) {
-      console.log('Failed to parse payload:', e.message);
+      console.log("Failed to parse payload:", e.message);
     }
   }
-  
+
   console.log(`Received ${event} event`);
-  console.log('Repo:', payload.repository?.name, 'Branch:', payload.ref?.replace('refs/heads/', ''));
-  
+  console.log(
+    "Repo:",
+    payload.repository?.name,
+    "Branch:",
+    payload.ref?.replace("refs/heads/", ""),
+  );
+
   // Handle different event types
   switch (event) {
-    case 'push':
+    case "push":
       handlePush(payload);
       break;
-    case 'pull_request':
+    case "pull_request":
       handlePullRequest(payload);
       break;
-    case 'release':
+    case "release":
       handleRelease(payload);
       break;
     default:
       console.log(`Unhandled event: ${event}`);
   }
-  
+
   res.json({ received: true, event });
 });
 
 function handlePush(payload) {
   const ref = payload.ref || payload.after;
-  const branch = ref ? ref.replace('refs/heads/', '') : 'unknown';
+  const branch = ref ? ref.replace("refs/heads/", "") : "unknown";
   const commits = payload.commits || [];
   const pusher = payload.pusher || {};
   const repository = payload.repository || {};
   const repoName = repository.name;
   const before = payload.before;
   const after = payload.after;
-  
+
   // Get the most recent commit message
-  const commitMessage = commits.length > 0 ? commits[0].message : 'Unknown commit';
-  
+  const commitMessage =
+    commits.length > 0 ? commits[0].message : "Unknown commit";
+
   console.log(`Push to ${branch} by ${pusher.name} (repo: ${repoName})`);
   console.log(`Commits: ${commits.length}, before: ${before}, after: ${after}`);
   console.log(`Latest commit: ${commitMessage}`);
-  
+
   // Check if this is actually a meaningful push (not just a tag creation or force push)
-  if (before === '0000000000000000000000000000000000000000') {
+  if (before === "0000000000000000000000000000000000000000") {
     console.log(`Ignoring initial branch push (no commits yet)`);
     return;
   }
-  
+
   if (commits.length === 0) {
     console.log(`Ignoring empty push (no new commits)`);
     return;
   }
-  
+
   // Kill any previous builds before starting new one
   killPreviousBuilds();
-  
+
   // Update build status
   buildStatus.lastCommit = after;
   buildStatus.lastCommitMessage = commitMessage;
@@ -214,23 +346,44 @@ function handlePush(payload) {
   buildStatus.lastBranch = branch;
   buildStatus.isBuilding = true;
   buildStatus.lastBuildTime = new Date().toISOString();
-  
+
   // Pull latest from the triggered repo
   pullRepo(repoName);
-  
+
   // Route based on repository
-  if (repoName === 'atg_monorepo' && branch === 'Peaches') {
-    console.log('🔥 Triggering ATG iOS build...');
-    triggerBuild('/Users/peanut/.openclaw/workspace/atg_monorepo/run_release_iphone.sh', 'ATG', commitMessage);
-  } else if (repoName === 'keepMovin') {
-    console.log('📱 Triggering keepMovin iOS build...');
-    triggerBuild('/Users/peanut/.openclaw/workspace/keepMovin/run_release_iphone.sh', 'KeepMovin', commitMessage);
-  } else if (repoName === 'BuyAHabit' || repoName === 'buyahabit') {
-    console.log('💰 Triggering BuyAHabit iOS build...');
-    triggerBuild('/Users/peanut/.openclaw/workspace/buyahabit/build_local.sh', 'BuyAHabit', commitMessage);
-  } else if (repoName === 'GardenManager') {
-    console.log('🌱 Triggering GardenManager iOS build...');
-    triggerBuild('/Users/peanut/.openclaw/workspace/GardenManager/run_release_iphone.sh', 'GardenManager', commitMessage);
+  const repoConfig = REPO_CONFIGS[repoName];
+  const scriptPath = ensureBuildScriptPath(repoName);
+
+  if (scriptPath) {
+    if (repoName === "atg_monorepo" && branch === "Peaches") {
+      console.log("🔥 Triggering ATG iOS build...");
+      triggerBuild(scriptPath, "ATG", commitMessage);
+    } else if (repoName === "keepMovin") {
+      console.log("📱 Triggering keepMovin iOS build...");
+      triggerBuild(scriptPath, "KeepMovin", commitMessage);
+    } else if (repoName === "BuyAHabit" || repoName === "buyahabit") {
+      console.log("💰 Triggering BuyAHabit iOS build...");
+      triggerBuild(scriptPath, "BuyAHabit", commitMessage);
+    } else if (repoName === "GardenManager") {
+      console.log("🌱 Triggering GardenManager iOS build...");
+      triggerBuild(scriptPath, "GardenManager", commitMessage);
+    } else if (
+      repoConfig &&
+      repoConfig.branch &&
+      branch !== repoConfig.branch
+    ) {
+      console.log(
+        `No build configured for repo: ${repoName} branch: ${branch}`,
+      );
+    } else {
+      console.log(
+        `No build configured for repo: ${repoName} branch: ${branch}`,
+      );
+    }
+  } else if (repoConfig) {
+    console.log(
+      `⚠️ Build script path for ${repoName} is unavailable on this machine.`,
+    );
   } else {
     console.log(`No build configured for repo: ${repoName} branch: ${branch}`);
   }
@@ -246,10 +399,12 @@ let autoFixAttempted = {}; // { appName: { timestamp } }
 function shouldAutoFix(appName) {
   const state = autoFixAttempted[appName];
   if (!state) return true;
-  
+
   // If we attempted a fix in the last 5 minutes, don't auto-fix again
   if (Date.now() - state.timestamp < 5 * 60 * 1000) {
-    console.log(`⏭️ Skipping auto-fix for ${appName} - already attempted fix recently`);
+    console.log(
+      `⏭️ Skipping auto-fix for ${appName} - already attempted fix recently`,
+    );
     return false;
   }
   return true;
@@ -263,108 +418,162 @@ function markAutoFixDone(appName) {
   autoFixAttempted[appName] = { timestamp: Date.now() };
 }
 
-function triggerBuild(scriptPath, appName, commitMessage, attempt = 1, previousOutput = '') {
+function triggerBuild(
+  scriptPath,
+  appName,
+  commitMessage,
+  attempt = 1,
+  previousOutput = "",
+) {
   // Send message that build is starting
-  const shortCommitMsg = commitMessage.length > 100 ? commitMessage.substring(0, 100) + '...' : commitMessage;
-  
+  const shortCommitMsg =
+    commitMessage.length > 100
+      ? commitMessage.substring(0, 100) + "..."
+      : commitMessage;
+
   if (attempt === 1) {
-    sendTelegramMessage(`🏗️ ${appName} build started...\n\nCommit: ${shortCommitMsg}`);
+    sendTelegramMessage(
+      `🏗️ ${appName} build started...\n\nCommit: ${shortCommitMsg}`,
+    );
   } else {
-    sendTelegramMessage(`🔄 ${appName} build attempt ${attempt} of ${MAX_RETRIES + 1}...`);
+    sendTelegramMessage(
+      `🔄 ${appName} build attempt ${attempt} of ${MAX_RETRIES + 1}...`,
+    );
   }
-  
-  exec(`bash "${scriptPath}" 2>&1`, { timeout: 600000 }, (error, stdout, stderr) => {
-    const fullOutput = stdout + '\n' + stderr;
-    const buildSucceeded = fullOutput.includes('BUILD SUCCEEDED') || 
-                           fullOutput.includes('BUILD SUCCEEDED') ||
-                           fullOutput.includes('App launched successfully') || 
-                           fullOutput.includes('Build completed successfully!') || 
-                           fullOutput.includes('Build and install completed successfully!') ||
-                           fullOutput.includes('ARCHIVE SUCCEEDED') ||
-                           fullOutput.includes('UPLOAD SUCCEEDED');
-    const buildFailed = error || fullOutput.includes('BUILD FAILED') || fullOutput.includes('ARCHIVE FAILED');
-    
-    if (buildSucceeded) {
+
+  exec(
+    `bash "${scriptPath}" 2>&1`,
+    { timeout: 600000 },
+    (error, stdout, stderr) => {
+      const fullOutput = stdout + "\n" + stderr;
+      const buildSucceeded =
+        fullOutput.includes("BUILD SUCCEEDED") ||
+        fullOutput.includes("BUILD SUCCEEDED") ||
+        fullOutput.includes("App launched successfully") ||
+        fullOutput.includes("Build completed successfully!") ||
+        fullOutput.includes("Build and install completed successfully!") ||
+        fullOutput.includes("ARCHIVE SUCCEEDED") ||
+        fullOutput.includes("UPLOAD SUCCEEDED");
+      const buildFailed =
+        error ||
+        fullOutput.includes("BUILD FAILED") ||
+        fullOutput.includes("ARCHIVE FAILED");
+
+      if (buildSucceeded) {
+        console.log(`${appName} build output:`, stdout);
+        console.log(
+          `✅ ${appName} build triggered successfully (attempt ${attempt})`,
+        );
+        buildStatus.isBuilding = false;
+        buildStatus.lastBuild = "success";
+        if (attempt > 1) {
+          sendTelegramMessage(
+            `✅ ${appName} build succeeded on retry ${attempt}!\n\nCommit: ${shortCommitMsg}`,
+          );
+        } else {
+          sendTelegramMessage(
+            `✅ ${appName} build succeeded!\n\nCommit: ${shortCommitMsg}`,
+          );
+        }
+        return;
+      }
+
+      if (buildFailed) {
+        console.error(
+          `${appName} build FAILED (attempt ${attempt}):`,
+          error?.message || "Build error",
+        );
+
+        // After 2nd attempt fails, trigger auto-fix then retry
+        if (attempt === AUTO_FIX_AT_ATTEMPT && shouldAutoFix(appName)) {
+          console.log(`🤖 Attempt ${attempt} failed. Running AI auto-fix...`);
+          const errors = fullOutput
+            .split("\n")
+            .filter(
+              (line) =>
+                line.includes("error:") ||
+                line.includes("Error:") ||
+                line.includes("BUILD FAILED") ||
+                line.includes("fatal:"),
+            )
+            .slice(0, 8)
+            .join("\n");
+
+          sendTelegramMessage(
+            `🤖 Attempt 2 failed for ${appName}. Analyzing and attempting fix...`,
+          );
+
+          markAutoFixing(appName);
+
+          // Run auto-fix - I will fix code then push to GitHub which triggers new build
+          autoFixWithAI(appName, scriptPath, fullOutput, shortCommitMsg);
+          // Don't auto-retry - wait for GitHub push to trigger new build
+          return;
+        }
+
+        if (attempt <= MAX_RETRIES) {
+          console.log(`⏳ Retrying in ${RETRY_DELAY_MS / 1000}s...`);
+          setTimeout(() => {
+            triggerBuild(
+              scriptPath,
+              appName,
+              commitMessage,
+              attempt + 1,
+              fullOutput,
+            );
+          }, RETRY_DELAY_MS);
+          return;
+        }
+
+        // All retries exhausted
+        const errors = fullOutput
+          .split("\n")
+          .filter(
+            (line) =>
+              line.includes("error:") ||
+              line.includes("Error:") ||
+              line.includes("BUILD FAILED") ||
+              line.includes("fatal:"),
+          )
+          .slice(0, 8)
+          .join("\n");
+        sendTelegramMessage(
+          `❌ ${appName} build FAILED after ${MAX_RETRIES + 1} attempts!\n\nCommit: ${shortCommitMsg}\n\nError:\n${errors || error?.message || "Unknown error - check logs"}`,
+        );
+
+        // Attempt AI auto-fix (for future reference)
+        console.log("🤖 All retries exhausted. Notifying about failure.");
+        buildStatus.isBuilding = false;
+        buildStatus.lastBuild = "failed";
+        return;
+      }
+
+      // Build completed but unclear if it succeeded or failed
       console.log(`${appName} build output:`, stdout);
-      console.log(`✅ ${appName} build triggered successfully (attempt ${attempt})`);
-      buildStatus.isBuilding = false;
-      buildStatus.lastBuild = 'success';
-      if (attempt > 1) {
-        sendTelegramMessage(`✅ ${appName} build succeeded on retry ${attempt}!\n\nCommit: ${shortCommitMsg}`);
-      } else {
-        sendTelegramMessage(`✅ ${appName} build succeeded!\n\nCommit: ${shortCommitMsg}`);
-      }
-      return;
-    }
-    
-    if (buildFailed) {
-      console.error(`${appName} build FAILED (attempt ${attempt}):`, error?.message || 'Build error');
-      
-      // After 2nd attempt fails, trigger auto-fix then retry
-      if (attempt === AUTO_FIX_AT_ATTEMPT && shouldAutoFix(appName)) {
-        console.log(`🤖 Attempt ${attempt} failed. Running AI auto-fix...`);
-        const errors = fullOutput.split('\n').filter(line => 
-          line.includes('error:') || 
-          line.includes('Error:') || 
-          line.includes('BUILD FAILED') ||
-          line.includes('fatal:')
-        ).slice(0, 8).join('\n');
-        
-        sendTelegramMessage(`🤖 Attempt 2 failed for ${appName}. Analyzing and attempting fix...`);
-        
-        markAutoFixing(appName);
-        
-        // Run auto-fix - I will fix code then push to GitHub which triggers new build
-        autoFixWithAI(appName, scriptPath, fullOutput, shortCommitMsg);
-        // Don't auto-retry - wait for GitHub push to trigger new build
-        return;
-      }
-      
-      if (attempt <= MAX_RETRIES) {
-        console.log(`⏳ Retrying in ${RETRY_DELAY_MS / 1000}s...`);
-        setTimeout(() => {
-          triggerBuild(scriptPath, appName, commitMessage, attempt + 1, fullOutput);
-        }, RETRY_DELAY_MS);
-        return;
-      }
-      
-      // All retries exhausted
-      const errors = fullOutput.split('\n').filter(line => 
-        line.includes('error:') || 
-        line.includes('Error:') || 
-        line.includes('BUILD FAILED') ||
-        line.includes('fatal:')
-      ).slice(0, 8).join('\n');
-      sendTelegramMessage(`❌ ${appName} build FAILED after ${MAX_RETRIES + 1} attempts!\n\nCommit: ${shortCommitMsg}\n\nError:\n${errors || error?.message || 'Unknown error - check logs'}`);
-      
-      // Attempt AI auto-fix (for future reference)
-      console.log('🤖 All retries exhausted. Notifying about failure.');
-      buildStatus.isBuilding = false;
-      buildStatus.lastBuild = 'failed';
-      return;
-    }
-    
-    // Build completed but unclear if it succeeded or failed
-    console.log(`${appName} build output:`, stdout);
-    if (stderr) console.error(`${appName} build stderr:`, stderr);
-  });
+      if (stderr) console.error(`${appName} build stderr:`, stderr);
+    },
+  );
 }
 
 // AI Auto-fix function - notifies me via Telegram, I fix then push to GitHub
 async function autoFixWithAI(appName, scriptPath, buildOutput, commitMessage) {
-  const errors = buildOutput.split('\n').filter(line => 
-    line.includes('error:') || 
-    line.includes('Error:') || 
-    line.includes('BUILD FAILED') ||
-    line.includes('fatal:')
-  ).slice(0, 15).join('\n');
-  const repoPath = scriptPath.replace('/run_release_iphone.sh', '');
-  
+  const errors = buildOutput
+    .split("\n")
+    .filter(
+      (line) =>
+        line.includes("error:") ||
+        line.includes("Error:") ||
+        line.includes("BUILD FAILED") ||
+        line.includes("fatal:"),
+    )
+    .slice(0, 15)
+    .join("\n");
+  const repoPath = path.dirname(scriptPath);
+
   console.log(`🤖 Auto-fix for ${appName}...`);
-  
+
   // Write error to a file for me to analyze
   const fixScriptPath = `/tmp/${appName.toLowerCase()}_build_error.json`;
-  const fs = require('fs');
   const errorData = {
     appName,
     repoPath,
@@ -372,53 +581,55 @@ async function autoFixWithAI(appName, scriptPath, buildOutput, commitMessage) {
     errors,
     commitMessage,
     fullOutput: buildOutput.substring(0, 50000),
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   };
   fs.writeFileSync(fixScriptPath, JSON.stringify(errorData, null, 2));
-  
+
   // Send me detailed notification
-  sendTelegramMessage(`🤖 AUTO-FIX NEEDED for ${appName}\n\nErrors:\n${errors.substring(0, 1000)}\n\nRepo: ${repoPath}\n\nPlease fix and push to GitHub to trigger retry.`);
-  
-  // Mark that we've attempted fix - when I push and a new build triggers, 
+  sendTelegramMessage(
+    `🤖 AUTO-FIX NEEDED for ${appName}\n\nErrors:\n${errors.substring(0, 1000)}\n\nRepo: ${repoPath}\n\nPlease fix and push to GitHub to trigger retry.`,
+  );
+
+  // Mark that we've attempted fix - when I push and a new build triggers,
   // shouldAutoFix will return false for 5 min to avoid another auto-fix loop
   markAutoFixDone(appName);
 }
 
 function sendTelegramMessage(text) {
-  const https = require('https');
-  const token = '8799248997:AAGYVuR1NpGkHAIqTiZG1tHxP_3_J4bCP58';
-  const chatId = '7145887916';
-  
+  const https = require("https");
+  const token = "8799248997:AAGYVuR1NpGkHAIqTiZG1tHxP_3_J4bCP58";
+  const chatId = "7145887916";
+
   const postData = JSON.stringify({
     chat_id: chatId,
-    text: text
+    text: text,
   });
-  
+
   const options = {
-    hostname: 'api.telegram.org',
+    hostname: "api.telegram.org",
     path: `/bot${token}/sendMessage`,
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-      'Content-Length': Buffer.byteLength(postData)
-    }
+      "Content-Type": "application/json",
+      "Content-Length": Buffer.byteLength(postData),
+    },
   };
-  
+
   const req = https.request(options, (res) => {
-    let data = '';
-    res.on('data', (chunk) => data += chunk);
-    res.on('end', () => {
-      console.log('Telegram response status:', res.statusCode);
-      console.log('Telegram response body:', data.substring(0, 200));
+    let data = "";
+    res.on("data", (chunk) => (data += chunk));
+    res.on("end", () => {
+      console.log("Telegram response status:", res.statusCode);
+      console.log("Telegram response body:", data.substring(0, 200));
       if (res.statusCode === 200) {
-        console.log('Telegram notification sent successfully');
+        console.log("Telegram notification sent successfully");
       } else {
-        console.error('Telegram notification failed:', res.statusCode, data);
+        console.error("Telegram notification failed:", res.statusCode, data);
       }
     });
   });
-  
-  req.on('error', (e) => console.error('Telegram error:', e.message));
+
+  req.on("error", (e) => console.error("Telegram error:", e.message));
   req.write(postData);
   req.end();
 }
@@ -426,18 +637,18 @@ function sendTelegramMessage(text) {
 function handlePullRequest(payload) {
   const { action, pull_request } = payload;
   const { title, head, base } = pull_request || {};
-  
+
   console.log(`PR ${action}: "${title}" (${head?.ref} -> ${base?.ref})`);
-  
+
   // TODO: Add actions here
 }
 
 function handleRelease(payload) {
   const { action, release } = payload;
   const { tag_name, name } = release || {};
-  
+
   console.log(`Release ${action}: ${name || tag_name}`);
-  
+
   // TODO: Add actions here
 }
 
