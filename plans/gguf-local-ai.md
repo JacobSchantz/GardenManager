@@ -2,6 +2,8 @@
 
 ## Overview
 
+**REJECTED: Apple Vision Framework** — explicitly ruled out. Not smart enough for useful image understanding in chat.
+
 Replace Apple Foundation models with GGUF models in the Local AI tab. **Must support vision (image + text) in chat.**
 
 The current `swift-llama-cpp` package does NOT expose vision APIs. We need to switch to a package or approach that supports multimodal GGUF models.
@@ -27,25 +29,29 @@ The current `swift-llama-cpp` package does NOT expose vision APIs. We need to sw
 - Requires: `mlc-llm` package or compile llama.cpp with MLC
 - See: https://github.com/mlc-ai/mlc-llm
 
-### Option B: llm-ui or LocalAI
+### Option B: LocalAI REST API (Local Server)
+- Local server (runs on Mac) handles vision
+- Swift app sends images via HTTP
+- Simpler Swift side, local server setup required
+- Vision model runs locally on Mac GPU/CPU
+
+### Option C: Dedicated Vision Model
+- Run a separate vision model (CLIP, SigLIP, etc.) to encode images
+- Feed encoded features to Llama as special tokens
+- More engineering but avoids MLC complexity
 - REST API server (runs locally) that handles vision
 - Swift app sends images via HTTP
 - Simpler Swift side, more complex local server setup
 
-### Option C: Use Apple Vision as Image Encoder + Llama for Text
-- Apple Vision framework encodes images to text descriptions
-- Feed description to Llama as context
-- Works with current `swift-llama-cpp`
-- Downside: lossy, indirect, not true multimodal
+
 
 ### Option D: Fork/update swift-llama-cpp
 - Add Swift bindings for llama.cpp vision APIs
 - Significant engineering effort
 
-### Recommended: Option A (MLC-LLM) or Option C (Apple Vision + current Llama)
+### Recommended: Option A (MLC-LLM) — true multimodal GGUF support
 
 - If you want true native multimodal GGUF → MLC-LLM
-- If you want faster to ship → Apple Vision + current Llama (images get described, Llama responds)
 
 ## ☐ Phase 3: Implementation
 
@@ -54,7 +60,7 @@ The current `swift-llama-cpp` package does NOT expose vision APIs. We need to sw
 - [ ] Remove or disable Apple Foundation model code
 
 ### Step 3.2: Implement Vision Support
-- [ ] Implement chosen vision approach (Option A/B/C above)
+- [ ] Implement chosen vision approach (Option A, B, or C)
 - [ ] Add image encoding/preprocessing
 - [ ] Pass image data to GGUF model alongside text
 - [ ] Handle multimodal prompt construction
@@ -129,11 +135,12 @@ curl -L -o test_fixtures/llava-1.6-mistral-7b.Q4_K_M.gguf \
   - Much better response quality
   - Support for larger, more capable models
 
-- **Vision/Multimodal**: Current `swift-llama-cpp` does NOT support vision. Must switch to MLC-LLM or use Apple Vision as image encoder + Llama for text.
+- **Vision/Multimodal**: Current `swift-llama-cpp` does NOT support vision. Must switch to MLC-LLM, LocalAI, or a dedicated vision encoder.
+- **REJECTED: Apple Vision Framework** — not smart enough for useful image understanding in chat.
 
 - **MLC-LLM** is the recommended path for true multimodal GGUF. See: https://github.com/mlc-ai/mlc-llm
 
-- **Apple Vision fallback**: Faster to implement. Use Vision framework to describe images, feed description to Llama. Not true multimodal but works.
+
 
 - **Model Sources**: 
   - HuggingFace (e.g., Mistral, Llama, Phi variants in GGUF format)
