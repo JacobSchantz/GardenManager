@@ -325,6 +325,11 @@ function handlePush(payload) {
   console.log(`Commits: ${commits.length}, before: ${before}, after: ${after}`);
   console.log(`Latest commit: ${commitMessage}`);
 
+  // Confirm receipt via Telegram
+  sendTelegramMessage(
+    `📡 Webhook: ${repoName}/${branch}\n"${commitMessage}" — ${commits.length} commit(s)`,
+  );
+
   // Check if this is actually a meaningful push (not just a tag creation or force push)
   if (before === "0000000000000000000000000000000000000000") {
     console.log(`Ignoring initial branch push (no commits yet)`);
