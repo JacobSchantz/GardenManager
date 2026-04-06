@@ -143,8 +143,8 @@ struct UnifiedChatView: View {
                     Button {
                         viewModel.showLocalAISettings.toggle()
                     } label: {
-                        Image(systemName: viewModel.localAIConnected ? "checkmark.circle.fill" : "exclamationmark.circle")
-                            .foregroundStyle(viewModel.localAIConnected ? .green : .orange)
+                        Image(systemName: "server.rack")
+                            .foregroundStyle(.secondary)
                     }
                     .sheet(isPresented: $viewModel.showLocalAISettings) {
                         LocalAISettingsSheet(
@@ -497,7 +497,6 @@ private final class UnifiedChatViewModel: ObservableObject {
     @Published var localAIServerURL: String = LocalAISettingsCache.loadServerURL()
     @Published var localAIModelName: String = LocalAISettingsCache.loadModelName()
     @Published var showLocalAISettings = false
-    @Published var localAIConnected = false
 
     private var localAIClient: LocalAIClient?
 
@@ -537,7 +536,7 @@ private final class UnifiedChatViewModel: ObservableObject {
         case .gguf:
             return modelName.isEmpty ? "Pick a GGUF file to start" : "On-device via llama.cpp"
         case .localAI:
-            return localAIConnected ? "Connected to LocalAI" : "Configure LocalAI server in settings"
+            return localAIConfigured ? "Via LocalAI server" : "Configure LocalAI server in settings"
         case .cloud:
             return "Via OpenRouter API"
         }
@@ -590,15 +589,11 @@ private final class UnifiedChatViewModel: ObservableObject {
 
     private func initializeLlama(with url: URL) async {
         llamaService = nil
-        do {
-            let service = LlamaService(
-                modelUrl: url,
-                config: LlamaConfig(batchSize: 512, maxTokenCount: 2048, useGPU: true)
-            )
-            llamaService = service
-        } catch {
-            reportError("Failed to initialize model: \(error.localizedDescription)")
-        }
+        let service = LlamaService(
+            modelUrl: url,
+            config: LlamaConfig(batchSize: 512, maxTokenCount: 2048, useGPU: true)
+        )
+        llamaService = service
     }
 
     // MARK: - Send Message
@@ -807,12 +802,6 @@ private final class UnifiedChatViewModel: ObservableObject {
 
         let historyMessages: [ChatMessage] = conversationHistory.dropLast().map { msg in
             ChatMessage(role: msg.role == .user ? "user" : "assistant", text: msg.text)
-        }
-
-        // Check connectivity
-        let reachable = await client.ping()
-        await MainActor.run {
-            localAIConnected = reachable
         }
 
         return try await client.sendMessage(text: prompt, imageData: imageData, history: historyMessages)
