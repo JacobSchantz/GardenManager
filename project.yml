@@ -32,3 +32,20 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.gardenmanager.application
         INFOPLIST_FILE: GardenManager/Info.plist
         DEVELOPMENT_TEAM: "563V2QK49N"
+
+  GardenManagerTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: GardenManagerTests
+    dependencies:
+      - target: GardenManager
+        embed: false
+      - package: SwiftLlama
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.gardenmanager.tests
+        INFOPLIST_FILE: GardenManagerTests/Info.plist
+        DEVELOPMENT_TEAM: "563V2QK49N"
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/GardenManager.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/GardenManager"
+        BUNDLE_LOADER: "$(TEST_HOST)"

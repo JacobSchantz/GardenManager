@@ -11,33 +11,64 @@
 		58DE49DAEDCCB7C78C2A0477 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57E25AB53CF1C8F7AA8580F3 /* AppDelegate.swift */; };
 		6E3167BB648BC2CD41D27869 /* FastVLMImageProcessing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1049E218AF2165B175282CB0 /* FastVLMImageProcessing.swift */; };
 		84FD4CCF1677F305B05EF540 /* FastVLMImageProcessing.swift.disabled in Resources */ = {isa = PBXBuildFile; fileRef = E9B87885E3ECC34BF04DD67B /* FastVLMImageProcessing.swift.disabled */; };
+		8E28981DAE6DD57D1D81C0FE /* SwiftLlama in Frameworks */ = {isa = PBXBuildFile; productRef = DD23F09B3FFAFFAC8423D0E1 /* SwiftLlama */; };
+		93F326C31A81E7EB1870FD64 /* ChatCrashRegressionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DAAD866110DC51F79951834 /* ChatCrashRegressionTests.swift */; };
 		C2B4034382C121BDC4CBDACA /* OpenClawVoiceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 332F05ABAFB5325904140E8E /* OpenClawVoiceService.swift */; };
 		CAC1431134AE16D836E163CD /* SwiftLlama in Frameworks */ = {isa = PBXBuildFile; productRef = F995B001296578981A14E5AF /* SwiftLlama */; };
 		CEB5386EA518934CD63F9F4B /* GrokVoiceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39305927F4656B443DBA3B5A /* GrokVoiceService.swift */; };
+		D34ECCDE0BC244CCFED65A44 /* GGUFMultimodalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F4E4FD065CA72440031A60A /* GGUFMultimodalTests.swift */; };
 		D3D5864AB12A7B038FEB2DEC /* GrokVoiceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02E4DE8CF024785D92B1EBC4 /* GrokVoiceView.swift */; };
 		D4988C42C96AEBE061C2C42F /* BuildStatusTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501AC7D802EF8ABF840C5404 /* BuildStatusTabView.swift */; };
+		F1F71A167C6AAEA4653EDF16 /* GGUFModelLoaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA93A0A4B9F96E2476B33861 /* GGUFModelLoaderTests.swift */; };
+		F2A8A592B6C3A56D4D179605 /* GGUFInferenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5465E79EE872088ABFE860E1 /* GGUFInferenceTests.swift */; };
 		F2B195715BA20D9343012D8B /* AITabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB4A48BF09269F9169962D57 /* AITabView.swift */; };
 		F40B7A27987F32C13BDC2DBE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F238D1F176156184E7E8AFAA /* Assets.xcassets */; };
+		F79C0BB51064AEE61F169A2D /* LocalAIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AA6C45D4D19FDAD6E86A48A /* LocalAIClient.swift */; };
 		FB0BA55947CD1AAF0076E906 /* OpenClawVoiceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CDEF68A88E27820CBB9D30A8 /* OpenClawVoiceView.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		2151282986BD32AC6C7550E7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 629BB110FCA66C5F544AC160 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8090CD793CA5DB251BF5BFF4;
+			remoteInfo = GardenManager;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		02E4DE8CF024785D92B1EBC4 /* GrokVoiceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrokVoiceView.swift; sourceTree = "<group>"; };
 		1049E218AF2165B175282CB0 /* FastVLMImageProcessing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FastVLMImageProcessing.swift; sourceTree = "<group>"; };
+		1AA6C45D4D19FDAD6E86A48A /* LocalAIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalAIClient.swift; sourceTree = "<group>"; };
 		1C388DA753AFE5093063A2A4 /* GardenManager.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = GardenManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		2D16E592999BAC728F95A13A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		332F05ABAFB5325904140E8E /* OpenClawVoiceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenClawVoiceService.swift; sourceTree = "<group>"; };
 		39305927F4656B443DBA3B5A /* GrokVoiceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrokVoiceService.swift; sourceTree = "<group>"; };
 		501AC7D802EF8ABF840C5404 /* BuildStatusTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildStatusTabView.swift; sourceTree = "<group>"; };
+		5465E79EE872088ABFE860E1 /* GGUFInferenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GGUFInferenceTests.swift; sourceTree = "<group>"; };
+		552202C9B584BD8247961084 /* GardenManagerTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = GardenManagerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		57E25AB53CF1C8F7AA8580F3 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		613D126342A6B10D41E68D1C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		7DAAD866110DC51F79951834 /* ChatCrashRegressionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatCrashRegressionTests.swift; sourceTree = "<group>"; };
 		8919C9873ED7317E8A8E62AC /* GardenManagerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GardenManagerApp.swift; sourceTree = "<group>"; };
+		8F4E4FD065CA72440031A60A /* GGUFMultimodalTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GGUFMultimodalTests.swift; sourceTree = "<group>"; };
 		AB4A48BF09269F9169962D57 /* AITabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AITabView.swift; sourceTree = "<group>"; };
 		CDEF68A88E27820CBB9D30A8 /* OpenClawVoiceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenClawVoiceView.swift; sourceTree = "<group>"; };
+		DA93A0A4B9F96E2476B33861 /* GGUFModelLoaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GGUFModelLoaderTests.swift; sourceTree = "<group>"; };
 		E9B87885E3ECC34BF04DD67B /* FastVLMImageProcessing.swift.disabled */ = {isa = PBXFileReference; path = FastVLMImageProcessing.swift.disabled; sourceTree = "<group>"; };
 		F238D1F176156184E7E8AFAA /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		3150484D8004C1970AF1357B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8E28981DAE6DD57D1D81C0FE /* SwiftLlama in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		D7D869FCC7905B23E49B4ECE /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -53,6 +84,7 @@
 			isa = PBXGroup;
 			children = (
 				AB4A48BF09269F9169962D57 /* AITabView.swift */,
+				1AA6C45D4D19FDAD6E86A48A /* LocalAIClient.swift */,
 				C9F3E18E5095D5A1E62EE568 /* FastVLM */,
 			);
 			path = AI;
@@ -62,6 +94,7 @@
 			isa = PBXGroup;
 			children = (
 				1C388DA753AFE5093063A2A4 /* GardenManager.app */,
+				552202C9B584BD8247961084 /* GardenManagerTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -98,10 +131,23 @@
 			path = BuildStatus;
 			sourceTree = "<group>";
 		};
+		A7619C110E4D8111B6F37E59 /* GardenManagerTests */ = {
+			isa = PBXGroup;
+			children = (
+				7DAAD866110DC51F79951834 /* ChatCrashRegressionTests.swift */,
+				5465E79EE872088ABFE860E1 /* GGUFInferenceTests.swift */,
+				DA93A0A4B9F96E2476B33861 /* GGUFModelLoaderTests.swift */,
+				8F4E4FD065CA72440031A60A /* GGUFMultimodalTests.swift */,
+				2D16E592999BAC728F95A13A /* Info.plist */,
+			);
+			path = GardenManagerTests;
+			sourceTree = "<group>";
+		};
 		C5CBE673CA134839955C87E2 = {
 			isa = PBXGroup;
 			children = (
 				39F42B6B4D9CE7C82C363244 /* GardenManager */,
+				A7619C110E4D8111B6F37E59 /* GardenManagerTests */,
 				28C0822AC49FF25127182914 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -127,6 +173,26 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		2B841D17F97E80CBCBADB78E /* GardenManagerTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 057C880EE8A1C535D4316256 /* Build configuration list for PBXNativeTarget "GardenManagerTests" */;
+			buildPhases = (
+				B9B8B0346F50EAD2E8046CB9 /* Sources */,
+				3150484D8004C1970AF1357B /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B1911E61D3EE468022B7BD7C /* PBXTargetDependency */,
+			);
+			name = GardenManagerTests;
+			packageProductDependencies = (
+				DD23F09B3FFAFFAC8423D0E1 /* SwiftLlama */,
+			);
+			productName = GardenManagerTests;
+			productReference = 552202C9B584BD8247961084 /* GardenManagerTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		8090CD793CA5DB251BF5BFF4 /* GardenManager */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 913C2E941B3A4FB2A025CDA3 /* Build configuration list for PBXNativeTarget "GardenManager" */;
@@ -156,6 +222,10 @@
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1600;
 				TargetAttributes = {
+					2B841D17F97E80CBCBADB78E = {
+						DevelopmentTeam = 563V2QK49N;
+						ProvisioningStyle = Automatic;
+					};
 					8090CD793CA5DB251BF5BFF4 = {
 						DevelopmentTeam = 563V2QK49N;
 						ProvisioningStyle = Automatic;
@@ -180,6 +250,7 @@
 			projectRoot = "";
 			targets = (
 				8090CD793CA5DB251BF5BFF4 /* GardenManager */,
+				2B841D17F97E80CBCBADB78E /* GardenManagerTests */,
 			);
 		};
 /* End PBXProject section */
@@ -208,12 +279,32 @@
 				2190DBF72C1AC02F2AB01302 /* GardenManagerApp.swift in Sources */,
 				CEB5386EA518934CD63F9F4B /* GrokVoiceService.swift in Sources */,
 				D3D5864AB12A7B038FEB2DEC /* GrokVoiceView.swift in Sources */,
+				F79C0BB51064AEE61F169A2D /* LocalAIClient.swift in Sources */,
 				C2B4034382C121BDC4CBDACA /* OpenClawVoiceService.swift in Sources */,
 				FB0BA55947CD1AAF0076E906 /* OpenClawVoiceView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B9B8B0346F50EAD2E8046CB9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				93F326C31A81E7EB1870FD64 /* ChatCrashRegressionTests.swift in Sources */,
+				F2A8A592B6C3A56D4D179605 /* GGUFInferenceTests.swift in Sources */,
+				F1F71A167C6AAEA4653EDF16 /* GGUFModelLoaderTests.swift in Sources */,
+				D34ECCDE0BC244CCFED65A44 /* GGUFMultimodalTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		B1911E61D3EE468022B7BD7C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8090CD793CA5DB251BF5BFF4 /* GardenManager */;
+			targetProxy = 2151282986BD32AC6C7550E7 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		7CC7B70EC09735548F0F3AF1 /* Release */ = {
@@ -358,6 +449,42 @@
 			};
 			name = Debug;
 		};
+		8F789AC4208DCB12866AE1DC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				DEVELOPMENT_TEAM = 563V2QK49N;
+				INFOPLIST_FILE = GardenManagerTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.gardenmanager.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/GardenManager.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/GardenManager";
+			};
+			name = Debug;
+		};
+		E1FB44ADB77E74EA6EE7C80E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				DEVELOPMENT_TEAM = 563V2QK49N;
+				INFOPLIST_FILE = GardenManagerTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.gardenmanager.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/GardenManager.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/GardenManager";
+			};
+			name = Release;
+		};
 		EC995564DBAFD4A5969501E0 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -378,6 +505,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		057C880EE8A1C535D4316256 /* Build configuration list for PBXNativeTarget "GardenManagerTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8F789AC4208DCB12866AE1DC /* Debug */,
+				E1FB44ADB77E74EA6EE7C80E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
 		913C2E941B3A4FB2A025CDA3 /* Build configuration list for PBXNativeTarget "GardenManager" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -410,6 +546,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		DD23F09B3FFAFFAC8423D0E1 /* SwiftLlama */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 94CB3B18A0FC26B5F6100146 /* XCRemoteSwiftPackageReference "swift-llama-cpp" */;
+			productName = SwiftLlama;
+		};
 		F995B001296578981A14E5AF /* SwiftLlama */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 94CB3B18A0FC26B5F6100146 /* XCRemoteSwiftPackageReference "swift-llama-cpp" */;

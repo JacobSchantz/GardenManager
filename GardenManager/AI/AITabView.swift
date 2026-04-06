@@ -1,8 +1,6 @@
 import SwiftUI
 import UIKit
 import PhotosUI
-import Vision
-import CoreML
 import UniformTypeIdentifiers
 // MARK: - Photo Picker
 
@@ -54,10 +52,6 @@ struct PhotoPickerView: UIViewControllerRepresentable {
         }
     }
 }
-
-#if canImport(FoundationModels)
-import FoundationModels
-#endif
 import SwiftLlama
 
 // MARK: - Unified Chat View
@@ -121,10 +115,11 @@ struct UnifiedChatView: View {
             HStack {
                 Picker("Model", selection: $viewModel.selectedMode) {
                     Text("GGUF").tag(ChatMode.gguf)
+                    Text("LocalAI").tag(ChatMode.localAI)
                     Text("Cloud").tag(ChatMode.cloud)
                 }
                 .pickerStyle(.segmented)
-                .frame(width: 180)
+                .frame(width: 220)
 
                 Spacer()
 
@@ -143,18 +138,37 @@ struct UnifiedChatView: View {
                         )
                     }
                 }
+
+                if viewModel.selectedMode == .localAI {
+                    Button {
+                        viewModel.showLocalAISettings.toggle()
+                    } label: {
+                        Image(systemName: viewModel.localAIConnected ? "checkmark.circle.fill" : "exclamationmark.circle")
+                            .foregroundStyle(viewModel.localAIConnected ? .green : .orange)
+                    }
+                    .sheet(isPresented: $viewModel.showLocalAISettings) {
+                        LocalAISettingsSheet(
+                            serverURL: $viewModel.localAIServerURL,
+                            modelName: $viewModel.localAIModelName
+                        )
+                    }
+                }
             }
 
             // Model info row
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(spacing: 6) {
-                        Image(systemName: viewModel.selectedMode == .gguf ? "cpu" : "cloud")
+                        Image(systemName: viewModel.modelTypeIcon)
                             .font(.caption)
                             .foregroundStyle(.secondary)
 
                         if viewModel.selectedMode == .gguf {
                             Text(viewModel.modelName.isEmpty ? "No model selected" : viewModel.modelName)
+                                .font(.headline)
+                                .lineLimit(1)
+                        } else if viewModel.selectedMode == .localAI {
+                            Text(viewModel.localAIModelName.isEmpty ? "No model set" : viewModel.localAIModelName)
                                 .font(.headline)
                                 .lineLimit(1)
                         } else {
@@ -164,9 +178,7 @@ struct UnifiedChatView: View {
                         }
                     }
 
-                    Text(viewModel.selectedMode == .gguf
-                         ? (viewModel.modelName.isEmpty ? "Pick a GGUF file to start" : "On-device via llama.cpp")
-                         : "Via OpenRouter API")
+                    Text(viewModel.modelStatusText)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -198,21 +210,14 @@ struct UnifiedChatView: View {
                 LazyVStack(spacing: 10) {
                     if viewModel.messages.isEmpty {
                         VStack(spacing: 12) {
-                            Image(systemName: viewModel.selectedMode == .gguf ? "cpu" : "cloud")
+                            Image(systemName: viewModel.modelTypeIcon)
                                 .font(.system(size: 40))
                                 .foregroundStyle(.secondary)
 
-                            if viewModel.selectedMode == .gguf {
-                                Text("Pick a GGUF model file, then send a message.")
-                                    .font(.subheadline)
-                                    .foregroundStyle(.secondary)
-                                    .multilineTextAlignment(.center)
-                            } else {
-                                Text("Enter your OpenRouter API key and send a message.")
-                                    .font(.subheadline)
-                                    .foregroundStyle(.secondary)
-                                    .multilineTextAlignment(.center)
-                            }
+                            Text(viewModel.emptyStateMessage)
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                                .multilineTextAlignment(.center)
                         }
                         .frame(maxWidth: .infinity)
                         .padding(.top, 60)
@@ -405,10 +410,64 @@ private struct CloudSettingsSheet: View {
     }
 }
 
+// MARK: - LocalAI Settings Sheet
+
+private struct LocalAISettingsSheet: View {
+    @Binding var serverURL: String
+    @Binding var modelName: String
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("LocalAI Server") {
+                    TextField("Server URL", text: $serverURL)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                        .keyboardType(.URL)
+                }
+
+                Section("Vision Model") {
+                    TextField("Model name", text: $modelName)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+
+                    Text("Use a vision-capable model such as llava, moondream, or bakllava running on your LocalAI server.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                Section {
+                    Text("LocalAI must be running on your Mac with a vision model. See: github.com/mudler/LocalAI")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .navigationTitle("LocalAI Settings")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") {
+                        saveAndDismiss()
+                    }
+                }
+            }
+        }
+    }
+
+    private func saveAndDismiss() {
+        let trimmedURL = serverURL.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedModel = modelName.trimmingCharacters(in: .whitespacesAndNewlines)
+        LocalAISettingsCache.save(serverURL: trimmedURL, modelName: trimmedModel)
+        dismiss()
+    }
+}
+
 // MARK: - ViewModel
 
 enum ChatMode: String {
     case gguf
+    case localAI
     case cloud
 }
 
@@ -434,6 +493,14 @@ private final class UnifiedChatViewModel: ObservableObject {
     @Published var selectedImageData: Data?
     @Published var showImagePicker = false
 
+    // LocalAI mode
+    @Published var localAIServerURL: String = LocalAISettingsCache.loadServerURL()
+    @Published var localAIModelName: String = LocalAISettingsCache.loadModelName()
+    @Published var showLocalAISettings = false
+    @Published var localAIConnected = false
+
+    private var localAIClient: LocalAIClient?
+
     // MARK: - Private State
     private var llamaService: LlamaService?
     private var conversationHistory: [UnifiedChatMessage] = []
@@ -452,10 +519,45 @@ private final class UnifiedChatViewModel: ObservableObject {
         !cloudAPIKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
+    var localAIConfigured: Bool {
+        !localAIServerURL.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+        !localAIModelName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    var modelTypeIcon: String {
+        switch selectedMode {
+        case .gguf: return "cpu"
+        case .localAI: return "server.rack"
+        case .cloud: return "cloud"
+        }
+    }
+
+    var modelStatusText: String {
+        switch selectedMode {
+        case .gguf:
+            return modelName.isEmpty ? "Pick a GGUF file to start" : "On-device via llama.cpp"
+        case .localAI:
+            return localAIConnected ? "Connected to LocalAI" : "Configure LocalAI server in settings"
+        case .cloud:
+            return "Via OpenRouter API"
+        }
+    }
+
+    var emptyStateMessage: String {
+        switch selectedMode {
+        case .gguf:
+            return "Pick a GGUF model file, then send a message."
+        case .localAI:
+            return "Configure your LocalAI server, then send a message."
+        case .cloud:
+            return "Enter your OpenRouter API key and send a message."
+        }
+    }
+
     var composerDisabled: Bool {
         if isGenerating { return true }
-        // Only block send if cloud mode needs an API key
         if selectedMode == .cloud && !hasAPIKey { return true }
+        if selectedMode == .localAI && !localAIConfigured { return true }
         return false
     }
 
@@ -520,6 +622,8 @@ private final class UnifiedChatViewModel: ObservableObject {
 
         if selectedMode == .gguf {
             sendGGUFMessage(trimmed, imageData: imageData)
+        } else if selectedMode == .localAI {
+            sendLocalAIMessage(trimmed, imageData: imageData)
         } else {
             sendCloudMessage(trimmed, imageData: imageData)
         }
@@ -670,6 +774,50 @@ private final class UnifiedChatViewModel: ObservableObject {
         }
     }
 
+    private func sendLocalAIMessage(_ prompt: String, imageData: Data?) {
+        guard localAIConfigured else {
+            lastError = "Configure LocalAI server URL and model name in settings."
+            isGenerating = false
+            return
+        }
+
+        Task {
+            do {
+                let reply = try await generateLocalAIReply(for: prompt, imageData: imageData)
+                await MainActor.run {
+                    let assistantMessage = UnifiedChatMessage(role: .assistant, text: reply)
+                    messages.append(assistantMessage)
+                    conversationHistory.append(assistantMessage)
+                    isGenerating = false
+                }
+            } catch {
+                await MainActor.run {
+                    lastError = error.localizedDescription
+                    isGenerating = false
+                }
+            }
+        }
+    }
+
+    private func generateLocalAIReply(for prompt: String, imageData: Data?) async throws -> String {
+        let serverURL = URL(string: localAIServerURL.trimmingCharacters(in: .whitespacesAndNewlines)) ?? URL(string: "http://localhost:8080")!
+        let modelName = localAIModelName.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        let client = LocalAIClient(serverURL: serverURL, modelName: modelName)
+
+        let historyMessages: [ChatMessage] = conversationHistory.dropLast().map { msg in
+            ChatMessage(role: msg.role == .user ? "user" : "assistant", text: msg.text)
+        }
+
+        // Check connectivity
+        let reachable = await client.ping()
+        await MainActor.run {
+            localAIConnected = reachable
+        }
+
+        return try await client.sendMessage(text: prompt, imageData: imageData, history: historyMessages)
+    }
+
     private func reportError(_ message: String) {
         errorText = message
         showError = true
@@ -760,6 +908,26 @@ enum OpenRouterAPIKeyCache {
 
     static func load() -> String {
         UserDefaults.standard.string(forKey: key) ?? ""
+    }
+}
+
+// MARK: - LocalAI Settings Cache
+
+enum LocalAISettingsCache {
+    static let serverURLKey = "localAI_serverURL"
+    static let modelNameKey = "localAI_modelName"
+
+    static func save(serverURL: String, modelName: String) {
+        UserDefaults.standard.set(serverURL, forKey: serverURLKey)
+        UserDefaults.standard.set(modelName, forKey: modelNameKey)
+    }
+
+    static func loadServerURL() -> String {
+        UserDefaults.standard.string(forKey: serverURLKey) ?? "http://localhost:8080"
+    }
+
+    static func loadModelName() -> String {
+        UserDefaults.standard.string(forKey: modelNameKey) ?? "vision-model"
     }
 }
 
@@ -921,33 +1089,3 @@ struct CameraImagePicker: UIViewControllerRepresentable {
         }
     }
 }
-
-#if canImport(FoundationModels)
-@available(iOS 26.0, *)
-private extension SystemLanguageModel.Availability.UnavailableReason {
-    var localizedDescription: String {
-        switch self {
-        case .deviceNotEligible:
-            return "This device does not support on-device foundation models."
-        case .appleIntelligenceNotEnabled:
-            return "Apple Intelligence is not enabled on this device."
-        case .modelNotReady:
-            return "The local model is still being prepared by the system."
-        @unknown default:
-            return "The local model is currently unavailable."
-        }
-    }
-}
-
-@available(iOS 26.0, *)
-private extension SystemLanguageModel.Availability {
-    var localizedDescription: String {
-        switch self {
-        case .available:
-            return "Available"
-        case .unavailable(let reason):
-            return reason.localizedDescription
-        }
-    }
-}
-#endif
