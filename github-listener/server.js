@@ -235,16 +235,15 @@ app.get("/openclaw", (req, res) => {
 // Kill any previous builds to avoid queued builds
 function killPreviousBuilds() {
   console.log("🛑 Killing previous builds...");
-  exec(
-    'pkill -9 -f flutter; pkill -9 -f xcodebuild; pkill -9 -f "flutter run"; pkill -9 -f "flutter build"',
-    (err) => {
-      if (err) {
-        console.log("No previous builds to kill (or none found)");
-      } else {
-        console.log("✅ Previous builds killed");
-      }
-    },
-  );
+  try {
+    require("child_process").execSync(
+      'pkill -9 -f flutter 2>/dev/null; pkill -9 -f xcodebuild 2>/dev/null; pkill -9 -f "flutter run" 2>/dev/null; pkill -9 -f "flutter build" 2>/dev/null; sleep 2',
+      { timeout: 10000 },
+    );
+    console.log("✅ Previous builds killed and settled");
+  } catch (err) {
+    console.log("No previous builds to kill (or none found)");
+  }
 }
 
 // Pull latest from the triggered repo
