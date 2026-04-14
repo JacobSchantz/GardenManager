@@ -94,7 +94,7 @@ final class GGUFInferenceTests: XCTestCase {
         await service.stopCompletion()
 
         task.cancel()
-        XCTAssertTrue(task.isCancelled || task.isFaulted, "Task should be cancelled or faulted")
+        XCTAssertTrue(task.isCancelled, "Task should be cancelled")
     }
 
     // MARK: - Test: Memory is freed after inference session

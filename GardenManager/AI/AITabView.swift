@@ -815,7 +815,7 @@ private final class UnifiedChatViewModel: ObservableObject {
 
 // MARK: - Models
 
-private struct UnifiedChatMessage: Identifiable {
+struct UnifiedChatMessage: Identifiable {
     enum Role {
         case user
         case assistant
