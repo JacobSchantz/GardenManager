@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		2190DBF72C1AC02F2AB01302 /* GardenManagerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8919C9873ED7317E8A8E62AC /* GardenManagerApp.swift */; };
+		356844AA9AFA42CF2117E459 /* tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf in Resources */ = {isa = PBXBuildFile; fileRef = 32C86AAB7ADEFA4B04D6BDA1 /* tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf */; };
 		58DE49DAEDCCB7C78C2A0477 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57E25AB53CF1C8F7AA8580F3 /* AppDelegate.swift */; };
 		6E3167BB648BC2CD41D27869 /* FastVLMImageProcessing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1049E218AF2165B175282CB0 /* FastVLMImageProcessing.swift */; };
 		84FD4CCF1677F305B05EF540 /* FastVLMImageProcessing.swift.disabled in Resources */ = {isa = PBXBuildFile; fileRef = E9B87885E3ECC34BF04DD67B /* FastVLMImageProcessing.swift.disabled */; };
@@ -16,6 +17,7 @@
 		C2B4034382C121BDC4CBDACA /* OpenClawVoiceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 332F05ABAFB5325904140E8E /* OpenClawVoiceService.swift */; };
 		CAC1431134AE16D836E163CD /* SwiftLlama in Frameworks */ = {isa = PBXBuildFile; productRef = F995B001296578981A14E5AF /* SwiftLlama */; };
 		CEB5386EA518934CD63F9F4B /* GrokVoiceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39305927F4656B443DBA3B5A /* GrokVoiceService.swift */; };
+		D08632853EF0B9B867063BFB /* LFM2.5-VL-1.6B-Q4_0.gguf in Resources */ = {isa = PBXBuildFile; fileRef = 6C302166417C6C90958A2806 /* LFM2.5-VL-1.6B-Q4_0.gguf */; };
 		D34ECCDE0BC244CCFED65A44 /* GGUFMultimodalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F4E4FD065CA72440031A60A /* GGUFMultimodalTests.swift */; };
 		D3D5864AB12A7B038FEB2DEC /* GrokVoiceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02E4DE8CF024785D92B1EBC4 /* GrokVoiceView.swift */; };
 		D4988C42C96AEBE061C2C42F /* BuildStatusTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501AC7D802EF8ABF840C5404 /* BuildStatusTabView.swift */; };
@@ -43,6 +45,7 @@
 		1AA6C45D4D19FDAD6E86A48A /* LocalAIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalAIClient.swift; sourceTree = "<group>"; };
 		1C388DA753AFE5093063A2A4 /* GardenManager.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = GardenManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2D16E592999BAC728F95A13A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		32C86AAB7ADEFA4B04D6BDA1 /* tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf */ = {isa = PBXFileReference; path = "tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf"; sourceTree = "<group>"; };
 		332F05ABAFB5325904140E8E /* OpenClawVoiceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenClawVoiceService.swift; sourceTree = "<group>"; };
 		39305927F4656B443DBA3B5A /* GrokVoiceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrokVoiceService.swift; sourceTree = "<group>"; };
 		501AC7D802EF8ABF840C5404 /* BuildStatusTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildStatusTabView.swift; sourceTree = "<group>"; };
@@ -50,6 +53,7 @@
 		552202C9B584BD8247961084 /* GardenManagerTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = GardenManagerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		57E25AB53CF1C8F7AA8580F3 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		613D126342A6B10D41E68D1C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		6C302166417C6C90958A2806 /* LFM2.5-VL-1.6B-Q4_0.gguf */ = {isa = PBXFileReference; path = "LFM2.5-VL-1.6B-Q4_0.gguf"; sourceTree = "<group>"; };
 		7DAAD866110DC51F79951834 /* ChatCrashRegressionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatCrashRegressionTests.swift; sourceTree = "<group>"; };
 		8919C9873ED7317E8A8E62AC /* GardenManagerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GardenManagerApp.swift; sourceTree = "<group>"; };
 		8F4E4FD065CA72440031A60A /* GGUFMultimodalTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GGUFMultimodalTests.swift; sourceTree = "<group>"; };
@@ -131,6 +135,15 @@
 			path = BuildStatus;
 			sourceTree = "<group>";
 		};
+		9DD6C5B97AACCDDABA6E577A /* test_fixtures */ = {
+			isa = PBXGroup;
+			children = (
+				6C302166417C6C90958A2806 /* LFM2.5-VL-1.6B-Q4_0.gguf */,
+				32C86AAB7ADEFA4B04D6BDA1 /* tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf */,
+			);
+			path = test_fixtures;
+			sourceTree = "<group>";
+		};
 		A7619C110E4D8111B6F37E59 /* GardenManagerTests */ = {
 			isa = PBXGroup;
 			children = (
@@ -139,6 +152,7 @@
 				DA93A0A4B9F96E2476B33861 /* GGUFModelLoaderTests.swift */,
 				8F4E4FD065CA72440031A60A /* GGUFMultimodalTests.swift */,
 				2D16E592999BAC728F95A13A /* Info.plist */,
+				9DD6C5B97AACCDDABA6E577A /* test_fixtures */,
 			);
 			path = GardenManagerTests;
 			sourceTree = "<group>";
@@ -178,6 +192,7 @@
 			buildConfigurationList = 057C880EE8A1C535D4316256 /* Build configuration list for PBXNativeTarget "GardenManagerTests" */;
 			buildPhases = (
 				B9B8B0346F50EAD2E8046CB9 /* Sources */,
+				46B389F16A1F86F4804DF10F /* Resources */,
 				3150484D8004C1970AF1357B /* Frameworks */,
 			);
 			buildRules = (
@@ -262,6 +277,15 @@
 			files = (
 				F40B7A27987F32C13BDC2DBE /* Assets.xcassets in Resources */,
 				84FD4CCF1677F305B05EF540 /* FastVLMImageProcessing.swift.disabled in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		46B389F16A1F86F4804DF10F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D08632853EF0B9B867063BFB /* LFM2.5-VL-1.6B-Q4_0.gguf in Resources */,
+				356844AA9AFA42CF2117E459 /* tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

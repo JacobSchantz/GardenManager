@@ -7,8 +7,7 @@ import SwiftLlama
 final class GGUFInferenceTests: XCTestCase {
 
     private var fixturesURL: URL {
-        URL(fileURLWithPath: NSHomeDirectory())
-            .appendingPathComponent(".openclaw/workspace/GardenManager/test_fixtures")
+        Bundle(for: Self.self).bundleURL
     }
 
     private func tinyllamaURL() -> URL {
