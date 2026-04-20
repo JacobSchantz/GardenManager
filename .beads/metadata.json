@@ -1,0 +1,7 @@
+{
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "embedded",
+  "dolt_database": "GardenManager",
+  "project_id": "bd4eb6a1-e3df-41dc-b5d7-e3cb5c5cc15a"
+}
