@@ -8,3 +8,4 @@ build/
 .dolt/
 *.db
 .beads-credential-key
+.beads/config.yaml
