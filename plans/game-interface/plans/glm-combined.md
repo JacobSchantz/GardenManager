@@ -13,6 +13,24 @@
 
 Grok and Peaches echoed the prompt without producing a plan — not included.
 
+### Key External Influence: Gas Town (Steve Yegge)
+
+Gas Town is an agent orchestrator ("Kubernetes for AI coding agents") that validates Garden Interface's core concept. Key learnings incorporated throughout this plan:
+
+| Gas Town Concept | Garden Interface Equivalent |
+|-----------------|--------------------------|
+| Worker roles (Mayor, Polecats, Refinery, Witness, Crew) | Plant roles/specialties (Oak=architecture, Daisy=UI, Fern=tests) |
+| GUPP: "If work is on your hook, YOU MUST RUN IT" | "If someone talks to you, start working" — conversation triggers agent |
+| Beads (git-backed persistent work units) | SwiftData garden state — all work is persistent, sessions are ephemeral |
+| GUPP Nudge (kick idle agents) | Visual plant states: glowing=working, blooming=done, wilted=failed |
+| Merge Queue / Refinery | Need a merge mechanism when multiple agents push to same repo |
+| Molecules (workflows that survive crashes) | Task pipeline: Planner→Implementer→Tester survives agent restarts |
+| Degrades gracefully (works without tmux) | Garden works offline; agents queue and sync when connected |
+| Overseer identity + inbox | Player identity + journal |
+| `gt seance` (talk to predecessor) | Plant memory — new session recovers context from past conversations |
+
+**Core insight:** Garden Interface is Gas Town with a visual/garden metaphor instead of tmux/CLI. Same orchestration, different skin.
+
 ---
 
 ## 1. Tech Stack Decision
@@ -358,6 +376,33 @@ These values affect:
 
 ---
 
+### 6.1 Agent Orchestration Layer (Gas Town–inspired)
+
+Garden Interface isn't just a game — it's an **agent orchestrator with a visual interface**. This layer connects the garden to real cloud agents:
+
+| Component | Responsibility |
+|-----------|---------------|
+| **AgentManager** | Spins up cloud agents (OpenClaw) when player talks to a plant. Tracks agent lifecycle. |
+| **WorkQueue** | Persistent queue of tasks assigned to each plant/agent. Survives crashes. Like Gas Town's Hooks. |
+| **GUPP-equivalent** | "If work is on your hook, run it." Plants with pending work auto-resume. Visual indicator (pulsing glow). |
+| **Refinery** | Merge mechanism for when multiple agents push to the same repo. One merge at a time. No work lost. |
+| **Nudge system** | If an agent stalls, the garden nudges it (re-spawns with tighter context). Gas Town's GUPP Nudge. |
+| **Handoff** | Any plant can gracefully hand off work to a new session. Context persists in the plant's memory. |
+
+**Data flow:**
+```
+Player talks to plant → AgentManager spawns cloud agent → Agent works → Pushes to GitHub
+→ Garden reflects result (new growth, blooming) → Player sees outcome
+```
+
+**Agent visibility is mandatory:** At all times, the player can see:
+- Which plants have active agents (glowing/pulsing)
+- What each agent is working on (task name, progress)
+- Agent logs/output (accessible by tapping the plant)
+- Failed tasks (wilted plant → water to retry)
+
+---
+
 ## 7. Risks & Mitigation
 
 | Risk | Likelihood | Impact | Mitigation |
@@ -370,6 +415,10 @@ These values affect:
 | **SpriteKit + SwiftUI integration friction** | Medium | Medium | Spike in Phase 0. Use UIViewRepresentable bridge. SpriteKit for rendering only, SwiftUI for all UI. |
 | **Performance on older iPhones** | Low | Medium | Target 60fps on iPhone 12+. Profile early. Pool sprites. Limit active particles per zone. |
 | **Monetization feels pay-to-win** | Low | High | Nurturing is OPTIONAL; core experience free. Cosmetics only. |
+| **Cloud agent reliability** — agents crash, stall, or produce bad output | High | Medium | GUPP Nudge system auto-restarts stalled agents. Refinery handles merge conflicts. Failed tasks = wilted plants (water to retry). |
+| **Merge conflicts from parallel agents** | Medium | High | Refinery merges one at a time. Agents work in branches. No direct-to-main pushes. |
+| **Agent cost** — multiple cloud agents running simultaneously | Medium | Medium | Default to 1-2 active agents. Player controls concurrency. Show cost estimate before spinning up. |
+| **Context loss between agent sessions** | High | Medium | Plant memory persists in SwiftData. New session reads plant's conversation history (like `gt seance`). |
 
 ---
 
