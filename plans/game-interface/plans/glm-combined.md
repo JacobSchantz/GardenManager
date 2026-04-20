@@ -15,21 +15,13 @@ Grok and Peaches echoed the prompt without producing a plan — not included.
 
 ### Key External Influence: Gas Town (Steve Yegge)
 
-Gas Town is an agent orchestrator ("Kubernetes for AI coding agents") that validates Garden Interface's core concept. Key learnings incorporated throughout this plan:
+Gas Town is an agent orchestrator ("Kubernetes for AI coding agents"). Key learnings:
 
-| Gas Town Concept | Garden Interface Equivalent |
-|-----------------|--------------------------|
-| Worker roles (Mayor, Polecats, Refinery, Witness, Crew) | Plant roles/specialties (Oak=architecture, Daisy=UI, Fern=tests) |
-| GUPP: "If work is on your hook, YOU MUST RUN IT" | "If someone talks to you, start working" — conversation triggers agent |
-| Beads (git-backed persistent work units) | SwiftData garden state — all work is persistent, sessions are ephemeral |
-| GUPP Nudge (kick idle agents) | Visual plant states: glowing=working, blooming=done, wilted=failed |
-| Merge Queue / Refinery | Need a merge mechanism when multiple agents push to same repo |
-| Molecules (workflows that survive crashes) | Task pipeline: Planner→Implementer→Tester survives agent restarts |
-| Degrades gracefully (works without tmux) | Garden works offline; agents queue and sync when connected |
-| Overseer identity + inbox | Player identity + journal |
-| `gt seance` (talk to predecessor) | Plant memory — new session recovers context from past conversations |
-
-**Core insight:** Garden Interface is Gas Town with a visual/garden metaphor instead of tmux/CLI. Same orchestration, different skin.
+- **Multiple agents with roles** → Mayor, Planner, Implementer, Tester (duplicates allowed)
+- **GUPP: persistent work survives session crashes** → Plant memory persists in SwiftData
+- **Visual status** → Glowing=working, blooming=done, wilted=failed
+- **Graceful degradation** → Garden works offline; agents queue when disconnected
+- **Garden Interface = Gas Town with a garden skin**
 
 ---
 
@@ -376,30 +368,30 @@ These values affect:
 
 ---
 
-### 6.1 Agent Orchestration Layer (Gas Town–inspired)
+### 6.1 Agent Orchestration Layer
 
-Garden Interface isn't just a game — it's an **agent orchestrator with a visual interface**. This layer connects the garden to real cloud agents:
+Four agent types, each can have multiple instances:
 
-| Component | Responsibility |
-|-----------|---------------|
-| **AgentManager** | Spins up cloud agents (OpenClaw) when player talks to a plant. Tracks agent lifecycle. |
-| **WorkQueue** | Persistent queue of tasks assigned to each plant/agent. Survives crashes. Like Gas Town's Hooks. |
-| **GUPP-equivalent** | "If work is on your hook, run it." Plants with pending work auto-resume. Visual indicator (pulsing glow). |
-| **Refinery** | Merge mechanism for when multiple agents push to the same repo. One merge at a time. No work lost. |
-| **Nudge system** | If an agent stalls, the garden nudges it (re-spawns with tighter context). Gas Town's GUPP Nudge. |
-| **Handoff** | Any plant can gracefully hand off work to a new session. Context persists in the plant's memory. |
+| Agent | Role | Plant Metaphor |
+|-------|------|---------------|
+| **Mayor** | Receives tasks from player, assigns to Planners, monitors all agents | The oldest tree — talks to you, delegates work |
+| **Planner** | Reads a task, writes a step-by-step implementation plan | A wise plant — thinks before acting |
+| **Implementer** | Reads a plan, writes code, commits and pushes | A hardy plant — gets to work |
+| **Tester** | Verifies the implementation solves the original problem | A careful plant — checks everything |
 
-**Data flow:**
+**Simple flow:**
 ```
-Player talks to plant → AgentManager spawns cloud agent → Agent works → Pushes to GitHub
-→ Garden reflects result (new growth, blooming) → Player sees outcome
+Player talks to Mayor → Mayor assigns Planner → Planner writes plan
+→ Mayor assigns Implementer → Implementer writes code → Mayor assigns Tester → Tester verifies
 ```
 
-**Agent visibility is mandatory:** At all times, the player can see:
-- Which plants have active agents (glowing/pulsing)
-- What each agent is working on (task name, progress)
-- Agent logs/output (accessible by tapping the plant)
-- Failed tasks (wilted plant → water to retry)
+**Multiple instances:** You can have 2 Planners, 3 Implementers, etc. Each is its own plant in the garden.
+
+**Visibility is mandatory:**
+- Glowing/pulsing = working
+- Blooming = done
+- Wilted = failed (water to retry)
+- Tap any plant to see what it's working on
 
 ---
 
