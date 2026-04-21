@@ -12,9 +12,17 @@ struct Bead: Codable, Identifiable, Hashable {
     let created_by: String?
     let updated_at: String?
     let started_at: String?
+    let notes: String?
     let dependency_count: Int?
     let dependent_count: Int?
     let comment_count: Int?
+    var repo: Repo? = nil
+
+    enum CodingKeys: String, CodingKey {
+        case id, title, status, priority, issue_type
+        case assignee, owner, created_at, created_by, updated_at, started_at
+        case notes, dependency_count, dependent_count, comment_count
+    }
 
     enum StatusGroup {
         case inProgress, completed, notStarted

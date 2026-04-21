@@ -20,9 +20,21 @@ struct BeadRow: View {
                 .foregroundStyle(.secondary)
 
             // Title
-            Text(bead.title)
-                .font(.subheadline)
-                .lineLimit(2)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(bead.title)
+                    .font(.subheadline)
+                    .lineLimit(2)
+
+                if let repo = bead.repo {
+                    HStack(spacing: 4) {
+                        Image(systemName: repo.icon)
+                            .font(.system(size: 9))
+                        Text(repo.displayName)
+                            .font(.system(size: 11))
+                    }
+                    .foregroundStyle(repoColor)
+                }
+            }
 
             Spacer()
 
@@ -43,6 +55,16 @@ struct BeadRow: View {
         case 1: return .orange
         case 2: return .yellow
         default: return .gray
+        }
+    }
+
+    private var repoColor: Color {
+        switch bead.repo?.color {
+        case "green": return .green
+        case "orange": return .orange
+        case "blue": return .blue
+        case "purple": return .purple
+        default: return .secondary
         }
     }
 }

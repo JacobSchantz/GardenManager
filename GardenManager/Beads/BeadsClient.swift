@@ -14,23 +14,17 @@ final class BeadsClient {
         errorMessage = nil
 
         do {
-            let data = try loadBeadsData()
-            // issues.jsonl is JSON Lines — one JSON object per line
-            let lines = String(data: data, encoding: .utf8)?
-                .split(separator: "\n")
-                .map(String.init) ?? []
+            var allBeads: [Bead] = []
             
-            let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .iso8601
-            
-            var decoded: [Bead] = []
-            for line in lines {
-                guard let lineData = line.data(using: .utf8), !line.isEmpty else { continue }
-                if let bead = try? decoder.decode(Bead.self, from: lineData) {
-                    decoded.append(bead)
+            // Load beads from all bundled repos
+            for repo in Repo.allCases {
+                if let data = loadBeadsData(for: repo) {
+                    let decoded = parseJSONL(data, repo: repo)
+                    allBeads.append(contentsOf: decoded)
                 }
             }
-            beads = decoded
+            
+            beads = allBeads.sorted { $0.priority < $1.priority }
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -39,6 +33,10 @@ final class BeadsClient {
 
     func fetchBeadDetail(id: String) async -> Bead? {
         beads.first { $0.id == id }
+    }
+
+    func beadsForRepo(_ repo: Repo) -> [Bead] {
+        beads.filter { $0.repo == repo }
     }
 
     func startAutoRefresh(interval: TimeInterval = 60) {
@@ -55,39 +53,90 @@ final class BeadsClient {
         refreshTimer = nil
     }
 
-    /// Load beads from the bundled issues.jsonl file.
-    /// The file lives at .beads/issues.jsonl in the repo and gets
-    /// included in the app bundle via the xcodegen sources path.
-    private func loadBeadsData() throws -> Data {
-        // Try the app bundle first (works on device)
-        if let url = Bundle.main.url(forResource: "issues", withExtension: "jsonl", subdirectory: ".beads") {
-            return try Data(contentsOf: url)
+    // MARK: - Data Loading
+
+    private func loadBeadsData(for repo: Repo) -> Data? {
+        // Try the app bundle (resources added via project.yml)
+        if let url = Bundle.main.url(forResource: "\(repo.rawValue)_issues", withExtension: "jsonl") {
+            if let data = try? Data(contentsOf: url) { return data }
         }
-        
-        // Try without subdirectory (in case xcodegen flattens it)
-        if let url = Bundle.main.url(forResource: "issues", withExtension: "jsonl") {
-            return try Data(contentsOf: url)
-        }
-        
-        // Try the shared app group container (for live sync from OpenClaw)
+
+        // Try shared app group container for live sync
         if let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.gardenmanager.beads") {
-            let fileURL = containerURL.appendingPathComponent(".beads/issues.jsonl")
+            let fileURL = containerURL.appendingPathComponent("\(repo.rawValue)/.beads/issues.jsonl")
             if FileManager.default.fileExists(atPath: fileURL.path) {
-                return try Data(contentsOf: fileURL)
+                if let data = try? Data(contentsOf: fileURL) { return data }
             }
         }
-        
-        throw BeadsError.fileNotFound
+
+        return nil
+    }
+
+    private func parseJSONL(_ data: Data, repo: Repo) -> [Bead] {
+        let lines = String(data: data, encoding: .utf8)?
+            .split(separator: "\n")
+            .map(String.init) ?? []
+
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+
+        var decoded: [Bead] = []
+        for line in lines {
+            guard let lineData = line.data(using: .utf8), !line.isEmpty else { continue }
+            if var bead = try? decoder.decode(Bead.self, from: lineData) {
+                bead.repo = repo
+                decoded.append(bead)
+            }
+        }
+        return decoded
+    }
+}
+
+// MARK: - Repos
+
+enum Repo: String, CaseIterable, Identifiable {
+    case gardenManager = "GardenManager"
+    case buyAHabit = "BuyAHabit"
+    case keepMovin = "keepMovin"
+    case atg = "ATG"
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .gardenManager: return "Garden Manager"
+        case .buyAHabit: return "BuyAHabit"
+        case .keepMovin: return "KeepMovin"
+        case .atg: return "ATG"
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .gardenManager: return "leaf.fill"
+        case .buyAHabit: return "carrot.fill"
+        case .keepMovin: return "figure.run"
+        case .atg: return "sportscourt.fill"
+        }
+    }
+
+    var color: String {
+        switch self {
+        case .gardenManager: return "green"
+        case .buyAHabit: return "orange"
+        case .keepMovin: return "blue"
+        case .atg: return "purple"
+        }
     }
 }
 
 enum BeadsError: LocalizedError {
     case fileNotFound
-    
+
     var errorDescription: String? {
         switch self {
         case .fileNotFound:
-            return "Could not find issues.jsonl in app bundle or shared container"
+            return "Could not find any issues.jsonl files in app bundle"
         }
     }
 }
