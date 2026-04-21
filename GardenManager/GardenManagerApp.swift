@@ -38,6 +38,11 @@ struct RootView: View {
                 Label("Builds", systemImage: "hammer")
             }
 
+            BeadsView()
+            .tabItem {
+                Label("Beads", systemImage: "circle.grid.3")
+            }
+
             AccountTabView()
             .tabItem {
                 Label("Account", systemImage: "person.fill")
