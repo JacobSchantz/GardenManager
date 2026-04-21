@@ -25,6 +25,8 @@ targets:
       - path: GardenManager
         excludes:
           - "**/.DS_Store"
+    resources:
+      - path: .beads/issues.jsonl
     dependencies:
       - package: SwiftLlama
     settings:

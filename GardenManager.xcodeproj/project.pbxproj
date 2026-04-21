@@ -7,17 +7,20 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1BB7DD823384C561C0C1F773 /* BeadDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E641DA3B5D48E98396D8793B /* BeadDetailView.swift */; };
 		2190DBF72C1AC02F2AB01302 /* GardenManagerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8919C9873ED7317E8A8E62AC /* GardenManagerApp.swift */; };
-		356844AA9AFA42CF2117E459 /* tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf in Resources */ = {isa = PBXBuildFile; fileRef = 32C86AAB7ADEFA4B04D6BDA1 /* tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf */; };
+		29334CF7F712966FD46A837F /* BeadsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 758E6EE1B415B4EB3BA24262 /* BeadsView.swift */; };
+		2A5EE8A6D54F4BE7C971693E /* Bead.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05251F82CAEC3E07F3D42EF2 /* Bead.swift */; };
 		58DE49DAEDCCB7C78C2A0477 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57E25AB53CF1C8F7AA8580F3 /* AppDelegate.swift */; };
 		6E3167BB648BC2CD41D27869 /* FastVLMImageProcessing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1049E218AF2165B175282CB0 /* FastVLMImageProcessing.swift */; };
+		7EB8C3056F2522A74A6C30B1 /* BeadsClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9415A2E38966BAB35140745 /* BeadsClient.swift */; };
 		84FD4CCF1677F305B05EF540 /* FastVLMImageProcessing.swift.disabled in Resources */ = {isa = PBXBuildFile; fileRef = E9B87885E3ECC34BF04DD67B /* FastVLMImageProcessing.swift.disabled */; };
 		8E28981DAE6DD57D1D81C0FE /* SwiftLlama in Frameworks */ = {isa = PBXBuildFile; productRef = DD23F09B3FFAFFAC8423D0E1 /* SwiftLlama */; };
 		93F326C31A81E7EB1870FD64 /* ChatCrashRegressionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DAAD866110DC51F79951834 /* ChatCrashRegressionTests.swift */; };
 		C2B4034382C121BDC4CBDACA /* OpenClawVoiceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 332F05ABAFB5325904140E8E /* OpenClawVoiceService.swift */; };
+		C98C6182B7BB6AD4DE88405B /* BeadRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EA136E0E639DC3737A86822 /* BeadRow.swift */; };
 		CAC1431134AE16D836E163CD /* SwiftLlama in Frameworks */ = {isa = PBXBuildFile; productRef = F995B001296578981A14E5AF /* SwiftLlama */; };
 		CEB5386EA518934CD63F9F4B /* GrokVoiceService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39305927F4656B443DBA3B5A /* GrokVoiceService.swift */; };
-		D08632853EF0B9B867063BFB /* LFM2.5-VL-1.6B-Q4_0.gguf in Resources */ = {isa = PBXBuildFile; fileRef = 6C302166417C6C90958A2806 /* LFM2.5-VL-1.6B-Q4_0.gguf */; };
 		D34ECCDE0BC244CCFED65A44 /* GGUFMultimodalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F4E4FD065CA72440031A60A /* GGUFMultimodalTests.swift */; };
 		D3D5864AB12A7B038FEB2DEC /* GrokVoiceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02E4DE8CF024785D92B1EBC4 /* GrokVoiceView.swift */; };
 		D4988C42C96AEBE061C2C42F /* BuildStatusTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 501AC7D802EF8ABF840C5404 /* BuildStatusTabView.swift */; };
@@ -41,11 +44,12 @@
 
 /* Begin PBXFileReference section */
 		02E4DE8CF024785D92B1EBC4 /* GrokVoiceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrokVoiceView.swift; sourceTree = "<group>"; };
+		05251F82CAEC3E07F3D42EF2 /* Bead.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bead.swift; sourceTree = "<group>"; };
 		1049E218AF2165B175282CB0 /* FastVLMImageProcessing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FastVLMImageProcessing.swift; sourceTree = "<group>"; };
 		1AA6C45D4D19FDAD6E86A48A /* LocalAIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalAIClient.swift; sourceTree = "<group>"; };
 		1C388DA753AFE5093063A2A4 /* GardenManager.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = GardenManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2D16E592999BAC728F95A13A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		32C86AAB7ADEFA4B04D6BDA1 /* tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf */ = {isa = PBXFileReference; path = "tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf"; sourceTree = "<group>"; };
+		2EA136E0E639DC3737A86822 /* BeadRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeadRow.swift; sourceTree = "<group>"; };
 		332F05ABAFB5325904140E8E /* OpenClawVoiceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenClawVoiceService.swift; sourceTree = "<group>"; };
 		39305927F4656B443DBA3B5A /* GrokVoiceService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GrokVoiceService.swift; sourceTree = "<group>"; };
 		501AC7D802EF8ABF840C5404 /* BuildStatusTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildStatusTabView.swift; sourceTree = "<group>"; };
@@ -53,13 +57,15 @@
 		552202C9B584BD8247961084 /* GardenManagerTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = GardenManagerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		57E25AB53CF1C8F7AA8580F3 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		613D126342A6B10D41E68D1C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		6C302166417C6C90958A2806 /* LFM2.5-VL-1.6B-Q4_0.gguf */ = {isa = PBXFileReference; path = "LFM2.5-VL-1.6B-Q4_0.gguf"; sourceTree = "<group>"; };
+		758E6EE1B415B4EB3BA24262 /* BeadsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeadsView.swift; sourceTree = "<group>"; };
 		7DAAD866110DC51F79951834 /* ChatCrashRegressionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatCrashRegressionTests.swift; sourceTree = "<group>"; };
 		8919C9873ED7317E8A8E62AC /* GardenManagerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GardenManagerApp.swift; sourceTree = "<group>"; };
 		8F4E4FD065CA72440031A60A /* GGUFMultimodalTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GGUFMultimodalTests.swift; sourceTree = "<group>"; };
 		AB4A48BF09269F9169962D57 /* AITabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AITabView.swift; sourceTree = "<group>"; };
+		B9415A2E38966BAB35140745 /* BeadsClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeadsClient.swift; sourceTree = "<group>"; };
 		CDEF68A88E27820CBB9D30A8 /* OpenClawVoiceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenClawVoiceView.swift; sourceTree = "<group>"; };
 		DA93A0A4B9F96E2476B33861 /* GGUFModelLoaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GGUFModelLoaderTests.swift; sourceTree = "<group>"; };
+		E641DA3B5D48E98396D8793B /* BeadDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeadDetailView.swift; sourceTree = "<group>"; };
 		E9B87885E3ECC34BF04DD67B /* FastVLMImageProcessing.swift.disabled */ = {isa = PBXFileReference; path = FastVLMImageProcessing.swift.disabled; sourceTree = "<group>"; };
 		F238D1F176156184E7E8AFAA /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -111,6 +117,7 @@
 				8919C9873ED7317E8A8E62AC /* GardenManagerApp.swift */,
 				613D126342A6B10D41E68D1C /* Info.plist */,
 				05C9135B623C42A08919A79A /* AI */,
+				72366D68F1E5BC6B8E7174AD /* Beads */,
 				781A2D9424B397413AFC8B8B /* BuildStatus */,
 				6E97B3C3FB5CB8DC34912ADF /* GrokVoice */,
 				E770E5C94FFF313DA202571D /* OpenClawVoice */,
@@ -127,21 +134,24 @@
 			path = GrokVoice;
 			sourceTree = "<group>";
 		};
+		72366D68F1E5BC6B8E7174AD /* Beads */ = {
+			isa = PBXGroup;
+			children = (
+				05251F82CAEC3E07F3D42EF2 /* Bead.swift */,
+				E641DA3B5D48E98396D8793B /* BeadDetailView.swift */,
+				2EA136E0E639DC3737A86822 /* BeadRow.swift */,
+				B9415A2E38966BAB35140745 /* BeadsClient.swift */,
+				758E6EE1B415B4EB3BA24262 /* BeadsView.swift */,
+			);
+			path = Beads;
+			sourceTree = "<group>";
+		};
 		781A2D9424B397413AFC8B8B /* BuildStatus */ = {
 			isa = PBXGroup;
 			children = (
 				501AC7D802EF8ABF840C5404 /* BuildStatusTabView.swift */,
 			);
 			path = BuildStatus;
-			sourceTree = "<group>";
-		};
-		9DD6C5B97AACCDDABA6E577A /* test_fixtures */ = {
-			isa = PBXGroup;
-			children = (
-				6C302166417C6C90958A2806 /* LFM2.5-VL-1.6B-Q4_0.gguf */,
-				32C86AAB7ADEFA4B04D6BDA1 /* tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf */,
-			);
-			path = test_fixtures;
 			sourceTree = "<group>";
 		};
 		A7619C110E4D8111B6F37E59 /* GardenManagerTests */ = {
@@ -152,7 +162,6 @@
 				DA93A0A4B9F96E2476B33861 /* GGUFModelLoaderTests.swift */,
 				8F4E4FD065CA72440031A60A /* GGUFMultimodalTests.swift */,
 				2D16E592999BAC728F95A13A /* Info.plist */,
-				9DD6C5B97AACCDDABA6E577A /* test_fixtures */,
 			);
 			path = GardenManagerTests;
 			sourceTree = "<group>";
@@ -192,7 +201,6 @@
 			buildConfigurationList = 057C880EE8A1C535D4316256 /* Build configuration list for PBXNativeTarget "GardenManagerTests" */;
 			buildPhases = (
 				B9B8B0346F50EAD2E8046CB9 /* Sources */,
-				46B389F16A1F86F4804DF10F /* Resources */,
 				3150484D8004C1970AF1357B /* Frameworks */,
 			);
 			buildRules = (
@@ -280,15 +288,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		46B389F16A1F86F4804DF10F /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				D08632853EF0B9B867063BFB /* LFM2.5-VL-1.6B-Q4_0.gguf in Resources */,
-				356844AA9AFA42CF2117E459 /* tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -298,6 +297,11 @@
 			files = (
 				F2B195715BA20D9343012D8B /* AITabView.swift in Sources */,
 				58DE49DAEDCCB7C78C2A0477 /* AppDelegate.swift in Sources */,
+				2A5EE8A6D54F4BE7C971693E /* Bead.swift in Sources */,
+				1BB7DD823384C561C0C1F773 /* BeadDetailView.swift in Sources */,
+				C98C6182B7BB6AD4DE88405B /* BeadRow.swift in Sources */,
+				7EB8C3056F2522A74A6C30B1 /* BeadsClient.swift in Sources */,
+				29334CF7F712966FD46A837F /* BeadsView.swift in Sources */,
 				D4988C42C96AEBE061C2C42F /* BuildStatusTabView.swift in Sources */,
 				6E3167BB648BC2CD41D27869 /* FastVLMImageProcessing.swift in Sources */,
 				2190DBF72C1AC02F2AB01302 /* GardenManagerApp.swift in Sources */,

@@ -13,12 +13,23 @@ final class BeadsClient {
         isLoading = true
         errorMessage = nil
 
-        // On iOS, we can't shell out to `bd` CLI directly.
-        // In a production app, this would call a backend API.
-        // For now, load from the bundled mock data or use live data via a helper.
         do {
-            let data = try await fetchBeadsData()
-            let decoded = try JSONDecoder().decode([Bead].self, from: data)
+            let data = try loadBeadsData()
+            // issues.jsonl is JSON Lines — one JSON object per line
+            let lines = String(data: data, encoding: .utf8)?
+                .split(separator: "\n")
+                .map(String.init) ?? []
+            
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            
+            var decoded: [Bead] = []
+            for line in lines {
+                guard let lineData = line.data(using: .utf8), !line.isEmpty else { continue }
+                if let bead = try? decoder.decode(Bead.self, from: lineData) {
+                    decoded.append(bead)
+                }
+            }
             beads = decoded
         } catch {
             errorMessage = error.localizedDescription
@@ -44,18 +55,39 @@ final class BeadsClient {
         refreshTimer = nil
     }
 
-    /// Fetch beads data. On macOS this could shell out to `bd`;
-    /// on iOS we read from a bundled JSON or use mock data.
-    private func fetchBeadsData() async throws -> Data {
-        // Try to read from the app's shared directory (populated by an external process)
-        // Fall back to mock data if unavailable
-        let mockBeads: [Bead] = [
-            Bead(id: "GardenManager-bxg", title: "View and reorder beads in GardenManager UI", status: "in_progress", priority: 1, issue_type: "feature", assignee: "JacobSchantz", owner: "Butterber347@gmail.com", created_at: "2026-04-20T23:46:53Z", created_by: "JacobSchantz", updated_at: "2026-04-21T01:35:06Z", started_at: "2026-04-21T01:35:06Z", dependency_count: 0, dependent_count: 0, comment_count: 0),
-            Bead(id: "GardenManager-2qy", title: "Build Garden Interface game from combined plan", status: "open", priority: 0, issue_type: "epic", assignee: nil, owner: "Butterber347@gmail.com", created_at: "2026-04-20T23:38:04Z", created_by: "JacobSchantz", updated_at: "2026-04-20T23:38:04Z", started_at: nil, dependency_count: 0, dependent_count: 0, comment_count: 0),
-            Bead(id: "GardenManager-hb2", title: "Implement GUUF local models", status: "open", priority: 1, issue_type: "feature", assignee: nil, owner: "Butterber347@gmail.com", created_at: "2026-04-20T23:42:36Z", created_by: "JacobSchantz", updated_at: "2026-04-20T23:42:36Z", started_at: nil, dependency_count: 0, dependent_count: 0, comment_count: 0),
-            Bead(id: "GardenManager-5ju", title: "Integrate Beads as task data layer for garden", status: "open", priority: 1, issue_type: "feature", assignee: nil, owner: "Butterber347@gmail.com", created_at: "2026-04-20T23:38:12Z", created_by: "JacobSchantz", updated_at: "2026-04-20T23:38:12Z", started_at: nil, dependency_count: 0, dependent_count: 0, comment_count: 0),
-            Bead(id: "GardenManager-40k", title: "Implement SwiftUI garden scene with plant visuals", status: "open", priority: 1, issue_type: "feature", assignee: nil, owner: "Butterber347@gmail.com", created_at: "2026-04-20T23:38:11Z", created_by: "JacobSchantz", updated_at: "2026-04-20T23:38:11Z", started_at: nil, dependency_count: 0, dependent_count: 0, comment_count: 0),
-        ]
-        return try JSONEncoder().encode(mockBeads)
+    /// Load beads from the bundled issues.jsonl file.
+    /// The file lives at .beads/issues.jsonl in the repo and gets
+    /// included in the app bundle via the xcodegen sources path.
+    private func loadBeadsData() throws -> Data {
+        // Try the app bundle first (works on device)
+        if let url = Bundle.main.url(forResource: "issues", withExtension: "jsonl", subdirectory: ".beads") {
+            return try Data(contentsOf: url)
+        }
+        
+        // Try without subdirectory (in case xcodegen flattens it)
+        if let url = Bundle.main.url(forResource: "issues", withExtension: "jsonl") {
+            return try Data(contentsOf: url)
+        }
+        
+        // Try the shared app group container (for live sync from OpenClaw)
+        if let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.gardenmanager.beads") {
+            let fileURL = containerURL.appendingPathComponent(".beads/issues.jsonl")
+            if FileManager.default.fileExists(atPath: fileURL.path) {
+                return try Data(contentsOf: fileURL)
+            }
+        }
+        
+        throw BeadsError.fileNotFound
+    }
+}
+
+enum BeadsError: LocalizedError {
+    case fileNotFound
+    
+    var errorDescription: String? {
+        switch self {
+        case .fileNotFound:
+            return "Could not find issues.jsonl in app bundle or shared container"
+        }
     }
 }
