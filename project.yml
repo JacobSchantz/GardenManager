@@ -25,11 +25,6 @@ targets:
       - path: GardenManager
         excludes:
           - "**/.DS_Store"
-    resources:
-      - path: Resources/GardenManager_issues.jsonl
-      - path: Resources/BuyAHabit_issues.jsonl
-      - path: Resources/keepMovin_issues.jsonl
-      - path: Resources/ATG_issues.jsonl
     dependencies:
       - package: SwiftLlama
     settings:

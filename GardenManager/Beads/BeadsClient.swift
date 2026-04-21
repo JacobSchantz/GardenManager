@@ -13,20 +13,29 @@ final class BeadsClient {
         isLoading = true
         errorMessage = nil
 
-        do {
-            var allBeads: [Bead] = []
-            
-            // Load beads from all bundled repos
+        var allBeads: [Bead] = []
+        var errors: [String] = []
+
+        // Fetch beads from all repos in parallel
+        await withTaskGroup(of: (Repo, [Bead]).self) { group in
             for repo in Repo.allCases {
-                if let data = loadBeadsData(for: repo) {
-                    let decoded = parseJSONL(data, repo: repo)
-                    allBeads.append(contentsOf: decoded)
+                group.addTask {
+                    let beads = await self.fetchBeadsForRepo(repo)
+                    return (repo, beads)
                 }
             }
-            
-            beads = allBeads.sorted { $0.priority < $1.priority }
-        } catch {
-            errorMessage = error.localizedDescription
+            for await (repo, repoBeads) in group {
+                allBeads.append(contentsOf: repoBeads)
+                if repoBeads.isEmpty {
+                    errors.append(repo.displayName)
+                }
+            }
+        }
+
+        beads = allBeads.sorted { $0.priority < $1.priority }
+
+        if beads.isEmpty && !errors.isEmpty {
+            errorMessage = "Could not load beads from: \(errors.joined(separator: ", "))"
         }
         isLoading = false
     }
@@ -53,23 +62,25 @@ final class BeadsClient {
         refreshTimer = nil
     }
 
-    // MARK: - Data Loading
+    // MARK: - Remote Fetching
 
-    private func loadBeadsData(for repo: Repo) -> Data? {
-        // Try the app bundle (resources added via project.yml)
-        if let url = Bundle.main.url(forResource: "\(repo.rawValue)_issues", withExtension: "jsonl") {
-            if let data = try? Data(contentsOf: url) { return data }
+    private func fetchBeadsForRepo(_ repo: Repo) async -> [Bead] {
+        // Try the bundled file first (for offline / fast load)
+        if let url = Bundle.main.url(forResource: "\(repo.rawValue)_issues", withExtension: "jsonl"),
+           let data = try? Data(contentsOf: url) {
+            return parseJSONL(data, repo: repo)
         }
 
-        // Try shared app group container for live sync
-        if let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.com.gardenmanager.beads") {
-            let fileURL = containerURL.appendingPathComponent("\(repo.rawValue)/.beads/issues.jsonl")
-            if FileManager.default.fileExists(atPath: fileURL.path) {
-                if let data = try? Data(contentsOf: fileURL) { return data }
-            }
-        }
+        // Fetch from GitHub raw
+        guard let remoteURL = repo.remoteURL else { return [] }
 
-        return nil
+        do {
+            let (data, response) = try await URLSession.shared.data(from: remoteURL)
+            guard let http = response as? HTTPURLResponse, http.statusCode == 200 else { return [] }
+            return parseJSONL(data, repo: repo)
+        } catch {
+            return []
+        }
     }
 
     private func parseJSONL(_ data: Data, repo: Repo) -> [Bead] {
@@ -128,15 +139,19 @@ enum Repo: String, CaseIterable, Identifiable {
         case .atg: return "purple"
         }
     }
-}
 
-enum BeadsError: LocalizedError {
-    case fileNotFound
-
-    var errorDescription: String? {
+    /// GitHub raw URL for the repo's issues.jsonl
+    var remoteURL: URL? {
         switch self {
-        case .fileNotFound:
-            return "Could not find any issues.jsonl files in app bundle"
+        case .gardenManager:
+            return URL(string: "https://raw.githubusercontent.com/JacobSchantz/GardenManager/main/.beads/issues.jsonl")
+        case .buyAHabit:
+            return URL(string: "https://raw.githubusercontent.com/JacobSchantz/buyahabit/main/.beads/issues.jsonl")
+        case .keepMovin:
+            return URL(string: "https://raw.githubusercontent.com/JacobSchantz/keepMovin/main/.beads/issues.jsonl")
+        case .atg:
+            // ATG is on a different org — adjust if needed
+            return nil
         }
     }
 }
