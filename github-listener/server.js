@@ -656,6 +656,61 @@ function handleRelease(payload) {
   // TODO: Add actions here
 }
 
+// OpenClaw chat proxy — lets the iOS app send messages to OpenClaw
+app.post("/openclaw/chat", express.json(), async (req, res) => {
+  const { message, session } = req.body;
+  if (!message) {
+    return res.status(400).json({ error: "message is required" });
+  }
+
+  const GATEWAY_URL = process.env.OPENCLAW_GATEWAY_URL || "http://127.0.0.1:18789";
+  const GATEWAY_TOKEN = process.env.OPENCLAW_GATEWAY_TOKEN || "16cdfadb8295940f28e89effd050f86789a14c40951aa90c";
+
+  try {
+    const http = require("http");
+    const payload = JSON.stringify({
+      model: "openrouter/z-ai/glm-5.1",
+      messages: [{ role: "user", content: message }],
+      stream: false,
+    });
+
+    const options = {
+      hostname: "127.0.0.1",
+      port: 18789,
+      path: "/v1/chat/completions",
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${GATEWAY_TOKEN}`,
+        "Content-Length": Buffer.byteLength(payload),
+      },
+    };
+
+    const gwReq = http.request(options, (gwRes) => {
+      let data = "";
+      gwRes.on("data", (chunk) => (data += chunk));
+      gwRes.on("end", () => {
+        try {
+          const parsed = JSON.parse(data);
+          const reply = parsed.choices?.[0]?.message?.content || "No response";
+          res.json({ reply, model: parsed.model });
+        } catch (e) {
+          res.status(500).json({ error: "Failed to parse OpenClaw response", raw: data.substring(0, 500) });
+        }
+      });
+    });
+
+    gwReq.on("error", (e) => {
+      res.status(502).json({ error: "OpenClaw gateway unreachable", details: e.message });
+    });
+
+    gwReq.write(payload);
+    gwReq.end();
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // Start server
 app.listen(PORT, () => {
   console.log(`GitHub Listener running on port ${PORT}`);
