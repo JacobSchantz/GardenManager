@@ -127,6 +127,9 @@ let buildStatus = {
   lastBuildTime: null,
 };
 
+// Pending build queue — ensures rapid pushes don't get lost
+let pendingBuild = null; // { scriptPath, appName, commitMessage }
+
 // GitHub webhook secret (set in environment)
 const GITHUB_SECRET = process.env.GITHUB_SECRET || "";
 
@@ -340,56 +343,22 @@ function handlePush(payload) {
     return;
   }
 
-  // Kill any previous builds before starting new one
-  killPreviousBuilds();
-
-  // Update build status
-  buildStatus.lastCommit = after;
-  buildStatus.lastCommitMessage = commitMessage;
-  buildStatus.lastRepo = repoName;
-  buildStatus.lastBranch = branch;
-  buildStatus.isBuilding = true;
-  buildStatus.lastBuildTime = new Date().toISOString();
-
-  // Pull latest from the triggered repo
-  pullRepo(repoName);
-
-  // Route based on repository
+  // Queue this push — if a build is running, we'll build after it finishes
+  // This ensures we always build the latest commit, never lose pushes
   const repoConfig = REPO_CONFIGS[repoName];
   const scriptPath = ensureBuildScriptPath(repoName);
 
   if (scriptPath) {
-    if (repoName === "atg_monorepo" && branch === "Peaches") {
-      console.log("🔥 Triggering ATG iOS build...");
-      triggerBuild(scriptPath, "ATG", commitMessage);
-    } else if (repoName === "keepMovin") {
-      console.log("📱 Triggering keepMovin iOS build...");
-      triggerBuild(scriptPath, "KeepMovin", commitMessage);
-    } else if (repoName === "BuyAHabit" || repoName === "buyahabit") {
-      console.log("💰 Triggering BuyAHabit iOS build...");
-      triggerBuild(scriptPath, "BuyAHabit", commitMessage);
-    } else if (repoName === "GardenManager") {
-      console.log("🌱 Triggering GardenManager iOS build...");
-      triggerBuild(scriptPath, "GardenManager", commitMessage);
-    } else if (
-      repoConfig &&
-      repoConfig.branch &&
-      branch !== repoConfig.branch
-    ) {
-      console.log(
-        `No build configured for repo: ${repoName} branch: ${branch}`,
-      );
+    const buildInfo = { scriptPath, appName: repoConfig.appName, commitMessage };
+
+    if (buildStatus.isBuilding) {
+      console.log(`⏳ Build already in progress. Queuing ${repoConfig.appName} for after current build.`);
+      pendingBuild = buildInfo;
+      // Still pull the latest so the repo is ready
+      pullRepo(repoName);
     } else {
-      console.log(
-        `No build configured for repo: ${repoName} branch: ${branch}`,
-      );
+      triggerBuild(scriptPath, repoConfig.appName, commitMessage);
     }
-  } else if (repoConfig) {
-    console.log(
-      `⚠️ Build script path for ${repoName} is unavailable on this machine.`,
-    );
-  } else {
-    console.log(`No build configured for repo: ${repoName} branch: ${branch}`);
   }
 }
 
@@ -422,6 +391,19 @@ function markAutoFixDone(appName) {
   autoFixAttempted[appName] = { timestamp: Date.now() };
 }
 
+function drainPendingBuild() {
+  if (pendingBuild) {
+    const next = pendingBuild;
+    pendingBuild = null;
+    console.log(`📤 Draining queued build for ${next.appName}...`);
+    sendTelegramMessage(`📤 Building queued push for ${next.appName}...`);
+    // Pull latest before building
+    const repoName = Object.keys(REPO_CONFIGS).find(k => REPO_CONFIGS[k].appName === next.appName);
+    if (repoName) pullRepo(repoName);
+    triggerBuild(next.scriptPath, next.appName, next.commitMessage);
+  }
+}
+
 function triggerBuild(
   scriptPath,
   appName,
@@ -429,6 +411,11 @@ function triggerBuild(
   attempt = 1,
   previousOutput = "",
 ) {
+  // Update build status
+  buildStatus.lastCommitMessage = commitMessage;
+  buildStatus.lastRepo = appName;
+  buildStatus.isBuilding = true;
+  buildStatus.lastBuildTime = new Date().toISOString();
   // Send message that build is starting
   const shortCommitMsg =
     commitMessage.length > 100
@@ -470,6 +457,7 @@ function triggerBuild(
         );
         buildStatus.isBuilding = false;
         buildStatus.lastBuild = "success";
+        drainPendingBuild(); // Build next queued push if any
         if (attempt > 1) {
           sendTelegramMessage(
             `✅ ${appName} build succeeded on retry ${attempt}!\n\nCommit: ${shortCommitMsg}`,
@@ -549,6 +537,7 @@ function triggerBuild(
         console.log("🤖 All retries exhausted. Notifying about failure.");
         buildStatus.isBuilding = false;
         buildStatus.lastBuild = "failed";
+        drainPendingBuild(); // Build next queued push if any
         return;
       }
 
