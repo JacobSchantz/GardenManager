@@ -15,7 +15,7 @@ const DEFAULT_WORKSPACE_ROOT =
 const BUY_A_HABIT_CONFIG = {
   appName: "BuyAHabit",
   branch: null,
-  buildScript: "build_local.sh",
+  buildScript: "build_local_or_testflight.sh",
   dirName: "buyahabit",
   repoPathEnv: "BUYAHABIT_PATH",
 };
