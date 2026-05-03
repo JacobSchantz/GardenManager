@@ -5689,3 +5689,13 @@ Telegram response body: {"ok":true,"result":{"message_id":7763,"from":{"id":8799
 Telegram notification sent successfully
 GitHub Listener running on port 8765
 Webhook URL: /webhook
+Received push event
+Repo: GardenManager Branch: main
+Push to main by butterber347 (repo: GardenManager)
+Commits: 1, before: 357deaadde4527938659c3ee8c77ed7ca6caee97, after: 99b3619da7d64526710c06fb99e3aa24b202af2d
+Latest commit: fix: use build_local_or_testflight.sh so off-WiFi builds go to TestFlight
+⚠️ Build script for GardenManager does not exist: /Users/peanut/.openclaw/workspace/GardenManager/run_release_iphone.sh
+Update GARDENMANAGER_PATH or OPENCLAW_WORKSPACE to point at a checkout with run_release_iphone.sh.
+Telegram response status: 200
+Telegram response body: {"ok":true,"result":{"message_id":7764,"from":{"id":8799248997,"is_bot":true,"first_name":"Peanut","username":"Peanut_mini_bot"},"chat":{"id":7145887916,"first_name":"Yacs","last_name":"Man","type":"p
+Telegram notification sent successfully
