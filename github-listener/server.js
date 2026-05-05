@@ -15,7 +15,7 @@ const DEFAULT_WORKSPACE_ROOT =
 const BUY_A_HABIT_CONFIG = {
   appName: "BuyAHabit",
   branch: null,
-  buildScript: "build_local_or_testflight.sh",
+  buildScript: "build_local.sh",
   dirName: "buyahabit",
   repoPathEnv: "BUYAHABIT_PATH",
 };
@@ -159,6 +159,14 @@ app.get("/", (req, res) => {
 // Build status endpoint
 app.get("/status", (req, res) => {
   res.json(buildStatus);
+});
+
+// Reset stuck build status
+app.post("/reset-status", (req, res) => {
+  buildStatus.isBuilding = false;
+  buildStatus.lastBuild = buildStatus.lastBuild === "success" ? buildStatus.lastBuild : null;
+  pendingBuild = null;
+  res.json({ ok: true, status: buildStatus });
 });
 
 // OpenClaw current activity endpoint
@@ -340,6 +348,23 @@ function handlePush(payload) {
 
   if (commits.length === 0) {
     console.log(`Ignoring empty push (no new commits)`);
+    return;
+  }
+
+  // Skip build if only testable JSON files changed (no actual code changes)
+  const allChangedFiles = commits.flatMap(c => [
+    ...(c.added || []),
+    ...(c.modified || []),
+    ...(c.removed || [])
+  ]);
+  const onlyTestablesChanged = allChangedFiles.length > 0 && allChangedFiles.every(f =>
+    f.includes('testables/') && f.endsWith('.json')
+  );
+  if (onlyTestablesChanged) {
+    console.log(`⏭️ Skipping build — only testables JSON changed`);
+    sendTelegramMessage(
+      `⏭️ ${repoName}: only testables changed, skipping build`
+    );
     return;
   }
 
